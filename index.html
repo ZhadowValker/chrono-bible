@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 64 64%27%3E%3Crect width=%2764%27 height=%2764%27 rx=%2714%27 fill=%275146d8%27/%3E%3Ctext x=%2732%27 y=%2745%27 text-anchor=%27middle%27 font-size=%2740%27%3E📖%3C/text%3E%3C/svg%3E">
 <title>Bible Chronology — Exact Source Order</title>
 <style>
 :root {
@@ -43,13 +44,16 @@ main{max-width:1500px;margin:auto;padding:20px 22px 60px}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:12px 15px;border-bottom:1px solid var(--line);gap:12px}
 .modal-title{font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .close{font-size:20px;padding:5px 10px;background:#f2f4f7}
-iframe{border:0;flex:1;width:100%;background:#fff}
+.source-body{padding:22px;overflow:auto}.source-meta{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:16px}.source-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}.source-link{display:flex;align-items:center;justify-content:center;gap:7px;text-decoration:none;border:1px solid var(--line);background:#f8f9fc;color:var(--accent);font-weight:750;border-radius:12px;padding:12px 10px}.source-link:hover{border-color:#b9b6ec;background:var(--soft)}
 @media(max-width:760px){
  .header-inner,.toolbar,main{padding-left:12px;padding-right:12px}
  h1{font-size:20px} .grid{grid-template-columns:1fr}
  .row{grid-template-columns:42px 1fr} .row>*:nth-child(n+3){grid-column:2}
  input{min-width:150px}
 }
+
+.audio-panel{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(180deg,#fafaff,#f6f7fb)}
+.audio-panel h3{margin:0 0 6px;font-size:16px}.audio-note{font-size:12px;color:var(--muted);margin-bottom:12px}.audio-player{width:100%;margin:8px 0 14px}.audio-chapters{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}.audio-chapter{border:1px solid var(--line);background:#fff;color:var(--accent);border-radius:10px;padding:10px 8px;font-weight:750;cursor:pointer}.audio-chapter:hover,.audio-chapter.active{background:var(--soft);border-color:#b9b6ec}.audio-chapter.playing::before{content:"▶ ";}.source-link{cursor:pointer}
 </style>
 </head>
 <body>
@@ -80,8 +84,11 @@ iframe{border:0;flex:1;width:100%;background:#fff}
 
 <div id="overlay" class="overlay">
  <div class="modal">
-  <div class="modal-head"><div id="modalTitle" class="modal-title"></div><button id="close" class="close">×</button></div>
-  <iframe id="frame" title="Sajeeva Vahini Bible source"></iframe>
+  <div class="modal-head"><div id="modalTitle" class="modal-title"></div><button id="close" class="close" aria-label="Close">×</button></div>
+  <div class="source-body">
+   <div id="sourceMeta" class="source-meta"></div>
+   <div id="sourceLinks" class="source-links"></div>
+  </div>
  </div>
 </div>
 
@@ -126,12 +133,60 @@ function row(r){
    <div class="ref">${esc(r.Reference)}</div>
  </div>`;
 }
-function openSource(r){
- const src=firstSource(r); if(!src) return;
- $("modalTitle").textContent=`#${r["#"]} · ${r.Date} · ${r.Reference}`;
- $("frame").src=src; $("overlay").style.display="flex"; document.body.style.overflow="hidden";
+function audioChapterUrl(bookNum, chapter){
+ return `https://hadassahstore.sajeevavahini.com/audiobible/${bookNum}/${chapter}.mp3`;
 }
-function closeSource(){$("frame").src="";$("overlay").style.display="none";document.body.style.overflow=""}
+const BOOK_NUM={
+ genesis:1,exodus:2,leviticus:3,numbers:4,deuteronomy:5,joshua:6,judges:7,ruth:8,
+ "1-samuel":9,"2-samuel":10,"1-kings":11,"2-kings":12,"1-chronicles":13,"2-chronicles":14,
+ ezra:15,nehemiah:16,esther:17,job:18,psalms:19,proverbs:20,ecclesiastes:21,"song-of-solomon":22,
+ isaiah:23,jeremiah:24,lamentations:25,ezekiel:26,daniel:27,hosea:28,joel:29,amos:30,obadiah:31,
+ jonah:32,micah:33,nahum:34,habakkuk:35,zephaniah:36,haggai:37,zechariah:38,malachi:39,
+ matthew:40,mark:41,luke:42,john:43,acts:44,romans:45,"1-corinthians":46,"2-corinthians":47,
+ galatians:48,ephesians:49,philippians:50,colossians:51,"1-thessalonians":52,"2-thessalonians":53,
+ "1-timothy":54,"2-timothy":55,titus:56,philemon:57,hebrews:58,james:59,"1-peter":60,"2-peter":61,
+ "1-john":62,"2-john":63,"3-john":64,jude:65,revelation:66
+};
+function audioItems(r){
+ const sources=(r.Source||"").split(" | ").filter(Boolean);
+ return sources.map(src=>{
+   const m=src.match(/sajeevavahini\.com\/bible\/[^/]+\/([^/]+)\/(\d+)\/?$/i);
+   if(!m) return null;
+   const slug=m[1].toLowerCase(), chapter=Number(m[2]), bookNum=BOOK_NUM[slug];
+   if(!bookNum) return null;
+   return {chapter,bookNum,url:audioChapterUrl(bookNum,chapter)};
+ }).filter(Boolean);
+}
+function openSource(r){
+ const sources=(r.Source||"").split(" | ").filter(Boolean);
+ if(!sources.length) return;
+ const items=audioItems(r);
+ $("modalTitle").textContent=`#${r["#"]} · ${r.Date} · ${r.Reference}`;
+ $("sourceMeta").innerHTML=`<strong>${esc(r.Event)}</strong><br>${esc(r["Part-Title"])}<br><br>Listen directly to the Sajeeva Vahini Telugu Audio Bible. The MP3 is loaded directly into this page — no iframe and no proxy.`;
+ const first=items[0];
+ $("sourceLinks").innerHTML = `
+   <div class="audio-panel">
+     <h3>🎧 Sajeeva Vahini Audio Bible</h3>
+     <div class="audio-note">${items.length} chapter${items.length===1?'':'s'} available for this reference.</div>
+     <audio id="audioPlayer" class="audio-player" controls preload="none" ${first?`src="${esc(first.url)}"`:''}></audio>
+     <div class="audio-chapters">
+       ${items.map((x,i)=>`<button class="audio-chapter${i===0?' active':''}" data-audio="${esc(x.url)}" data-chapter="${x.chapter}">▶ Chapter ${x.chapter}</button>`).join('')}
+     </div>
+   </div>
+   <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:10px">
+     ${sources.map((src,i)=>{const m=src.match(/\/(\d+)\/?$/);const label=m?`Open Bible Chapter ${m[1]}`:`Open official source ${i+1}`;return `<a class="source-link" href="${esc(src)}" target="_blank" rel="noopener noreferrer">↗ ${label}</a>`}).join('')}
+   </div>`;
+ $("overlay").style.display="flex"; document.body.style.overflow="hidden";
+ const player=$("audioPlayer");
+ document.querySelectorAll('.audio-chapter').forEach(btn=>btn.addEventListener('click',()=>{
+   document.querySelectorAll('.audio-chapter').forEach(b=>b.classList.remove('active'));
+   btn.classList.add('active');
+   player.src=btn.dataset.audio;
+   player.play().catch(()=>{});
+ }));
+}
+
+function closeSource(){$("overlay").style.display="none";$("sourceLinks").innerHTML="";document.body.style.overflow=""}
 
 function render(){
  const a=filtered();
