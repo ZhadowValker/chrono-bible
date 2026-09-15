@@ -75,6 +75,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .bar-fill::after{content:"";position:absolute;right:-6px;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--accent);transform:translateY(-50%);box-shadow:0 2px 6px rgba(40,50,90,.3);transition:transform .15s,width .15s,height .15s}
 .bar.dragging .bar-fill::after{width:17px;height:17px;right:-8px;transform:translateY(-50%) scale(1.05)}
 .bar-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar-tools{display:flex;gap:6px}
 .chip-speed{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 9px;font-size:11px;font-weight:600;color:var(--ink);cursor:pointer}
 .upnext{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.45}
 .upnext b{color:var(--ink);font-weight:650}
@@ -173,10 +174,18 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    <div class="bar" id="bar"><div class="bar-fill" id="barFill"></div></div>
    <div class="bar-foot">
     <span id="nowTime">0:00</span>
-    <select class="chip-speed" id="speed" title="Playback speed" aria-label="Playback speed">
-     <option value="0.8">0.8x</option><option value="1" selected>1x</option>
-     <option value="1.2">1.2x</option><option value="1.5">1.5x</option><option value="2">2x</option>
-    </select>
+    <div class="bar-tools">
+     <select class="chip-speed" id="version" title="Audio version" aria-label="Audio version">
+      <option value="telugu" selected>Telugu</option>
+      <option value="hindi">Hindi</option>
+      <option value="esv">ESV (English)</option>
+      <option value="nlt">NLT (English)</option>
+     </select>
+     <select class="chip-speed" id="speed" title="Playback speed" aria-label="Playback speed">
+      <option value="0.8">0.8x</option><option value="1" selected>1x</option>
+      <option value="1.2">1.2x</option><option value="1.5">1.5x</option><option value="2">2x</option>
+     </select>
+    </div>
    </div>
    <div class="upnext" id="upnext">Up next — nothing queued</div>
    <div class="err" id="err" hidden></div>
@@ -224,6 +233,34 @@ const BOOK_NUM={
 };
 const TITLE_CASE=s=>s.split("-").map(w=>w[0].toUpperCase()+w.slice(1)).join(" ");
 
+// ESV/NLT mp3 filenames follow "{bookNum:2digits}_{abbr}_{chapter:3digits}.mp3" on content.swncdn.com.
+// Confirmed against Genesis (01_ge_001.mp3 / 01_ge_002.mp3); the rest follow Bible Study Tools' standard
+// two/three-letter scheme but haven't all been individually checked — the player will show a load error
+// on any chapter whose filename doesn't match, rather than fail silently.
+const ESV_NLT_ABBR={
+ 1:"ge",2:"ex",3:"le",4:"nu",5:"de",6:"jos",7:"jdg",8:"ru",
+ 9:"1sa",10:"2sa",11:"1ki",12:"2ki",13:"1ch",14:"2ch",
+ 15:"ezr",16:"ne",17:"es",18:"job",19:"ps",20:"pr",21:"ec",22:"so",
+ 23:"isa",24:"jer",25:"la",26:"eze",27:"da",28:"ho",29:"joe",30:"am",31:"ob",
+ 32:"jon",33:"mic",34:"na",35:"hab",36:"zep",37:"hag",38:"zec",39:"mal",
+ 40:"mt",41:"mr",42:"lu",43:"joh",44:"ac",45:"ro",46:"1co",47:"2co",
+ 48:"ga",49:"eph",50:"php",51:"col",52:"1th",53:"2th",
+ 54:"1ti",55:"2ti",56:"tit",57:"phm",58:"heb",59:"jas",60:"1pe",61:"2pe",
+ 62:"1jo",63:"2jo",64:"3jo",65:"jude",66:"re"
+};
+const pad2=n=>String(n).padStart(2,"0");
+const pad3=n=>String(n).padStart(3,"0");
+
+// One version-config object per audio source. Only Telugu (the original) and the Hindi/ESV/NLT
+// filename patterns confirmed by the user are wired up here.
+const VERSIONS={
+ telugu:{label:"Telugu",url:it=>AUDIO_BASE+it.bookNum+"/"+it.chapter+".mp3"},
+ hindi: {label:"Hindi", url:it=>"https://www.wordproaudio.net/bibles/app/audio/3/"+it.bookNum+"/"+it.chapter+".mp3"},
+ esv:   {label:"ESV (English)",url:it=>"https://content.swncdn.com/biblestudytools/audio/esv-mp3/"+pad2(it.bookNum)+"_"+ESV_NLT_ABBR[it.bookNum]+"_"+pad3(it.chapter)+".mp3"},
+ nlt:   {label:"NLT (English)",url:it=>"https://content.swncdn.com/biblestudytools/audio/nlt-mp3/"+pad2(it.bookNum)+"_"+ESV_NLT_ABBR[it.bookNum]+"_"+pad3(it.chapter)+".mp3"}
+};
+let currentVersion="telugu";
+
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clock=s=>Number.isFinite(s)?Math.floor(Math.max(0,s)/60)+":"+String(Math.floor(Math.max(0,s))%60).padStart(2,"0"):"--:--";
@@ -237,7 +274,7 @@ function chaptersOf(r){
   const slug=m[1].toLowerCase(), n=BOOK_NUM[slug];
   if(!n) return null;
   const chapter=Number(m[2]);
-  return {chapter,book:TITLE_CASE(slug),url:AUDIO_BASE+n+"/"+chapter+".mp3",page:src};
+  return {chapter,book:TITLE_CASE(slug),bookNum:n,url:AUDIO_BASE+n+"/"+chapter+".mp3",page:src};
  }).filter(Boolean);
 }
 const CH=new Map(DATA.map(r=>[r["#"],chaptersOf(r)]));
@@ -317,7 +354,7 @@ function load(i,autoplay){
 
  $("err").hidden=true;
  $("barFill").style.width="0%";$("nowTime").textContent="0:00";$("nowDur").textContent="--:--";
- audio.src=item.url;audio.load();
+ audio.src=VERSIONS[currentVersion].url(item);audio.load();
  if(autoplay!==false) play();
  paintNow();
 }
@@ -385,6 +422,13 @@ $("btnLink").onclick=()=>{
  if(item) window.open(item.page,"_blank","noopener");
 };
 $("speed").onchange=()=>{audio.playbackRate=Number($("speed").value)};
+$("version").addEventListener("change",()=>{
+ currentVersion=$("version").value;
+ if(qi>-1){
+  const wasPlaying=!audio.paused;
+  load(qi,wasPlaying);
+ }
+});
 
 function seek(e){
  if(!audio.duration) return;
