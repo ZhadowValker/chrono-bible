@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2715%27%20fill%3D%27%235146d8%27%2F%3E%3Cg%20fill%3D%27none%27%20stroke%3D%27%23fff%27%20stroke-width%3D%273.4%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M32%2021c-3.9-3.1-8.3-4.3-12.7-4.3H16v27.6h3.9c4.5%200%208.6%201.2%2012.1%203.5%27%2F%3E%3Cpath%20d%3D%27M32%2021c3.9-3.1%208.3-4.3%2012.7-4.3H48v27.6h-3.9c-4.5%200-8.6%201.2-12.1%203.5%27%2F%3E%3Cpath%20d%3D%27M32%2021v26.8%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<title>Bible Timeline — Chronology Chart</title>
+<!-- Colour and type tokens matched to chrono-bible (Bible Chronology — Listening Console) for a consistent family look. -->
+<style>
+:root{
+  --bg:#e6eaf2; --panel:#f4f7fb; --surface:#fff;
+  --ink:#1d2536; --muted:#71829e; --line:#dde4ee;
+  --accent:#5146d8; --accent-dark:#4038c4; --accent-ring:#b9b6ec; --soft:#eceaff; --soft-ink:#443db5;
+  --sans:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --lift:0 18px 40px -14px rgba(50,74,130,.42);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+button,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+
+.hero{position:relative;isolation:isolate;overflow:hidden;color:#fff;
+  background:linear-gradient(118deg,#241d63 0%,#3d33a8 38%,#5146d8 68%,#7a6ce6 100%)}
+.hero::before{content:"";position:absolute;inset:-70% -15% auto;height:420px;z-index:-1;
+  background:radial-gradient(52% 58% at 26% 100%,rgba(255,255,255,.26),transparent 68%)}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:70px;pointer-events:none;
+  background:linear-gradient(180deg,rgba(230,234,242,0) 0%,rgba(230,234,242,.55) 58%,var(--bg) 100%)}
+.hero-inner{max-width:1320px;margin:auto;padding:36px 24px 52px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hero-mark{flex:0 0 auto;width:48px;height:48px;display:grid;place-items:center;border-radius:14px;
+  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px)}
+.hero-mark svg{width:25px;height:25px}
+.hero-text{min-width:0}
+.hero h1{margin:0;font-family:var(--serif);font-weight:600;font-size:clamp(26px,4vw,36px);
+  line-height:1.06;letter-spacing:-.02em}
+.hero p{margin:6px 0 0;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.76);max-width:48ch}
+.poc-flag{display:inline-block;font-size:11px;color:#fff;border:1px solid rgba(255,255,255,.5);
+  border-radius:99px;padding:3px 10px;margin-left:8px;vertical-align:middle;font-family:var(--sans);font-weight:600}
+
+.app{max-width:1320px;margin:auto;padding:4px 24px 56px}
+
+.tools{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.tools label{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.tools select{border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  border-radius:12px;padding:10px 13px;font-size:13.5px;cursor:pointer}
+.tools select:hover{border-color:var(--accent-ring)}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
+  display:grid;place-items:center;font-size:16px;color:#a8b3c9;cursor:pointer;transition:color .2s,background .2s,box-shadow .2s}
+.iconbtn:hover{color:var(--accent);background:#fff;border-color:var(--accent-ring);box-shadow:0 6px 14px -6px rgba(76,70,124,.35)}
+.spacer{flex:1}
+.expand-all{font-size:12.5px;color:var(--accent-dark);background:var(--soft);border:1px solid var(--accent-ring);
+  border-radius:99px;padding:8px 14px;cursor:pointer}
+.expand-all:hover{background:#e0dcff}
+
+.card{background:var(--surface);border-radius:20px;box-shadow:var(--lift);overflow:hidden}
+
+.legend{display:flex;flex-wrap:wrap;gap:14px;padding:13px 18px;border-bottom:1px solid var(--line);
+  background:var(--panel);font-size:12px;color:var(--muted)}
+.legend-item{display:flex;align-items:center;gap:6px}
+.swatch{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+
+.scroll-area{overflow-x:auto;overflow-y:hidden}
+.timeline-inner{position:relative}
+
+.axis-row{display:flex;position:sticky;top:0;z-index:3;background:var(--surface);border-bottom:1px solid var(--line)}
+.axis-label-cell{position:sticky;left:0;z-index:4;width:168px;min-width:168px;background:var(--surface);
+  border-right:1px solid var(--line)}
+.axis-track{position:relative;flex:1;height:30px}
+.tick{position:absolute;top:0;bottom:0;border-left:1px solid var(--line);font-size:10px;color:var(--muted);
+  padding:8px 0 0 5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.row{display:flex;align-items:stretch;border-bottom:1px solid var(--line);cursor:pointer;border-left:3px solid transparent}
+.row:last-child{border-bottom:none}
+.row:hover{background:linear-gradient(90deg,var(--soft),var(--surface) 65%)}
+.row.expanded{border-left-color:var(--accent)}
+.row.expanded .label-cell{color:var(--accent-dark);font-weight:700}
+.row.child{cursor:default;background:var(--panel)}
+.row.child:hover{background:var(--panel)}
+.row.child:last-of-type{border-bottom:1px solid var(--line)}
+
+.label-cell{position:sticky;left:0;z-index:2;width:165px;min-width:165px;background:var(--surface);
+  padding:0 10px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px;border-right:1px solid var(--line)}
+.row.child .label-cell{background:var(--panel);font-size:11.5px;font-weight:500;color:var(--ink);
+  padding-left:26px;line-height:1.25}
+.chevron{width:12px;flex-shrink:0;font-size:10px;color:var(--muted);transition:transform .15s}
+.row.expanded>.label-cell .chevron{transform:rotate(90deg);color:var(--accent)}
+.group-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.track-cell{position:relative;flex:1;height:44px}
+.row.child .track-cell{height:32px}
+
+.span-bar{position:absolute;top:16px;height:12px;border-radius:6px;opacity:.85}
+.written-marker{position:absolute;top:7px;width:12px;height:12px;transform:translateX(-6px) rotate(45deg);
+  border:1.5px solid var(--surface)}
+.written-range{position:absolute;top:11px;height:20px;border-radius:3px;
+  background:repeating-linear-gradient(45deg,rgba(29,37,54,.55),rgba(29,37,54,.55) 3px,transparent 3px,transparent 6px)}
+
+.d-bar{position:absolute;top:11px;height:9px;border-radius:5px;opacity:.8}
+.d-marker{position:absolute;top:8px;width:10px;height:10px;transform:translateX(-5px) rotate(45deg);
+  border:1.5px solid var(--panel)}
+.d-range{position:absolute;top:9px;height:13px;border-radius:3px;
+  background:repeating-linear-gradient(45deg,rgba(29,37,54,.5),rgba(29,37,54,.5) 3px,transparent 3px,transparent 6px)}
+.d-chip{position:absolute;left:0;top:6px;font-size:10px;color:var(--muted);background:var(--surface);
+  border:1px solid var(--line);border-radius:99px;padding:2px 8px}
+
+.hint{font-size:12px;color:var(--muted);margin:12px 4px 0}
+
+.tooltip{position:fixed;z-index:50;background:var(--accent-dark);color:#fff;padding:10px 12px;border-radius:10px;
+  font-size:12px;line-height:1.45;pointer-events:none;opacity:0;transform:translateY(4px);
+  transition:opacity .1s ease,transform .1s ease;max-width:230px;box-shadow:0 14px 30px -10px rgba(50,74,130,.55)}
+.tooltip.visible{opacity:1;transform:translateY(0)}
+.tooltip .tt-title{font-weight:700;margin-bottom:3px;font-size:12.5px;font-family:var(--serif)}
+.tooltip .tt-line{color:rgba(255,255,255,.82)}
+
+@media(max-width:760px){
+  .app{padding:4px 14px 48px}
+  .hero-inner{padding:28px 14px 44px}
+  .label-cell,.axis-label-cell{width:120px;min-width:120px}
+  .row.child .label-cell{padding-left:18px}
+}
+</style>
+</head><body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <span class="hero-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="6" x2="21" y2="6"/><circle cx="6" cy="6" r="1.4" fill="currentColor" stroke="none"/>
+        <line x1="3" y1="12" x2="21" y2="12"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/>
+        <line x1="3" y1="18" x2="21" y2="18"/><circle cx="17" cy="18" r="1.4" fill="currentColor" stroke="none"/>
+      </svg>
+    </span>
+    <div class="hero-text">
+      <h1>Bible Timeline<span class="poc-flag">all 66 books</span></h1>
+      <p>All 66 books, 547 events, from Genesis to Revelation on one shared chronology</p>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+  <div class="tools">
+    <label>Group by
+      <select id="groupBy">
+        <option value="canonical">Canonical order</option>
+        <option value="chronological">Chronological order</option>
+        <option value="testament">Testament</option>
+        <option value="section">Section</option>
+        <option value="written">Date written</option>
+      </select>
+    </label>
+    <button class="iconbtn" id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+    <button class="iconbtn" id="zoomIn" title="Zoom in" aria-label="Zoom in">+</button>
+    <span class="spacer"></span>
+    <button class="expand-all" id="expandAll">Expand all</button>
+  </div>
+
+  <div class="card">
+    <div class="legend" id="legend"></div>
+    <div class="scroll-area" id="scrollArea">
+      <div class="timeline-inner">
+        <div class="axis-row">
+          <div class="axis-label-cell"></div>
+          <div class="axis-track" id="axisTrack"></div>
+        </div>
+        <div id="rows"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">Drag, or shift + scroll, to move through time · +/− to zoom · hover any row for a quick look · click a book to expand its events right here on the timeline</div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+const SECTION_COLORS = {
+  "Pentateuch":"#6d597a","Historical":"#355c7d","Wisdom":"#b08968","Major Prophets":"#a44a3f",
+  "Minor Prophets":"#a15a7a","Gospels":"#2f6b5e","Acts":"#5c7a3f","Pauline Epistles":"#8c3b3b",
+  "General Epistles":"#6b6458","Revelation":"#1c2b36"
+};
+const TESTAMENT_COLORS = { "OT": "#5146d8", "NT": "#241d63" };
+
+const BOOKS = [
+{name:"Genesis",order:1,section:"Pentateuch",testament:"OT",spanStart:-2166,spanEnd:-1406,writtenStart:-1446,writtenEnd:-1406,events:[["Creation, Fall","Point","undated","undated",null,null,"undated"],["The Flood","Point","undated","undated",null,null,"undated"],["Tower of Babel","Point","undated","undated",null,null,"undated"],["Abraham's life","Range","2166 BC","1991 BC",-2166,-1991,""],["Isaac's life","Range","2066 BC","1886 BC",-2066,-1886,""],["Jacob's life","Range","2006 BC","1859 BC",-2006,-1859,""],["Joseph's life","Range","1915 BC","1805 BC",-1915,-1805,""],["Book of Genesis written","Range","1446 BC","1406 BC",-1446,-1406,""]]},
+{name:"Exodus",order:2,section:"Pentateuch",testament:"OT",spanStart:-1526,spanEnd:-1406,writtenStart:-1440,writtenEnd:-1440,events:[["Moses' birth","Point","1526 BC","1526 BC",-1526,-1526,"c."],["The plagues; the Passover","Point","1446 BC","1446 BC",-1446,-1446,"c."],["The Exodus","Point","1446 BC","1446 BC",-1446,-1446,"c."],["Desert wanderings","Range","1446 BC","1406 BC",-1446,-1406,"c."],["The Ten Commandments","Point","1445 BC","1445 BC",-1445,-1445,"c."],["Book of Exodus written","Point","1440 BC","1440 BC",-1440,-1440,"c."],["Moses dies; Joshua becomes leader","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."]]},
+{name:"Leviticus",order:3,section:"Pentateuch",testament:"OT",spanStart:-1526,spanEnd:-1406,writtenStart:-1440,writtenEnd:-1440,events:[["Moses' birth","Point","1526 BC","1526 BC",-1526,-1526,"c."],["The plagues; the Passover","Point","1446 BC","1446 BC",-1446,-1446,"c."],["The Exodus","Point","1446 BC","1446 BC",-1446,-1446,"c."],["Desert wanderings","Range","1446 BC","1406 BC",-1446,-1406,"c."],["The Ten Commandments","Point","1445 BC","1445 BC",-1445,-1445,"c."],["Book of Leviticus written","Point","1440 BC","1440 BC",-1440,-1440,"c."],["Moses dies; Joshua becomes leader","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."]]},
+{name:"Numbers",order:4,section:"Pentateuch",testament:"OT",spanStart:-1526,spanEnd:-1406,writtenStart:-1406,writtenEnd:-1406,events:[["Moses' birth","Point","1526 BC","1526 BC",-1526,-1526,"c."],["The plagues; the Passover","Point","1446 BC","1446 BC",-1446,-1446,"c."],["The Exodus","Point","1446 BC","1446 BC",-1446,-1446,"c."],["Desert wanderings","Range","1446 BC","1406 BC",-1446,-1406,"c."],["Exploration of Canaan","Point","1443 BC","1443 BC",-1443,-1443,"c."],["Book of Numbers written","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Moses dies; Joshua becomes leader","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."]]},
+{name:"Deuteronomy",order:5,section:"Pentateuch",testament:"OT",spanStart:-1526,spanEnd:-1406,writtenStart:-1406,writtenEnd:-1406,events:[["Moses' birth","Point","1526 BC","1526 BC",-1526,-1526,"c."],["The plagues; the Passover","Point","1446 BC","1446 BC",-1446,-1446,"c."],["The Exodus","Point","1446 BC","1446 BC",-1446,-1446,"c."],["Desert wanderings","Range","1446 BC","1406 BC",-1446,-1406,"c."],["The Ten Commandments","Point","1445 BC","1445 BC",-1445,-1445,"c."],["Book of Deuteronomy written","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Moses dies; Joshua becomes leader","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."]]},
+{name:"Joshua",order:6,section:"Historical",testament:"OT",spanStart:-1406,spanEnd:-930,writtenStart:-1390,writtenEnd:-1390,events:[["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Conquest of Canaan","Range","1406 BC","1375 BC",-1406,-1375,"c."],["Book of Joshua written","Point","1390 BC","1390 BC",-1390,-1390,"c."],["Joshua's death","Point","1390 BC","1390 BC",-1390,-1390,"c."],["Judges begin to rule","Point","1375 BC","1375 BC",-1375,-1375,"c."],["Saul named king","Point","1050 BC","1050 BC",-1050,-1050,""],["David named king","Point","1010 BC","1010 BC",-1010,-1010,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""]]},
+{name:"Judges",order:7,section:"Historical",testament:"OT",spanStart:-1406,spanEnd:-930,writtenStart:-1000,writtenEnd:-1000,events:[["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Deborah's rule","Range","1209 BC","1169 BC",-1209,-1169,"c."],["Gideon's rule","Range","1162 BC","1122 BC",-1162,-1122,"c."],["Samuel's birth","Point","1105 BC","1105 BC",-1105,-1105,"c."],["Jephthah's rule","Range","1078 BC","1072 BC",-1078,-1072,"c."],["Samson's rule","Range","1075 BC","1055 BC",-1075,-1055,"c."],["Book of Judges written","Point","1000 BC","1000 BC",-1000,-1000,"c."],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""]]},
+{name:"Ruth",order:8,section:"Historical",testament:"OT",spanStart:-1406,spanEnd:-930,writtenStart:-1000,writtenEnd:-1000,events:[["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Judges begin to rule","Point","1375 BC","1375 BC",-1375,-1375,"c."],["Deborah's rule","Range","1209 BC","1169 BC",-1209,-1169,"c."],["Samuel's birth","Point","1105 BC","1105 BC",-1105,-1105,"c."],["Samson's rule","Range","1075 BC","1055 BC",-1075,-1055,"c."],["David named king","Point","1010 BC","1010 BC",-1010,-1010,"c."],["Book of Ruth written","Point","1000 BC","1000 BC",-1000,-1000,"c."],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""]]},
+{name:"1 Samuel",order:9,section:"Historical",testament:"OT",spanStart:-1406,spanEnd:-925,writtenStart:-925,writtenEnd:-925,events:[["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Judges begin to rule","Point","1375 BC","1375 BC",-1375,-1375,"c."],["Saul named king","Point","1050 BC","1050 BC",-1050,-1050,""],["David kills Goliath","Point","1025 BC","1025 BC",-1025,-1025,"c."],["Saul dies; David named king","Point","1010 BC","1010 BC",-1010,-1010,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Book of 1 Samuel written","Point","925 BC","925 BC",-925,-925,"c."]]},
+{name:"2 Samuel",order:10,section:"Historical",testament:"OT",spanStart:-1406,spanEnd:-586,writtenStart:-925,writtenEnd:-925,events:[["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Judges begin to rule","Point","1375 BC","1375 BC",-1375,-1375,"c."],["Saul's reign","Range","1050 BC","1010 BC",-1050,-1010,""],["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Book of 2 Samuel written","Point","925 BC","925 BC",-925,-925,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"1 Kings",order:11,section:"Historical",testament:"OT",spanStart:-1010,spanEnd:-550,writtenStart:-560,writtenEnd:-550,events:[["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Building of the temple","Range","966 BC","959 BC",-966,-959,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Elijah's ministry in Israel","Range","875 BC","848 BC",-875,-848,"c."],["Ahab's reign","Range","874 BC","853 BC",-874,-853,""],["Elisha's ministry in Israel","Range","848 BC","797 BC",-848,-797,"c."],["Book of 1 Kings written","Range","560 BC","550 BC",-560,-550,"c."]]},
+{name:"2 Kings",order:12,section:"Historical",testament:"OT",spanStart:-930,spanEnd:-550,writtenStart:-560,writtenEnd:-550,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Elijah's ministry in Israel","Range","875 BC","848 BC",-875,-848,"c."],["Elisha's ministry in Israel","Range","848 BC","797 BC",-848,-797,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Hezekiah's reign","Range","715 BC","686 BC",-715,-686,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["King Jehoiachin released from prison","Point","561 BC","561 BC",-561,-561,"c."],["Book of 2 Kings written","Range","560 BC","550 BC",-560,-550,"c."]]},
+{name:"1 Chronicles",order:13,section:"Historical",testament:"OT",spanStart:-1050,spanEnd:-400,writtenStart:-450,writtenEnd:-400,events:[["Saul's reign","Range","1050 BC","1010 BC",-1050,-1010,""],["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Building of the temple","Range","966 BC","959 BC",-966,-959,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Book of 1 Chronicles written","Range","450 BC","400 BC",-450,-400,"c."]]},
+{name:"2 Chronicles",order:14,section:"Historical",testament:"OT",spanStart:-970,spanEnd:-400,writtenStart:-450,writtenEnd:-400,events:[["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Building of the temple","Range","966 BC","959 BC",-966,-959,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Completion of temple","Point","516 BC","516 BC",-516,-516,""],["Book of 2 Chronicles written","Range","450 BC","400 BC",-450,-400,"c."]]},
+{name:"Ezra",order:15,section:"Historical",testament:"OT",spanStart:-586,spanEnd:-440,writtenStart:-440,writtenEnd:-440,events:[["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Persia's conquest of Babylon","Point","539 BC","539 BC",-539,-539,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Ministries of Haggai and Zechariah","Range","520 BC","480 BC",-520,-480,"c."],["Completion of temple","Point","516 BC","516 BC",-516,-516,""],["Second return to Jerusalem under Ezra","Point","458 BC","458 BC",-458,-458,""],["Third return to Jerusalem under Nehemiah","Point","444 BC","444 BC",-444,-444,""],["Book of Ezra written","Point","440 BC","440 BC",-440,-440,"c."]]},
+{name:"Nehemiah",order:16,section:"Historical",testament:"OT",spanStart:-586,spanEnd:-430,writtenStart:-430,writtenEnd:-430,events:[["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Persia's conquest of Babylon","Point","539 BC","539 BC",-539,-539,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Ministries of Haggai and Zechariah","Range","520 BC","480 BC",-520,-480,"c."],["Temple restoration completed","Point","516 BC","516 BC",-516,-516,""],["Second return to Jerusalem under Ezra","Point","458 BC","458 BC",-458,-458,""],["Third return to Jerusalem under Nehemiah","Point","444 BC","444 BC",-444,-444,""],["Jerusalem's wall rebuilt","Point","444 BC","444 BC",-444,-444,""],["Book of Nehemiah written","Point","430 BC","430 BC",-430,-430,"c."]]},
+{name:"Esther",order:17,section:"Historical",testament:"OT",spanStart:-586,spanEnd:-350,writtenStart:-460,writtenEnd:-350,events:[["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Persia's conquest of Babylon","Point","539 BC","539 BC",-539,-539,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Xerxes' reign in Persia","Range","486 BC","465 BC",-486,-465,""],["Esther becomes queen of Persia","Point","479 BC","479 BC",-479,-479,""],["Second return to Jerusalem under Ezra","Point","458 BC","458 BC",-458,-458,""],["Third return to Jerusalem under Nehemiah","Point","444 BC","444 BC",-444,-444,""],["Jerusalem's wall rebuilt","Point","444 BC","444 BC",-444,-444,""],["Book of Esther written","Range","460 BC","350 BC",-460,-350,"c."]]},
+{name:"Job",order:18,section:"Wisdom",testament:"OT",spanStart:-2166,spanEnd:-1406,writtenStart:-1406,writtenEnd:-1406,events:[["Creation, Fall, Flood","Point","undated","undated",null,null,"undated"],["Abraham's life","Range","2166 BC","1991 BC",-2166,-1991,"c."],["Isaac's life","Range","2066 BC","1886 BC",-2066,-1886,"c."],["Jacob's life","Range","2006 BC","1859 BC",-2006,-1859,"c."],["Joseph's life","Range","1915 BC","1805 BC",-1915,-1805,"c."],["Historical setting of Job","Range","1900 BC","1700 BC",-1900,-1700,"c."],["Moses' life","Range","1526 BC","1406 BC",-1526,-1406,"c."]]},
+{name:"Psalms",order:19,section:"Wisdom",testament:"OT",spanStart:-1410,spanEnd:-430,writtenStart:-1410,writtenEnd:-430,events:[["Psalms written","Range","1410 BC","430 BC",-1410,-430,"c."],["Israelites enter Canaan","Point","1406 BC","1406 BC",-1406,-1406,"c."],["Judges begin to rule","Point","1375 BC","1375 BC",-1375,-1375,"c."],["Saul's reign","Range","1050 BC","1010 BC",-1050,-1010,""],["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""]]},
+{name:"Proverbs",order:20,section:"Wisdom",testament:"OT",spanStart:-1010,spanEnd:-586,writtenStart:-970,writtenEnd:-930,events:[["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Many proverbs written","Range","970 BC","930 BC",-970,-930,"c."],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Hezekiah's reign","Range","715 BC","686 BC",-715,-686,""],["Proverbs compiled and edited","Range","715 BC","686 BC",-715,-686,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Ecclesiastes",order:21,section:"Wisdom",testament:"OT",spanStart:-1050,spanEnd:-586,writtenStart:-970,writtenEnd:-930,events:[["Saul's reign","Range","1050 BC","1010 BC",-1050,-1010,""],["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Book of Ecclesiastes written","Range","970 BC","930 BC",-970,-930,"c."],["Building of the temple","Range","966 BC","959 BC",-966,-959,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Song of Songs",order:22,section:"Wisdom",testament:"OT",spanStart:-1050,spanEnd:-586,writtenStart:-970,writtenEnd:-930,events:[["Saul's reign","Range","1050 BC","1010 BC",-1050,-1010,""],["David's reign","Range","1010 BC","970 BC",-1010,-970,""],["Solomon's reign","Range","970 BC","930 BC",-970,-930,""],["Book of Song of Songs written","Range","970 BC","930 BC",-970,-930,"c."],["Building of the temple","Range","966 BC","959 BC",-966,-959,""],["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Isaiah",order:23,section:"Major Prophets",testament:"OT",spanStart:-930,spanEnd:-586,writtenStart:-700,writtenEnd:-681,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Ministries of Amos and Hosea in Israel","Range","760 BC","715 BC",-760,-715,"c."],["Isaiah's ministry in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Micah's ministry in Judah","Range","735 BC","700 BC",-735,-700,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Book of Isaiah written","Range","700 BC","681 BC",-700,-681,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Jeremiah",order:24,section:"Major Prophets",testament:"OT",spanStart:-930,spanEnd:-580,writtenStart:-585,writtenEnd:-580,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Ministries of Amos and Hosea in Israel","Range","760 BC","715 BC",-760,-715,"c."],["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Book of Jeremiah written","Range","585 BC","580 BC",-585,-580,"c."]]},
+{name:"Lamentations",order:25,section:"Major Prophets",testament:"OT",spanStart:-930,spanEnd:-580,writtenStart:-586,writtenEnd:-580,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Ministries of Amos and Hosea in Israel","Range","760 BC","715 BC",-760,-715,"c."],["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Book of Lamentations written","Range","586 BC","580 BC",-586,-580,"c."]]},
+{name:"Ezekiel",order:26,section:"Major Prophets",testament:"OT",spanStart:-930,spanEnd:-536,writtenStart:-571,writtenEnd:-571,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Daniel's exile in Babylon","Range","605 BC","536 BC",-605,-536,"c."],["Ezekiel's ministry","Range","593 BC","571 BC",-593,-571,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Book of Ezekiel written","Point","571 BC","571 BC",-571,-571,"c."],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""]]},
+{name:"Daniel",order:27,section:"Major Prophets",testament:"OT",spanStart:-626,spanEnd:-530,writtenStart:-536,writtenEnd:-530,events:[["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Daniel's exile in Babylon","Range","605 BC","536 BC",-605,-536,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Persia's conquest of Babylon","Point","539 BC","539 BC",-539,-539,""],["Daniel in the lions' den","Point","539 BC","539 BC",-539,-539,"c."],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Book of Daniel written","Range","536 BC","530 BC",-536,-530,"c."],["End of Daniel's ministry","Point","536 BC","536 BC",-536,-536,"c."]]},
+{name:"Hosea",order:28,section:"Minor Prophets",testament:"OT",spanStart:-930,spanEnd:-586,writtenStart:-715,writtenEnd:-715,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Amos's ministry in Israel","Range","760 BC","750 BC",-760,-750,"c."],["Hosea's ministry in Israel","Range","753 BC","715 BC",-753,-715,"c."],["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Book of Hosea written","Point","715 BC","715 BC",-715,-715,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Joel",order:29,section:"Minor Prophets",testament:"OT",spanStart:-930,spanEnd:-586,writtenStart:-586,writtenEnd:-586,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Joel's ministry in Judah","Range","835 BC","796 BC",-835,-796,"c.; uncertain (?)"],["Jonah's ministry in Nineveh","Range","800 BC","750 BC",-800,-750,"c."],["Amos's ministry in Israel","Range","760 BC","750 BC",-760,-750,"c."],["Hosea's ministry in Israel","Range","753 BC","715 BC",-753,-715,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Amos",order:30,section:"Minor Prophets",testament:"OT",spanStart:-930,spanEnd:-586,writtenStart:-760,writtenEnd:-750,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Amos's ministry in Israel","Range","760 BC","750 BC",-760,-750,"c."],["Book of Amos written","Range","760 BC","750 BC",-760,-750,"c."],["Hosea's ministry in Israel","Range","753 BC","715 BC",-753,-715,"c."],["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Obadiah",order:31,section:"Minor Prophets",testament:"OT",spanStart:-930,spanEnd:-585,writtenStart:-585,writtenEnd:-585,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Joel's ministry in Judah","Range","835 BC","796 BC",-835,-796,"c.; uncertain (?)"],["Jonah's ministry in Nineveh","Range","800 BC","750 BC",-800,-750,"c."],["Amos's ministry in Israel","Range","760 BC","750 BC",-760,-750,"c."],["Hosea's ministry in Israel","Range","753 BC","715 BC",-753,-715,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Obadiah's ministry","Range","605 BC","585 BC",-605,-585,"c.; uncertain (?)"],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Jonah",order:32,section:"Minor Prophets",testament:"OT",spanStart:-930,spanEnd:-586,writtenStart:-785,writtenEnd:-750,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Jonah's ministry in Nineveh","Range","800 BC","750 BC",-800,-750,"c."],["Book of Jonah written","Range","785 BC","750 BC",-785,-750,"c."],["Ministries of Amos and Hosea in Israel","Range","760 BC","715 BC",-760,-715,"c."],["Micah's ministry in Judah","Range","735 BC","700 BC",-735,-700,"c."],["Isaiah's ministry in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Micah",order:33,section:"Minor Prophets",testament:"OT",spanStart:-930,spanEnd:-586,writtenStart:-700,writtenEnd:-650,events:[["Division of the kingdom","Point","930 BC","930 BC",-930,-930,""],["Ministries of Elijah and Elisha in Israel","Range","875 BC","797 BC",-875,-797,"c."],["Ministries of Amos and Hosea in Israel","Range","760 BC","715 BC",-760,-715,"c."],["Isaiah's ministry in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Micah's ministry in Judah","Range","735 BC","700 BC",-735,-700,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Book of Micah written","Range","700 BC","650 BC",-700,-650,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Nahum",order:34,section:"Minor Prophets",testament:"OT",spanStart:-740,spanEnd:-480,writtenStart:-645,writtenEnd:-620,events:[["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Nahum's ministry","Range","645 BC","620 BC",-645,-620,"c."],["Book of Nahum written","Range","645 BC","620 BC",-645,-620,"c."],["Zephaniah's ministry in Judah","Range","640 BC","627 BC",-640,-627,"c."],["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Habakkuk's ministry in Judah","Range","605 BC","588 BC",-605,-588,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["Ministries of Haggai and Zechariah","Range","520 BC","480 BC",-520,-480,"c."]]},
+{name:"Habakkuk",order:35,section:"Minor Prophets",testament:"OT",spanStart:-740,spanEnd:-585,writtenStart:-605,writtenEnd:-605,events:[["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Nahum's ministry","Range","645 BC","620 BC",-645,-620,"c."],["Zephaniah's ministry in Judah","Range","640 BC","627 BC",-640,-627,"c."],["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Habakkuk's ministry in Judah","Range","605 BC","588 BC",-605,-588,"c."],["Book of Habakkuk written","Point","605 BC","605 BC",-605,-605,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Zephaniah",order:36,section:"Minor Prophets",testament:"OT",spanStart:-740,spanEnd:-585,writtenStart:-640,writtenEnd:-612,events:[["Ministries of Micah and Isaiah in Judah","Range","740 BC","681 BC",-740,-681,"c."],["Exile of Israel","Point","722 BC","722 BC",-722,-722,""],["Nahum's ministry","Range","645 BC","620 BC",-645,-620,"c."],["Zephaniah's ministry in Judah","Range","640 BC","627 BC",-640,-627,"c."],["Book of Zephaniah written","Range","640 BC","612 BC",-640,-612,"c."],["Jeremiah's ministry in Judah","Range","626 BC","585 BC",-626,-585,"c."],["Habakkuk's ministry in Judah","Range","605 BC","588 BC",-605,-588,"c."],["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""]]},
+{name:"Haggai",order:37,section:"Minor Prophets",testament:"OT",spanStart:-586,spanEnd:-430,writtenStart:-520,writtenEnd:-520,events:[["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,"c."],["Ministries of Haggai and Zechariah","Range","520 BC","480 BC",-520,-480,"c."],["Book of Haggai written","Point","520 BC","520 BC",-520,-520,"c."],["Completion of temple","Point","516 BC","516 BC",-516,-516,""],["Second return to Jerusalem under Ezra","Point","458 BC","458 BC",-458,-458,""],["Third return to Jerusalem under Nehemiah","Point","444 BC","444 BC",-444,-444,""],["Malachi's ministry","Range","440 BC","430 BC",-440,-430,"c."]]},
+{name:"Zechariah",order:38,section:"Minor Prophets",testament:"OT",spanStart:-586,spanEnd:-430,writtenStart:-520,writtenEnd:-480,events:[["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Ministries of Haggai and Zechariah","Range","520 BC","480 BC",-520,-480,"c."],["Book of Zechariah written","Range","520 BC","480 BC",-520,-480,"c."],["Completion of temple","Point","516 BC","516 BC",-516,-516,""],["Second return to Jerusalem under Ezra","Point","458 BC","458 BC",-458,-458,""],["Third return to Jerusalem under Nehemiah","Point","444 BC","444 BC",-444,-444,""],["Malachi's ministry","Range","440 BC","430 BC",-440,-430,"c."]]},
+{name:"Malachi",order:39,section:"Minor Prophets",testament:"OT",spanStart:-586,spanEnd:-430,writtenStart:-430,writtenEnd:-430,events:[["Fall of Jerusalem","Point","586 BC","586 BC",-586,-586,""],["First return of exiles to Jerusalem","Point","538 BC","538 BC",-538,-538,""],["Ministries of Haggai and Zechariah","Range","520 BC","480 BC",-520,-480,"c."],["Completion of temple","Point","516 BC","516 BC",-516,-516,""],["Second return to Jerusalem under Ezra","Point","458 BC","458 BC",-458,-458,""],["Third return to Jerusalem under Nehemiah","Point","444 BC","444 BC",-444,-444,""],["Malachi's ministry","Range","440 BC","430 BC",-440,-430,"c."],["Book of Malachi written","Point","430 BC","430 BC",-430,-430,"c."]]},
+{name:"Matthew",order:40,section:"Gospels",testament:"NT",spanStart:-37,spanEnd:70,writtenStart:60,writtenEnd:70,events:[["Herod the Great's reign","Range","37 BC","4 BC",-37,-4,"c."],["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' flight to Egypt","Point","5/4 BC","5/4 BC",-5,-5,"c."],["Beginning of John the Baptist's ministry","Point","AD 26","AD 26",26,26,"c."],["Beginning of Jesus' ministry","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Book of Matthew written","Range","AD 60","AD 70",60,70,"c."]]},
+{name:"Mark",order:41,section:"Gospels",testament:"NT",spanStart:-37,spanEnd:65,writtenStart:55,writtenEnd:65,events:[["Herod the Great's reign","Range","37 BC","4 BC",-37,-4,"c."],["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' flight to Egypt","Point","5/4 BC","5/4 BC",-5,-5,"c."],["Beginning of John the Baptist's ministry","Point","AD 26","AD 26",26,26,"c."],["Beginning of Jesus' ministry","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Book of Mark written","Range","AD 55","AD 65",55,65,"c."]]},
+{name:"Luke",order:42,section:"Gospels",testament:"NT",spanStart:-37,spanEnd:63,writtenStart:59,writtenEnd:63,events:[["Herod the Great's reign","Range","37 BC","4 BC",-37,-4,"c."],["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' flight to Egypt","Point","5/4 BC","5/4 BC",-5,-5,"c."],["Jesus' visit to the temple","Point","AD 7/8","AD 7/8",7,7,"c."],["Beginning of John the Baptist's ministry","Point","AD 26","AD 26",26,26,"c."],["Beginning of Jesus' ministry","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Book of Luke written","Range","AD 59","AD 63",59,63,"c."]]},
+{name:"John",order:43,section:"Gospels",testament:"NT",spanStart:-37,spanEnd:95,writtenStart:60,writtenEnd:95,events:[["Herod the Great's reign","Range","37 BC","4 BC",-37,-4,"c."],["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' flight to Egypt","Point","5/4 BC","5/4 BC",-5,-5,"c."],["Beginning of John the Baptist's ministry","Point","AD 26","AD 26",26,26,"c."],["Beginning of Jesus' ministry","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Book of John written","Range","AD 60","AD 95",60,95,"c."],["John's exile on Patmos","Range","AD 90","AD 95",90,95,"c."]]},
+{name:"Acts",order:44,section:"Acts",testament:"NT",spanStart:-6,spanEnd:68,writtenStart:62,writtenEnd:62,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's first missionary journey","Range","AD 46","AD 48",46,48,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Paul's second missionary journey","Range","AD 50","AD 52",50,52,"c."],["Paul's third missionary journey","Range","AD 53","AD 57",53,57,"c."],["Book of Acts written","Point","AD 62","AD 62",62,62,"c."],["Paul's fourth missionary journey","Range","AD 62","AD 67",62,67,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."]]},
+{name:"Romans",order:45,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:57,writtenEnd:57,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of Romans written","Point","AD 57","AD 57",57,57,"c."],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"1 Corinthians",order:46,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:68,writtenStart:55,writtenEnd:55,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Paul's stay in Corinth","Range","AD 51","AD 52",51,52,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of 1 Corinthians written","Point","AD 55","AD 55",55,55,"c."],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."]]},
+{name:"2 Corinthians",order:47,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:68,writtenStart:55,writtenEnd:55,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of 2 Corinthians written","Point","AD 55","AD 55",55,55,"c."],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."]]},
+{name:"Galatians",order:48,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:48,writtenEnd:53,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Book of Galatians written","Range","AD 48","AD 53",48,53,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Ephesians",order:49,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:60,writtenEnd:60,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of Ephesians written","Point","AD 60","AD 60",60,60,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Philippians",order:50,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:61,writtenEnd:61,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of Philippians written","Point","AD 61","AD 61",61,61,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Colossians",order:51,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:60,writtenEnd:60,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of Colossians written","Point","AD 60","AD 60",60,60,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"1 Thessalonians",order:52,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:51,writtenEnd:51,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Book of 1 Thessalonians written","Point","AD 51","AD 51",51,51,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"2 Thessalonians",order:53,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:51,writtenEnd:52,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Book of 2 Thessalonians written","Range","AD 51","AD 52",51,52,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"1 Timothy",order:54,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:63,writtenEnd:65,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of 1 Timothy written","Range","AD 63","AD 65",63,65,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"2 Timothy",order:55,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:67,writtenEnd:68,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of 2 Timothy written","Range","AD 67","AD 68",67,68,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Titus",order:56,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:63,writtenEnd:65,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of Titus written","Range","AD 63","AD 65",63,65,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Philemon",order:57,section:"Pauline Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:60,writtenEnd:60,events:[["Jesus' life","Range","6/5 BC","AD 30",-6,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Paul's missionary journeys","Range","AD 46","AD 67",46,67,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's first imprisonment in Rome","Range","AD 59","AD 62",59,62,"c."],["Book of Philemon written","Point","AD 60","AD 60",60,60,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Hebrews",order:58,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:60,writtenEnd:70,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of Hebrews written","Range","AD 60","AD 70",60,70,"c."],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"James",order:59,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:40,writtenEnd:50,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Book of James written","Range","AD 40","AD 50",40,50,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["James's death","Point","AD 62","AD 62",62,62,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"1 Peter",order:60,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:60,writtenEnd:64,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Peter becomes a disciple","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of 1 Peter written","Range","AD 60","AD 64",60,64,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"2 Peter",order:61,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:70,writtenStart:65,writtenEnd:68,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of 2 Peter written","Range","AD 65","AD 68",65,68,"c."],["Peter's death","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"1 John",order:62,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:96,writtenStart:85,writtenEnd:95,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["John becomes a disciple","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."],["Domitian's reign","Range","AD 81","AD 96",81,96,"c."],["Book of 1 John written","Range","AD 85","AD 95",85,95,"c."],["John's exile on Patmos","Range","AD 90","AD 95",90,95,"c."]]},
+{name:"2 John",order:63,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:96,writtenStart:85,writtenEnd:95,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["John becomes a disciple","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."],["Domitian's reign","Range","AD 81","AD 96",81,96,"c."],["Book of 2 John written","Range","AD 85","AD 95",85,95,"c."],["John's exile on Patmos","Range","AD 90","AD 95",90,95,"c."]]},
+{name:"3 John",order:64,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:95,writtenStart:85,writtenEnd:95,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["John becomes a disciple","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."],["Book of 3 John written","Range","AD 85","AD 95",85,95,"c."],["John's exile on Patmos","Range","AD 90","AD 95",90,95,"c."]]},
+{name:"Jude",order:65,section:"General Epistles",testament:"NT",spanStart:-6,spanEnd:80,writtenStart:65,writtenEnd:80,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Jude's conversion","Point","AD 30","AD 30",30,30,"c."],["Paul's conversion","Point","AD 35","AD 35",35,35,"c."],["Council at Jerusalem","Point","AD 49/50","AD 49/50",49,49,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Book of Jude written","Range","AD 65","AD 80",65,80,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."]]},
+{name:"Revelation",order:66,section:"Revelation",testament:"NT",spanStart:-6,spanEnd:96,writtenStart:90,writtenEnd:96,events:[["Jesus' birth","Point","6/5 BC","6/5 BC",-6,-6,"c."],["John becomes a disciple","Point","AD 26","AD 26",26,26,"c."],["Jesus' death, resurrection and ascension","Point","AD 30","AD 30",30,30,"c."],["Nero's reign","Range","AD 54","AD 68",54,68,""],["Paul's imprisonment and death in Rome","Range","AD 67","AD 68",67,68,"c."],["Destruction of Jerusalem's temple","Point","AD 70","AD 70",70,70,"c."],["Domitian's reign","Range","AD 81","AD 96",81,96,"c."],["John's exile on Patmos","Range","AD 90","AD 95",90,95,"c."],["Book of Revelation written","Range","AD 90","AD 96",90,96,"c."]]},
+];
+const MIN_YEAR = -2200, MAX_YEAR = 120;
+let pxPerYear = 0.55;
+const ZOOM_STEP = 1.4;
+
+function yearToX(year){ return (year - MIN_YEAR) * pxPerYear; }
+function fmtYear(y){ if (y < 0) return Math.abs(y) + " BC"; if (y === 0) return "AD 1"; return "AD " + y; }
+
+let groupMode = "canonical";
+let expanded = new Set();
+
+function currentOrder(){
+  const arr = [...BOOKS];
+  if (groupMode === "canonical" || groupMode === "section") arr.sort((a,b)=>a.order-b.order);
+  else if (groupMode === "chronological") arr.sort((a,b)=> (a.spanStart-b.spanStart) || (a.spanEnd-b.spanEnd) || (a.order-b.order));
+  else if (groupMode === "testament") arr.sort((a,b)=> a.testament===b.testament ? a.order-b.order : (a.testament==="OT"?-1:1));
+  else if (groupMode === "written") arr.sort((a,b)=>a.writtenStart-b.writtenStart);
+  return arr;
+}
+function colorFor(book){ return groupMode === "testament" ? TESTAMENT_COLORS[book.testament] : SECTION_COLORS[book.section]; }
+
+function renderLegend(){
+  const legend = document.getElementById("legend"); legend.innerHTML = "";
+  const entries = groupMode === "testament"
+    ? [["Old Testament", TESTAMENT_COLORS.OT], ["New Testament", TESTAMENT_COLORS.NT]]
+    : Object.entries(SECTION_COLORS).filter(([n]) => BOOKS.some(b => b.section === n));
+  entries.forEach(([name, color]) => {
+    const el = document.createElement("div"); el.className = "legend-item";
+    el.innerHTML = `<span class="swatch" style="background:${color}"></span>${name}`;
+    legend.appendChild(el);
+  });
+}
+function renderAxis(){
+  const track = document.getElementById("axisTrack");
+  track.style.width = yearToX(MAX_YEAR) + "px"; track.innerHTML = "";
+  const step = pxPerYear > 1.2 ? 100 : pxPerYear > 0.35 ? 200 : 400;
+  for (let y = Math.ceil(MIN_YEAR/step)*step; y <= MAX_YEAR; y += step){
+    const tick = document.createElement("div"); tick.className = "tick";
+    tick.style.left = yearToX(y) + "px"; tick.textContent = fmtYear(y);
+    track.appendChild(tick);
+  }
+}
+
+function makeBookRow(book, totalWidth){
+  const isOpen = expanded.has(book.name);
+  const row = document.createElement("div");
+  row.className = "row" + (isOpen ? " expanded" : "");
+
+  const label = document.createElement("div"); label.className = "label-cell";
+  label.innerHTML = `<span class="chevron">▸</span><span class="group-dot" style="background:${colorFor(book)}"></span>${book.name}`;
+  row.appendChild(label);
+
+  const track = document.createElement("div"); track.className = "track-cell"; track.style.width = totalWidth + "px";
+  const barLeft = yearToX(book.spanStart), barWidth = Math.max(yearToX(book.spanEnd)-barLeft, 3);
+  const bar = document.createElement("div"); bar.className = "span-bar";
+  bar.style.left = barLeft+"px"; bar.style.width = barWidth+"px"; bar.style.background = colorFor(book);
+  track.appendChild(bar);
+
+  if (book.writtenStart === book.writtenEnd){
+    const marker = document.createElement("div"); marker.className = "written-marker";
+    marker.style.left = yearToX(book.writtenStart)+"px"; marker.style.background = colorFor(book);
+    track.appendChild(marker);
+  } else {
+    const wLeft = yearToX(book.writtenStart), wWidth = Math.max(yearToX(book.writtenEnd)-wLeft, 3);
+    const wr = document.createElement("div"); wr.className = "written-range";
+    wr.style.left = wLeft+"px"; wr.style.width = wWidth+"px"; track.appendChild(wr);
+    const flag = document.createElement("div"); flag.className = "written-marker";
+    flag.style.left = wLeft+"px"; flag.style.background = colorFor(book); track.appendChild(flag);
+  }
+  row.appendChild(track);
+
+  row.addEventListener("click", () => { toggleExpand(book.name); });
+  row.addEventListener("mouseenter", e => showBookTooltip(e, book));
+  row.addEventListener("mousemove", moveTooltip);
+  row.addEventListener("mouseleave", hideTooltip);
+  return row;
+}
+
+function makeEventRow(book, ev, totalWidth){
+  const [name, type, startDisp, endDisp, ss, es, notes] = ev;
+  const row = document.createElement("div"); row.className = "row child";
+
+  const label = document.createElement("div"); label.className = "label-cell";
+  label.innerHTML = name + (notes ? ` <span style="font-size:10px;color:var(--muted);font-style:italic">(${notes})</span>` : "");
+  row.appendChild(label);
+
+  const track = document.createElement("div"); track.className = "track-cell"; track.style.width = totalWidth + "px";
+  if (ss === null){
+    const chip = document.createElement("span"); chip.className = "d-chip"; chip.textContent = "undated";
+    chip.style.left = yearToX(book.spanStart) + "px";
+    track.appendChild(chip);
+  } else if (ss === es){
+    const m = document.createElement("div"); m.className = "d-marker";
+    m.style.left = yearToX(ss) + "px"; m.style.background = colorFor(book);
+    track.appendChild(m);
+  } else {
+    const left = yearToX(ss), width = Math.max(yearToX(es) - left, 2);
+    const bar = document.createElement("div"); bar.className = "d-bar";
+    bar.style.left = left+"px"; bar.style.width = width+"px"; bar.style.background = colorFor(book);
+    track.appendChild(bar);
+  }
+  row.appendChild(track);
+
+  row.addEventListener("mouseenter", e => showEventTooltip(e, book, ev));
+  row.addEventListener("mousemove", moveTooltip);
+  row.addEventListener("mouseleave", hideTooltip);
+  return row;
+}
+
+function renderRows(){
+  const rowsEl = document.getElementById("rows"); rowsEl.innerHTML = "";
+  const totalWidth = yearToX(MAX_YEAR);
+  currentOrder().forEach(book => {
+    rowsEl.appendChild(makeBookRow(book, totalWidth));
+    if (expanded.has(book.name)){
+      book.events.forEach(ev => rowsEl.appendChild(makeEventRow(book, ev, totalWidth)));
+    }
+  });
+}
+function renderAll(){ renderLegend(); renderAxis(); renderRows(); }
+
+function toggleExpand(name){
+  if (expanded.has(name)) expanded.delete(name); else expanded.add(name);
+  renderRows();
+}
+
+const tooltipEl = document.getElementById("tooltip");
+function showBookTooltip(e, book){
+  const w = book.writtenStart === book.writtenEnd ? fmtYear(book.writtenStart) : fmtYear(book.writtenStart)+" – "+fmtYear(book.writtenEnd);
+  tooltipEl.innerHTML = `<div class="tt-title">${book.name}</div><div class="tt-line">${book.section} · ${book.testament}</div>` +
+    `<div class="tt-line">Narrative: ${fmtYear(book.spanStart)} – ${fmtYear(book.spanEnd)}</div><div class="tt-line">Written: ${w}</div>` +
+    `<div class="tt-line" style="margin-top:4px;opacity:.9">Click to ${expanded.has(book.name) ? "collapse" : "expand"}</div>`;
+  tooltipEl.classList.add("visible"); moveTooltip(e);
+}
+function showEventTooltip(e, book, ev){
+  const [name, , startDisp, endDisp, ss, es, notes] = ev;
+  const dateStr = ss === null ? "Undated" : (ss === es ? startDisp : startDisp+" – "+endDisp);
+  tooltipEl.innerHTML = `<div class="tt-title">${name}</div><div class="tt-line">${book.name}${notes ? " · "+notes : ""}</div>` +
+    `<div class="tt-line">${dateStr}</div>`;
+  tooltipEl.classList.add("visible"); moveTooltip(e);
+}
+function moveTooltip(e){
+  const pad = 14; let x = e.clientX+pad, y = e.clientY+pad;
+  const r = tooltipEl.getBoundingClientRect();
+  if (x+r.width > window.innerWidth-8) x = e.clientX-r.width-pad;
+  if (y+r.height > window.innerHeight-8) y = e.clientY-r.height-pad;
+  tooltipEl.style.left = x+"px"; tooltipEl.style.top = y+"px";
+}
+function hideTooltip(){ tooltipEl.classList.remove("visible"); }
+
+document.getElementById("groupBy").addEventListener("change", e => { groupMode = e.target.value; renderAll(); });
+document.getElementById("zoomIn").addEventListener("click", () => { pxPerYear *= ZOOM_STEP; renderAll(); });
+document.getElementById("zoomOut").addEventListener("click", () => { pxPerYear /= ZOOM_STEP; renderAll(); });
+
+// Shift + mouse wheel scrolls the timeline horizontally (desktop only — see note below).
+const scrollAreaEl = document.getElementById("scrollArea");
+scrollAreaEl.addEventListener("wheel", (e) => {
+  if (e.shiftKey) {
+    e.preventDefault();
+    scrollAreaEl.scrollLeft += e.deltaY;
+  }
+}, { passive: false });
+document.getElementById("expandAll").addEventListener("click", () => {
+  const allOpen = BOOKS.every(b => expanded.has(b.name));
+  expanded = allOpen ? new Set() : new Set(BOOKS.map(b => b.name));
+  document.getElementById("expandAll").textContent = allOpen ? "Expand all" : "Collapse all";
+  renderRows();
+});
+
+renderAll();
+</script>
+</body></html>
