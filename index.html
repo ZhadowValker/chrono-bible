@@ -70,9 +70,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .now-sub{font-size:13px;color:var(--muted);line-height:1.4}
 .now-dur{font-size:17px;font-weight:700;color:var(--muted);opacity:.6;font-variant-numeric:tabular-nums}
 
-.bar{margin-top:14px;height:7px;border-radius:99px;background:#d4dcea;cursor:pointer;position:relative}
+.bar{margin-top:14px;height:7px;border-radius:99px;background:#d4dcea;cursor:pointer;position:relative;touch-action:none}
 .bar-fill{height:100%;width:0;border-radius:99px;background:var(--accent);position:relative}
-.bar-fill::after{content:"";position:absolute;right:-6px;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--accent);transform:translateY(-50%);box-shadow:0 2px 6px rgba(40,50,90,.3)}
+.bar-fill::after{content:"";position:absolute;right:-6px;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;border:3px solid var(--accent);transform:translateY(-50%);box-shadow:0 2px 6px rgba(40,50,90,.3);transition:transform .15s,width .15s,height .15s}
+.bar.dragging .bar-fill::after{width:17px;height:17px;right:-8px;transform:translateY(-50%) scale(1.05)}
 .bar-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .chip-speed{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 9px;font-size:11px;font-weight:600;color:var(--ink);cursor:pointer}
 .upnext{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.45}
@@ -392,7 +393,23 @@ function seek(e){
  audio.currentTime=ratio*audio.duration;
  $("barFill").style.width=ratio*100+"%";
 }
-$("bar").addEventListener("click",seek);
+let seeking=false;
+const barEl=$("bar");
+barEl.addEventListener("pointerdown",e=>{
+ seeking=true;
+ barEl.classList.add("dragging");
+ try{barEl.setPointerCapture(e.pointerId);}catch(_){}
+ seek(e);
+});
+barEl.addEventListener("pointermove",e=>{ if(seeking) seek(e); });
+function endSeek(e){
+ if(!seeking) return;
+ seeking=false;
+ barEl.classList.remove("dragging");
+ try{barEl.releasePointerCapture(e.pointerId);}catch(_){}
+}
+barEl.addEventListener("pointerup",endSeek);
+barEl.addEventListener("pointercancel",endSeek);
 
 $("queue").addEventListener("click",e=>{
  const row=e.target.closest(".q");
