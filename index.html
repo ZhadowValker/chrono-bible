@@ -739,7 +739,21 @@ if("mediaSession" in navigator){
 /* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
 let pipWin=null;
 let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
-let pipRAF=null;
+let pipRAF=null, pipPhase=0, pipZeroStreak=0;
+let pipAudioCtx=null, pipAnalyser=null, pipMediaSrc=null, pipUseReal=false;
+function ensurePipAnalyser(){
+ if(pipAnalyser) return true;
+ try{
+  pipAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  pipMediaSrc=pipAudioCtx.createMediaElementSource(audio); // one-time only — audio can never be attached to a 2nd source
+  pipAnalyser=pipAudioCtx.createAnalyser();
+  pipAnalyser.fftSize=64;
+  pipAnalyser.smoothingTimeConstant=0.75;
+  pipMediaSrc.connect(pipAnalyser);
+  pipAnalyser.connect(pipAudioCtx.destination); // keep audio audible — createMediaElementSource reroutes it
+  return true;
+ }catch(_){ pipAnalyser=null; return false; }
+}
 function maybeAutoPip(){
  if(pipDismissed||pipWin||!("documentPictureInPicture" in window)) return;
  openPiP().catch(()=>{}); // browser may refuse if this click didn't carry enough "user activation" — fine, just skip
@@ -774,8 +788,42 @@ function pipSyncProgress(){
  playBtn.innerHTML=audio.paused?"▶":"❚❚";
  playBtn.classList.toggle("live",!audio.paused);
 }
+function pipDrawVisualizer(){
+ if(!pipWin) return;
+ const bars=pipWin.document.querySelectorAll(".pip-vis span");
+ const playing=!audio.paused;
+ let usedReal=false;
+ if(pipUseReal&&playing&&pipAnalyser){
+  const data=new Uint8Array(pipAnalyser.frequencyBinCount);
+  pipAnalyser.getByteFrequencyData(data);
+  const sum=data.reduce((a,b)=>a+b,0);
+  if(sum>0){
+   usedReal=true; pipZeroStreak=0;
+   bars.forEach((bar,i)=>{ bar.style.transform=`scaleY(${Math.max(0.08,data[i]/255)})`; });
+  } else if(++pipZeroStreak>40){
+   pipUseReal=false; // ~0.6s of genuinely silent data → this host likely doesn't send CORS headers; stop trying
+  }
+ }
+ if(!usedReal){
+  pipPhase+=0.14;
+  bars.forEach((bar,i)=>{
+   const v=playing?(0.25+0.55*Math.abs(Math.sin(pipPhase+i*0.35))+0.2*Math.random()):0.08;
+   bar.style.transform=`scaleY(${Math.min(1,Math.max(0.08,v))})`;
+  });
+ }
+ pipRAF=pipWin.requestAnimationFrame(pipDrawVisualizer);
+}
 async function openPiP(){
  if(!("documentPictureInPicture" in window)) return;
+ // Unlock/resume the audio graph FIRST, synchronously within this same click — before any other
+ // await steals the "user gesture" the browser needs to let AudioContext actually start producing sound.
+ pipUseReal=false; pipZeroStreak=0;
+ if(ensurePipAnalyser()){
+  try{
+   await pipAudioCtx.resume();
+   if(pipAudioCtx.state==="running") pipUseReal=true;
+  }catch(_){}
+ }
  pipWin=await window.documentPictureInPicture.requestWindow({width:340,height:280});
  const style=pipWin.document.createElement("style");
  style.textContent=`
@@ -792,7 +840,9 @@ async function openPiP(){
   .pip-title{font-family:'Iowan Old Style',Palatino,serif;font-size:18px;font-weight:700;line-height:1.15;
    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px}
-  .pip-spacer{flex:1;min-height:10px}
+  .pip-vis{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:48px;padding:2px 0}
+  .pip-vis span{flex:1;max-width:5px;height:100%;border-radius:3px 3px 0 0;background:rgba(255,255,255,.85);
+   transform:scaleY(.08);transform-origin:bottom;transition:transform .09s ease-out}
   .pip-progress{display:flex;align-items:center;gap:8px}
   .pip-time{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:30px}
   #pipDur{text-align:right}
@@ -816,7 +866,7 @@ async function openPiP(){
    <div class="pip-topline"><span class="pip-badge" id="pipBadge"></span><span class="pip-partno" id="pipPartNo"></span></div>
    <div class="pip-title" id="pipTitle"></div>
    <div class="pip-sub" id="pipSub"></div>
-   <div class="pip-spacer"></div>
+   <div class="pip-vis" id="pipVis">${"<span></span>".repeat(24)}</div>
    <div class="pip-progress">
     <span class="pip-time" id="pipCur">0:00</span>
     <div class="pip-bar" id="pipBar"><div class="pip-fill" id="pipFill"></div><div class="pip-knob" id="pipKnob"></div></div>
@@ -858,6 +908,7 @@ async function openPiP(){
  audio.addEventListener("timeupdate",pipSyncProgress);
  audio.addEventListener("play",pipSyncProgress);
  audio.addEventListener("pause",pipSyncProgress);
+ pipDrawVisualizer();
  pipWin.addEventListener("pagehide",()=>{
   audio.removeEventListener("timeupdate",pipSyncProgress);
   audio.removeEventListener("play",pipSyncProgress);
