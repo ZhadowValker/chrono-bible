@@ -128,8 +128,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .book-tl-date{font-size:10.5px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
 .book-tl-track{position:relative;height:7px;border-radius:99px;background:var(--line)}
 .book-tl-bar{position:absolute;top:0;height:100%;border-radius:99px;background:var(--accent)}
-.book-tl-undated{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
-.book-tl-chip{font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:3px 9px}
+.book-tl-chip{position:absolute;left:0;top:50%;transform:translateY(-50%);font-size:9.5px;color:#8a93a6;background:#e7e9ef;border:1px solid #d3d7e0;border-radius:99px;padding:2px 8px;white-space:nowrap}
 
 @media(max-width:1000px){
  .app{grid-template-columns:1fr;gap:20px;padding:4px 14px 48px}
@@ -432,32 +431,38 @@ function renderBookTimelinePanel(slug){
  const written=book.writtenStart===book.writtenEnd?fmtYear(book.writtenStart):fmtYear(book.writtenStart)+" – "+fmtYear(book.writtenEnd);
 
  const dated=book.events.filter(ev=>ev[4]!==null&&ev[4]!==undefined);
- const undated=book.events.filter(ev=>ev[4]===null||ev[4]===undefined);
-
- let chart="";
+ let axisHtml="", lo=0, hi=1;
  if(dated.length){
   const starts=dated.map(ev=>ev[4]);
   const ends=dated.map(ev=>ev[5]!==null&&ev[5]!==undefined?ev[5]:ev[4]);
   const rawLo=Math.min(...starts), rawHi=Math.max(...ends);
   const range=Math.max(rawHi-rawLo,1);
   const pad=range*0.05;
-  const lo=rawLo-pad, hi=rawHi+pad;
-  const pct=y=>Math.min(100,Math.max(0,((y-lo)/(hi-lo))*100));
-  const rows=dated.map(ev=>{
-   const [name,,startDisp,endDisp,ss,es]=ev;
-   const left=pct(ss), right=pct(es!==null&&es!==undefined?es:ss);
-   const width=Math.max(right-left,1.5);
-   const dateTxt=(startDisp===endDisp)?startDisp:startDisp+" – "+endDisp;
-   return `<div class="book-tl-row">
-    <div class="book-tl-row-head"><span class="book-tl-name">${esc(name)}</span><span class="book-tl-date">${esc(dateTxt)}</span></div>
-    <div class="book-tl-track"><div class="book-tl-bar" style="left:${left}%;width:${width}%"></div></div>
-   </div>`;
-  }).join("");
-  chart=`<div class="book-tl-axis"><span>${esc(fmtYear(rawLo))}</span><span>${esc(fmtYear(rawHi))}</span></div>${rows}`;
+  lo=rawLo-pad; hi=rawHi+pad;
+  axisHtml=`<div class="book-tl-axis"><span>${esc(fmtYear(rawLo))}</span><span>${esc(fmtYear(rawHi))}</span></div>`;
  }
- const undatedHtml=undated.length?`<div class="book-tl-undated">${undated.map(ev=>`<span class="book-tl-chip">${esc(ev[0])}</span>`).join("")}</div>`:"";
+ const pct=y=>Math.min(100,Math.max(0,((y-lo)/(hi-lo))*100));
 
- return `<div class="book-tl-meta">Narrative: ${esc(span)} · Written: ${esc(written)}</div>${chart}${undatedHtml}`;
+ const rows=book.events.map(ev=>{
+  const [name,,startDisp,endDisp,ss,es]=ev;
+  if(ss===null||ss===undefined){
+   // No fixed date — same convention as the main timeline chart: an "undated" chip
+   // docked at the start of the track, just rendered gray instead of the book's section color.
+   return `<div class="book-tl-row">
+    <div class="book-tl-row-head"><span class="book-tl-name">${esc(name)}</span><span class="book-tl-date">undated</span></div>
+    <div class="book-tl-track"><span class="book-tl-chip">undated</span></div>
+   </div>`;
+  }
+  const left=pct(ss), right=pct(es!==null&&es!==undefined?es:ss);
+  const width=Math.max(right-left,1.5);
+  const dateTxt=(startDisp===endDisp)?startDisp:startDisp+" – "+endDisp;
+  return `<div class="book-tl-row">
+   <div class="book-tl-row-head"><span class="book-tl-name">${esc(name)}</span><span class="book-tl-date">${esc(dateTxt)}</span></div>
+   <div class="book-tl-track"><div class="book-tl-bar" style="left:${left}%;width:${width}%"></div></div>
+  </div>`;
+ }).join("");
+
+ return `<div class="book-tl-meta">Narrative: ${esc(span)} · Written: ${esc(written)}</div>${axisHtml}${rows}`;
 }
 function chapKey(id,chapter){ return id+"-"+chapter; }
 let lastSaveAt=0;
