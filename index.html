@@ -739,20 +739,7 @@ if("mediaSession" in navigator){
 /* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
 let pipWin=null;
 let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
-let pipAudioCtx=null, pipAnalyser=null, pipMediaSrc=null, pipRAF=null;
-function ensurePipAnalyser(){
- if(pipAnalyser) return pipAnalyser;
- try{
-  pipAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  pipMediaSrc=pipAudioCtx.createMediaElementSource(audio); // one-time; audio can't be attached to a 2nd source
-  pipAnalyser=pipAudioCtx.createAnalyser();
-  pipAnalyser.fftSize=64;
-  pipAnalyser.smoothingTimeConstant=0.75;
-  pipMediaSrc.connect(pipAnalyser);
-  pipAnalyser.connect(pipAudioCtx.destination); // keep audio audible — createMediaElementSource reroutes it
- }catch(_){ pipAnalyser=null; }
- return pipAnalyser;
-}
+let pipRAF=null, pipPhase=0;
 function maybeAutoPip(){
  if(pipDismissed||pipWin||!("documentPictureInPicture" in window)) return;
  openPiP().catch(()=>{}); // browser may refuse if this click didn't carry enough "user activation" — fine, just skip
@@ -788,14 +775,13 @@ function pipSyncProgress(){
  playBtn.classList.toggle("live",!audio.paused);
 }
 function pipDrawVisualizer(){
- if(!pipWin||!pipAnalyser) return;
+ if(!pipWin) return;
  const bars=pipWin.document.querySelectorAll(".pip-vis span");
- const data=new Uint8Array(pipAnalyser.frequencyBinCount);
- pipAnalyser.getByteFrequencyData(data);
  const playing=!audio.paused;
+ pipPhase+=0.14;
  bars.forEach((bar,i)=>{
-  const v=playing?data[i]/255:0;
-  bar.style.transform=`scaleY(${Math.max(0.08,v)})`;
+  const v=playing?(0.25+0.55*Math.abs(Math.sin(pipPhase+i*0.35))+0.2*Math.random()):0.08;
+  bar.style.transform=`scaleY(${Math.min(1,Math.max(0.08,v))})`;
  });
  pipRAF=pipWin.requestAnimationFrame(pipDrawVisualizer);
 }
@@ -869,10 +855,7 @@ async function openPiP(){
  audio.addEventListener("timeupdate",pipSyncProgress);
  audio.addEventListener("play",pipSyncProgress);
  audio.addEventListener("pause",pipSyncProgress);
- if(ensurePipAnalyser()){
-  try{ await pipAudioCtx.resume(); }catch(_){}
-  pipDrawVisualizer();
- }
+ pipDrawVisualizer();
  pipWin.addEventListener("pagehide",()=>{
   audio.removeEventListener("timeupdate",pipSyncProgress);
   audio.removeEventListener("play",pipSyncProgress);
