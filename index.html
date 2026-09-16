@@ -413,6 +413,8 @@ function loadProgress(){
 }
 function saveProgress(){ try{ localStorage.setItem("cbProgress",JSON.stringify(progress)); }catch(_){} }
 const progress=loadProgress();
+let pipWin=null;
+let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
 
 // ---- inline "this book's timeline" panel, populated from timeline.html's BOOKS data on demand ----
 let expandedBooksInline=new Set(); // stores book slugs
@@ -771,8 +773,6 @@ if("mediaSession" in navigator){
 }
 
 /* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
-let pipWin=null;
-let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
 function maybeAutoPip(){
  if(pipDismissed||pipWin||!("documentPictureInPicture" in window)) return;
  openPiP().catch(()=>{}); // browser may refuse if this click didn't carry enough "user activation" — fine, just skip
