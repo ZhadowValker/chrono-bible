@@ -188,12 +188,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
      </div>
     </div>
     <div class="rail">
-     <button id="btnAuto" class="on" title="Continuous play" aria-pressed="true">⟳</button>
-     <button id="btnLink" title="Open this chapter on Sajeeva Vahini">↗</button>
-     <button id="btnPrev" title="Previous chapter">⏮</button>
-     <button id="btnNext" title="Next chapter">⏭</button>
-     <button id="btnPop" title="Pop out player" hidden>⧉</button>
-     <button id="btnPlay" class="big" title="Play" aria-label="Play">▶</button>
+     <button id="btnAuto" class="on" title="Continuous play" aria-pressed="true"></button>
+     <button id="btnLink" title="Open this chapter on Sajeeva Vahini"></button>
+     <button id="btnPrev" title="Previous chapter"></button>
+     <button id="btnNext" title="Next chapter"></button>
+     <button id="btnPop" title="Pop out player" hidden></button>
+     <button id="btnPlay" class="big" title="Play" aria-label="Play"></button>
     </div>
    </div>
 
@@ -210,7 +210,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     <span id="nowTime">0:00</span>
     <div class="bar-tools">
      <div class="vol-control">
-      <span class="vol-icon" id="volIcon">🔊</span>
+      <span class="vol-icon" id="volIcon"></span>
       <input type="range" class="vol-slider" id="volume" min="0" max="1" step="0.01" value="1" title="Volume" aria-label="Volume">
      </div>
      <select class="chip-speed" id="version" title="Audio version" aria-label="Audio version">
@@ -374,6 +374,19 @@ function chapterPosText(pos,of){
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const ICONS={
+ play:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>`,
+ pause:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>`,
+ prev:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg>`,
+ next:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M16 5h2v14h-2zM4 5l10 7-10 7z"/></svg>`,
+ loop:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
+ external:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>`,
+ popout:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><rect x="12" y="11" width="9" height="6" rx="1" fill="currentColor" stroke="none"/></svg>`,
+ volHigh:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/><path d="M20 6a9 9 0 0 1 0 12"/></svg>`,
+ volLow:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/></svg>`,
+ volMute:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M23 9l-6 6"/><path d="M17 9l6 6"/></svg>`
+};
+function volIconFor(v){ return v===0?ICONS.volMute:v<0.5?ICONS.volLow:ICONS.volHigh; }
 const clock=s=>Number.isFinite(s)?Math.floor(Math.max(0,s)/60)+":"+String(Math.floor(Math.max(0,s))%60).padStart(2,"0"):"--:--";
 const sourcesOf=r=>(r.Source||"").split(" | ").filter(Boolean);
 
@@ -549,7 +562,7 @@ function buildQueue(){
      <span class="q-title">${esc(r.Event)}</span>
      <span class="q-meta">${esc(r.Reference)} · ${chs.length} ${chapterWord(chs.length)} · ${esc(r.Date)}</span>
     </span>
-    <span class="q-go">▶</span>
+    <span class="q-go">${ICONS.play}</span>
    </button>`;
   });
  } else {
@@ -561,7 +574,7 @@ function buildQueue(){
      <span class="q-title">${esc(r.Event)}</span>
      <span class="q-meta">${esc(r.Reference)} · ${chs.length} ${chapterWord(chs.length)} · ${esc(r.Date)}</span>
     </span>
-    <span class="q-go">▶</span>
+    <span class="q-go">${ICONS.play}</span>
    </button>`;
   }).join("");
  }
@@ -650,8 +663,8 @@ audio.addEventListener("timeupdate",()=>{
  $("barFill").style.width=(audio.duration?(audio.currentTime/audio.duration)*100:0)+"%";
  saveCurrentPosition(false);
 });
-audio.addEventListener("play",()=>{$("btnPlay").textContent="❚❚";$("btnPlay").title=I18N[uiLang].pause;$("btnPlay").setAttribute("aria-label",I18N[uiLang].pause)});
-audio.addEventListener("pause",()=>{$("btnPlay").textContent="▶";$("btnPlay").title=I18N[uiLang].play;$("btnPlay").setAttribute("aria-label",I18N[uiLang].play);saveCurrentPosition(true)});
+audio.addEventListener("play",()=>{$("btnPlay").innerHTML=ICONS.pause;$("btnPlay").title=I18N[uiLang].pause;$("btnPlay").setAttribute("aria-label",I18N[uiLang].pause)});
+audio.addEventListener("pause",()=>{$("btnPlay").innerHTML=ICONS.play;$("btnPlay").title=I18N[uiLang].play;$("btnPlay").setAttribute("aria-label",I18N[uiLang].play);saveCurrentPosition(true)});
 audio.addEventListener("error",()=>{if(audio.src){$("err").textContent=I18N[uiLang].loadError;$("err").hidden=false}});
 audio.addEventListener("ended",()=>{
  if(qi>-1){
@@ -695,7 +708,7 @@ let lastVolume=1;
  updateVolIcon();
 })();
 function updateVolIcon(){
- $("volIcon").textContent = audio.volume===0 ? "🔇" : audio.volume<0.5 ? "🔉" : "🔊";
+ $("volIcon").innerHTML = volIconFor(audio.volume);
  if(pipWin) pipSyncVolume();
 }
 $("volume").addEventListener("input",()=>{
@@ -805,7 +818,7 @@ function pipSyncVolume(){
  const s=d.getElementById("pipVolume"), i=d.getElementById("pipVolIcon");
  if(!s) return;
  s.value=audio.volume;
- i.textContent=audio.volume===0?"🔇":audio.volume<0.5?"🔉":"🔊";
+ i.innerHTML=volIconFor(audio.volume);
 }
 function pipSyncProgress(){
  if(!pipWin) return;
@@ -816,7 +829,7 @@ function pipSyncProgress(){
  d.getElementById("pipCur").textContent=clock(audio.currentTime);
  d.getElementById("pipDur").textContent=audio.duration?clock(audio.duration):"--:--";
  const playBtn=d.getElementById("pipPlay");
- playBtn.innerHTML=audio.paused?"▶":"❚❚";
+ playBtn.innerHTML=audio.paused?ICONS.play:ICONS.pause;
  playBtn.classList.toggle("live",!audio.paused);
  d.querySelector(".pip-card").classList.toggle("playing",!audio.paused);
 }
@@ -894,12 +907,12 @@ async function openPiP(){
     <span class="pip-time" id="pipDur">--:--</span>
    </div>
    <div class="pip-controls">
-    <button id="pipPrev" title="${esc(I18N[uiLang].prevCh)}">⏮</button>
-    <button id="pipPlay" title="${esc(I18N[uiLang].play)}">▶</button>
-    <button id="pipNext" title="${esc(I18N[uiLang].nextCh)}">⏭</button>
+    <button id="pipPrev" title="${esc(I18N[uiLang].prevCh)}">${ICONS.prev}</button>
+    <button id="pipPlay" title="${esc(I18N[uiLang].play)}">${ICONS.play}</button>
+    <button id="pipNext" title="${esc(I18N[uiLang].nextCh)}">${ICONS.next}</button>
    </div>
    <div class="pip-vol">
-    <span class="pip-vol-icon" id="pipVolIcon">🔊</span>
+    <span class="pip-vol-icon" id="pipVolIcon">${ICONS.volHigh}</span>
     <input type="range" class="pip-vol-slider" id="pipVolume" min="0" max="1" step="0.01" value="1">
    </div>
   </div>`;
@@ -993,6 +1006,13 @@ $("coverBook").addEventListener("click",()=>{
  const slug=QUEUE[qi].book.toLowerCase().replace(/\s+/g,"-");
  location.href="timeline.html?book="+slug;
 });
+
+$("btnAuto").innerHTML=ICONS.loop;
+$("btnLink").innerHTML=ICONS.external;
+$("btnPrev").innerHTML=ICONS.prev;
+$("btnNext").innerHTML=ICONS.next;
+$("btnPop").innerHTML=ICONS.popout;
+$("btnPlay").innerHTML=ICONS.play;
 
 applyLang(uiLang);
 
