@@ -308,7 +308,7 @@ function buildQueue(){
  QUEUE=[];
  list.forEach(r=>{
   const chs=CH.get(r["#"]);
-  chs.forEach((c,i)=>QUEUE.push({id:r["#"],chapter:c.chapter,book:c.book,url:c.url,page:c.page,pos:i+1,of:chs.length}));
+  chs.forEach((c,i)=>QUEUE.push({id:r["#"],chapter:c.chapter,book:c.book,bookNum:c.bookNum,url:c.url,page:c.page,pos:i+1,of:chs.length}));
  });
 
  $("queue").innerHTML=list.map(r=>{
