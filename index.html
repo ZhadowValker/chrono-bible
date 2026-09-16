@@ -739,6 +739,20 @@ if("mediaSession" in navigator){
 /* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
 let pipWin=null;
 let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
+let pipAudioCtx=null, pipAnalyser=null, pipMediaSrc=null, pipRAF=null;
+function ensurePipAnalyser(){
+ if(pipAnalyser) return pipAnalyser;
+ try{
+  pipAudioCtx=new (window.AudioContext||window.webkitAudioContext)();
+  pipMediaSrc=pipAudioCtx.createMediaElementSource(audio); // one-time; audio can't be attached to a 2nd source
+  pipAnalyser=pipAudioCtx.createAnalyser();
+  pipAnalyser.fftSize=64;
+  pipAnalyser.smoothingTimeConstant=0.75;
+  pipMediaSrc.connect(pipAnalyser);
+  pipAnalyser.connect(pipAudioCtx.destination); // keep audio audible — createMediaElementSource reroutes it
+ }catch(_){ pipAnalyser=null; }
+ return pipAnalyser;
+}
 function maybeAutoPip(){
  if(pipDismissed||pipWin||!("documentPictureInPicture" in window)) return;
  openPiP().catch(()=>{}); // browser may refuse if this click didn't carry enough "user activation" — fine, just skip
@@ -746,37 +760,101 @@ function maybeAutoPip(){
 function pipSyncMeta(){
  if(!pipWin) return;
  const item=qi>-1?QUEUE[qi]:null;
- pipWin.document.getElementById("pipTitle").textContent = item ? `${item.book} ${item.chapter}` : I18N[uiLang].nothingQueued;
- pipWin.document.getElementById("pipSub").textContent = item ? REC.get(item.id).Event : "";
+ const d=pipWin.document;
+ if(!item){
+  d.getElementById("pipTitle").textContent=I18N[uiLang].nothingQueued;
+  d.getElementById("pipSub").textContent="";
+  d.getElementById("pipBadge").textContent="—";
+  d.getElementById("pipPartNo").textContent="";
+  return;
+ }
+ const r=REC.get(item.id);
+ d.getElementById("pipTitle").textContent=`${item.book} ${item.chapter}`;
+ d.getElementById("pipSub").textContent=r.Event;
+ d.getElementById("pipBadge").textContent=VERSIONS[currentVersion].label.split(" ")[0];
+ d.getElementById("pipPartNo").textContent="PART "+r.Part;
+ d.querySelector(".pip-card").style.setProperty("--pip-cover",coverFor(Number(r.Part)));
 }
 function pipSyncProgress(){
  if(!pipWin) return;
- pipWin.document.getElementById("pipFill").style.width=(audio.duration?(audio.currentTime/audio.duration)*100:0)+"%";
- pipWin.document.getElementById("pipPlay").textContent=audio.paused?"▶":"❚❚";
+ const d=pipWin.document;
+ const pct=audio.duration?(audio.currentTime/audio.duration)*100:0;
+ d.getElementById("pipFill").style.width=pct+"%";
+ d.getElementById("pipKnob").style.left=pct+"%";
+ d.getElementById("pipCur").textContent=clock(audio.currentTime);
+ d.getElementById("pipDur").textContent=audio.duration?clock(audio.duration):"--:--";
+ const playBtn=d.getElementById("pipPlay");
+ playBtn.innerHTML=audio.paused?"▶":"❚❚";
+ playBtn.classList.toggle("live",!audio.paused);
+}
+function pipDrawVisualizer(){
+ if(!pipWin||!pipAnalyser) return;
+ const bars=pipWin.document.querySelectorAll(".pip-vis span");
+ const data=new Uint8Array(pipAnalyser.frequencyBinCount);
+ pipAnalyser.getByteFrequencyData(data);
+ const playing=!audio.paused;
+ bars.forEach((bar,i)=>{
+  const v=playing?data[i]/255:0;
+  bar.style.transform=`scaleY(${Math.max(0.08,v)})`;
+ });
+ pipRAF=pipWin.requestAnimationFrame(pipDrawVisualizer);
 }
 async function openPiP(){
  if(!("documentPictureInPicture" in window)) return;
- pipWin=await window.documentPictureInPicture.requestWindow({width:300,height:110});
+ pipWin=await window.documentPictureInPicture.requestWindow({width:340,height:280});
  const style=pipWin.document.createElement("style");
  style.textContent=`
-  body{margin:0;font-family:Inter,system-ui,sans-serif;background:#1d2536;color:#fff;
-   display:flex;flex-direction:column;height:100vh;box-sizing:border-box;padding:12px 14px;gap:8px}
-  .pipTitle{font-family:'Iowan Old Style',Palatino,serif;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pipSub{font-size:11px;opacity:.72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pipBar{margin-top:auto;height:5px;border-radius:99px;background:rgba(255,255,255,.25);position:relative;cursor:pointer}
-  .pipFill{height:100%;border-radius:99px;background:#7a6ce6;width:0%}
-  .pipRow{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:4px}
-  .pipRow button{background:none;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;padding:4px}
+  :root{--pip-cover:linear-gradient(140deg,#241d63,#5146d8)}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:#11162a;color:#fff;height:100vh;overflow:hidden}
+  .pip-card{position:relative;height:100%;display:flex;flex-direction:column;padding:16px 18px;gap:10px;
+   background:var(--pip-cover);background-size:180% 180%;animation:pipDrift 14s ease-in-out infinite}
+  @keyframes pipDrift{0%,100%{background-position:0% 0%}50%{background-position:100% 60%}}
+  .pip-topline{display:flex;align-items:center;justify-content:space-between}
+  .pip-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;
+   background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:3px 9px}
+  .pip-partno{font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.65)}
+  .pip-title{font-family:'Iowan Old Style',Palatino,serif;font-size:18px;font-weight:700;line-height:1.15;
+   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px}
+  .pip-vis{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:48px;padding:2px 0}
+  .pip-vis span{flex:1;max-width:5px;height:100%;border-radius:3px 3px 0 0;background:rgba(255,255,255,.85);
+   transform:scaleY(.08);transform-origin:bottom;transition:transform .09s ease-out}
+  .pip-progress{display:flex;align-items:center;gap:8px}
+  .pip-time{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:30px}
+  #pipDur{text-align:right}
+  .pip-bar{position:relative;flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.28);cursor:pointer}
+  .pip-fill{position:absolute;top:0;left:0;height:100%;border-radius:99px;background:#fff;width:0%}
+  .pip-knob{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:#fff;
+   box-shadow:0 1px 4px rgba(0,0,0,.4);transform:translate(-50%,-50%);left:0%}
+  .pip-controls{display:flex;align-items:center;justify-content:center;gap:22px;padding-top:2px}
+  .pip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:4px;line-height:1;
+   opacity:.9;transition:transform .12s,opacity .12s}
+  .pip-controls button:hover{opacity:1;transform:scale(1.08)}
+  #pipPrev,#pipNext{font-size:18px}
+  #pipPlay{font-size:15px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.16);
+   border:1px solid rgba(255,255,255,.34);display:flex;align-items:center;justify-content:center}
+  #pipPlay.live{animation:pipPulse 1.8s ease-in-out infinite}
+  @keyframes pipPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.25)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
  `;
  pipWin.document.head.appendChild(style);
+ const barCount=24;
  pipWin.document.body.innerHTML=`
-  <div class="pipTitle" id="pipTitle"></div>
-  <div class="pipSub" id="pipSub"></div>
-  <div class="pipBar" id="pipBar"><div class="pipFill" id="pipFill"></div></div>
-  <div class="pipRow">
-   <button id="pipPrev" title="${esc(I18N[uiLang].prevCh)}">⏮</button>
-   <button id="pipPlay" title="${esc(I18N[uiLang].play)}">${audio.paused?"▶":"❚❚"}</button>
-   <button id="pipNext" title="${esc(I18N[uiLang].nextCh)}">⏭</button>
+  <div class="pip-card">
+   <div class="pip-topline"><span class="pip-badge" id="pipBadge"></span><span class="pip-partno" id="pipPartNo"></span></div>
+   <div class="pip-title" id="pipTitle"></div>
+   <div class="pip-sub" id="pipSub"></div>
+   <div class="pip-vis" id="pipVis">${"<span></span>".repeat(barCount)}</div>
+   <div class="pip-progress">
+    <span class="pip-time" id="pipCur">0:00</span>
+    <div class="pip-bar" id="pipBar"><div class="pip-fill" id="pipFill"></div><div class="pip-knob" id="pipKnob"></div></div>
+    <span class="pip-time" id="pipDur">--:--</span>
+   </div>
+   <div class="pip-controls">
+    <button id="pipPrev" title="${esc(I18N[uiLang].prevCh)}">⏮</button>
+    <button id="pipPlay" title="${esc(I18N[uiLang].play)}">▶</button>
+    <button id="pipNext" title="${esc(I18N[uiLang].nextCh)}">⏭</button>
+   </div>
   </div>`;
  pipWin.document.getElementById("pipPlay").onclick=()=>{ audio.paused? play() : audio.pause(); };
  pipWin.document.getElementById("pipPrev").onclick=()=>step(-1);
@@ -791,10 +869,15 @@ async function openPiP(){
  audio.addEventListener("timeupdate",pipSyncProgress);
  audio.addEventListener("play",pipSyncProgress);
  audio.addEventListener("pause",pipSyncProgress);
+ if(ensurePipAnalyser()){
+  try{ await pipAudioCtx.resume(); }catch(_){}
+  pipDrawVisualizer();
+ }
  pipWin.addEventListener("pagehide",()=>{
   audio.removeEventListener("timeupdate",pipSyncProgress);
   audio.removeEventListener("play",pipSyncProgress);
   audio.removeEventListener("pause",pipSyncProgress);
+  if(pipRAF){ pipWin.cancelAnimationFrame(pipRAF); pipRAF=null; }
   pipWin=null;
   pipDismissed=true;
  },{once:true});
