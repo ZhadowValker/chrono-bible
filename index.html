@@ -115,6 +115,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .book-head-name:hover{color:var(--accent)}
 .book-chip{font-size:11px;font-weight:700;color:var(--soft-ink);background:var(--soft);border-radius:99px;padding:4px 10px;white-space:nowrap;cursor:pointer}
 .book-chip.done{color:#fff;background:var(--accent)}
+.book-head{cursor:pointer;user-select:none}
+.book-head-chevron{display:inline-block;font-size:11px;color:var(--muted);margin-right:6px;transition:transform .18s}
+.book-head.open .book-head-chevron{transform:rotate(90deg)}
+.book-tl{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:2px 0 8px}
+.book-tl-meta{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+.book-tl-loading{font-size:12.5px;color:var(--muted);padding:4px 0}
+.book-tl-row{display:flex;align-items:baseline;gap:8px;padding:4px 0;font-size:12.5px}
+.book-tl-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex:0 0 auto}
+.book-tl-name{flex:1;color:var(--ink);font-family:var(--serif)}
+.book-tl-date{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
 
 @media(max-width:1000px){
  .app{grid-template-columns:1fr;gap:20px;padding:4px 14px 48px}
@@ -392,6 +402,36 @@ function loadProgress(){
 }
 function saveProgress(){ try{ localStorage.setItem("cbProgress",JSON.stringify(progress)); }catch(_){} }
 const progress=loadProgress();
+
+// ---- inline "this book's timeline" panel, populated from timeline.html's BOOKS data on demand ----
+let expandedBooksInline=new Set(); // stores book slugs
+let TIMELINE_BOOKS=null;
+let timelineBooksPromise=null;
+function fmtYear(y){ if(y===null||y===undefined) return "undated"; if(y<0) return Math.abs(y)+" BC"; if(y===0) return "AD 1"; return "AD "+y; }
+function ensureTimelineBooksLoaded(){
+ if(TIMELINE_BOOKS) return Promise.resolve(TIMELINE_BOOKS);
+ if(timelineBooksPromise) return timelineBooksPromise;
+ timelineBooksPromise=fetch("timeline.html").then(r=>r.text()).then(html=>{
+  const m=html.match(/const BOOKS\s*=\s*(\[[\s\S]*?\]);/);
+  if(!m) throw new Error("BOOKS not found in timeline.html");
+  TIMELINE_BOOKS=new Function("return ("+m[1]+")")();
+  return TIMELINE_BOOKS;
+ }).catch(err=>{ timelineBooksPromise=null; throw err; });
+ return timelineBooksPromise;
+}
+function renderBookTimelinePanel(slug){
+ if(!TIMELINE_BOOKS) return `<div class="book-tl-loading">Loading…</div>`;
+ const book=TIMELINE_BOOKS.find(b=>b.name.toLowerCase().replace(/\s+/g,"-")===slug);
+ if(!book) return `<div class="book-tl-loading">Couldn't load that book's timeline.</div>`;
+ const span=book.spanStart===null?"undated":(book.spanStart===book.spanEnd?fmtYear(book.spanStart):fmtYear(book.spanStart)+" – "+fmtYear(book.spanEnd));
+ const written=book.writtenStart===book.writtenEnd?fmtYear(book.writtenStart):fmtYear(book.writtenStart)+" – "+fmtYear(book.writtenEnd);
+ const rows=book.events.map(ev=>{
+  const name=ev[0], ss=ev[4], startDisp=ev[2], endDisp=ev[3];
+  const date=ss===null?"Undated":(startDisp===endDisp?startDisp:startDisp+" – "+endDisp);
+  return `<div class="book-tl-row"><span class="book-tl-dot"></span><span class="book-tl-name">${esc(name)}</span><span class="book-tl-date">${esc(date)}</span></div>`;
+ }).join("");
+ return `<div class="book-tl-meta">Narrative: ${esc(span)} · Written: ${esc(written)}</div>${rows}`;
+}
 function chapKey(id,chapter){ return id+"-"+chapter; }
 let lastSaveAt=0;
 function saveCurrentPosition(force){
@@ -454,10 +494,13 @@ function buildQueue(){
     const slug=b.toLowerCase().replace(/\s+/g,"-");
     const done=doneByBook.get(b)||0, total=totalsByBook.get(b)||0;
     const complete=total>0&&done===total;
-    html+=`<div class="book-head" data-book="${esc(slug)}">
+    const isOpen=expandedBooksInline.has(slug);
+    html+=`<div class="book-head${isOpen?" open":""}" data-book="${esc(slug)}">
+     <span class="book-head-chevron">▸</span>
      <span class="book-head-name">${esc(b)}</span>
      <span class="book-chip${complete?" done":""}">${complete?"✓ ":""}${done}/${total}</span>
     </div>`;
+    if(isOpen) html+=`<div class="book-tl" data-book="${esc(slug)}">${renderBookTimelinePanel(slug)}</div>`;
    }
    html+=`<button class="q" data-id="${esc(r["#"])}">
     <span class="q-num">#${esc(r["#"])}</span>
@@ -483,7 +526,14 @@ function buildQueue(){
  }
  $("queue").innerHTML=html;
  $("queue").querySelectorAll(".book-head").forEach(h=>{
-  h.addEventListener("click",()=>{ location.href="timeline.html?book="+h.dataset.book; });
+  h.addEventListener("click",async ()=>{
+   const slug=h.dataset.book;
+   if(expandedBooksInline.has(slug)){ expandedBooksInline.delete(slug); buildQueue(); return; }
+   expandedBooksInline.add(slug);
+   buildQueue(); // paint immediately with a "Loading…" panel
+   try{ await ensureTimelineBooksLoaded(); }catch(_){}
+   buildQueue(); // repaint with the real data (or a friendly failure message)
+  });
  });
 
  $("count").textContent=list.length+" "+eventWord(list.length);
