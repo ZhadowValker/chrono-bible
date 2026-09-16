@@ -748,17 +748,21 @@ function pipSyncMeta(){
  const item=qi>-1?QUEUE[qi]:null;
  const d=pipWin.document;
  if(!item){
-  d.getElementById("pipTitle").textContent=I18N[uiLang].nothingQueued;
+  d.getElementById("pipPart").textContent="";
+  d.getElementById("pipBook").textContent=I18N[uiLang].nothingQueued;
+  d.getElementById("pipChNum").textContent="";
+  d.getElementById("pipChOf").textContent="";
   d.getElementById("pipSub").textContent="";
   d.getElementById("pipBadge").textContent="—";
-  d.getElementById("pipPartNo").textContent="";
   return;
  }
  const r=REC.get(item.id);
- d.getElementById("pipTitle").textContent=`${item.book} ${item.chapter}`;
+ d.getElementById("pipPart").textContent="PART "+r.Part;
+ d.getElementById("pipBook").textContent=item.book;
+ d.getElementById("pipChNum").textContent=item.chapter;
+ d.getElementById("pipChOf").textContent=item.of>1?" of "+item.of:"";
  d.getElementById("pipSub").textContent=r.Event;
  d.getElementById("pipBadge").textContent=VERSIONS[currentVersion].label.split(" ")[0];
- d.getElementById("pipPartNo").textContent="PART "+r.Part;
  d.querySelector(".pip-card").style.setProperty("--pip-cover",coverFor(Number(r.Part)));
 }
 function pipSyncProgress(){
@@ -788,10 +792,12 @@ async function openPiP(){
   .pip-topline{display:flex;align-items:center;justify-content:space-between}
   .pip-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;
    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:3px 9px}
-  .pip-partno{font-size:10px;font-weight:700;letter-spacing:.08em;color:rgba(255,255,255,.65)}
-  .pip-title{font-family:'Iowan Old Style',Palatino,serif;font-size:18px;font-weight:700;line-height:1.15;
-   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px}
+  .pip-part{font-size:10px;font-weight:700;letter-spacing:.16em;opacity:.78;margin-top:2px}
+  .pip-book{font-family:'Iowan Old Style',Palatino,serif;font-size:17px;line-height:1.15;
+   text-shadow:0 2px 10px rgba(30,22,80,.35);margin-top:6px}
+  .pip-chnum{font-family:'Iowan Old Style',Palatino,serif;font-size:40px;line-height:.95;letter-spacing:-.02em}
+  .pip-chnum small{font-size:12px;opacity:.75;letter-spacing:.04em;font-family:Inter,system-ui,sans-serif}
+  .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
   .pip-blobs{position:absolute;inset:0;overflow:hidden;z-index:0}
   .pip-blob{position:absolute;width:130%;padding-top:130%;border-radius:38%;
    background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.30),rgba(255,255,255,0) 62%);
@@ -829,8 +835,10 @@ async function openPiP(){
  pipWin.document.body.innerHTML=`
   <div class="pip-card">
    <div class="pip-blobs"><span class="pip-blob b1"></span><span class="pip-blob b2"></span><span class="pip-blob b3"></span></div>
-   <div class="pip-topline"><span class="pip-badge" id="pipBadge"></span><span class="pip-partno" id="pipPartNo"></span></div>
-   <div class="pip-title" id="pipTitle"></div>
+   <div class="pip-topline"><span class="pip-badge" id="pipBadge"></span></div>
+   <div class="pip-part" id="pipPart"></div>
+   <div class="pip-book" id="pipBook"></div>
+   <div class="pip-chnum"><span id="pipChNum"></span><small id="pipChOf"></small></div>
    <div class="pip-sub" id="pipSub"></div>
    <div class="pip-spacer"></div>
    <div class="pip-vis" id="pipVis">${"<span></span>".repeat(24)}</div>
