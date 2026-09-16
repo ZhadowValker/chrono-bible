@@ -492,8 +492,8 @@ audio.addEventListener("ended",()=>{
 });
 
 $("btnPlay").onclick=()=>{
- if(qi<0){load(0,true);return}
- audio.paused?play():audio.pause();
+ if(qi<0){load(0,true);maybeAutoPip();return}
+ if(audio.paused){play();maybeAutoPip();} else {audio.pause();}
 };
 $("btnPrev").onclick=()=>step(-1);
 $("btnNext").onclick=()=>step(1);
@@ -544,7 +544,7 @@ $("queue").addEventListener("click",e=>{
  const row=e.target.closest(".q");
  if(!row) return;
  const i=QUEUE.findIndex(x=>x.id===row.dataset.id);
- if(i>-1) load(i,true);
+ if(i>-1){ load(i,true); maybeAutoPip(); }
 });
 
 ["search","period","sort"].forEach(id=>{
@@ -570,6 +570,11 @@ if("mediaSession" in navigator){
 
 /* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
 let pipWin=null;
+let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
+function maybeAutoPip(){
+ if(pipDismissed||pipWin||!("documentPictureInPicture" in window)) return;
+ openPiP().catch(()=>{}); // browser may refuse if this click didn't carry enough "user activation" — fine, just skip
+}
 function pipSyncMeta(){
  if(!pipWin) return;
  const item=qi>-1?QUEUE[qi]:null;
@@ -623,11 +628,12 @@ async function openPiP(){
   audio.removeEventListener("play",pipSyncProgress);
   audio.removeEventListener("pause",pipSyncProgress);
   pipWin=null;
+  pipDismissed=true;
  },{once:true});
 }
 if("documentPictureInPicture" in window){
  $("btnPop").hidden=false;
- $("btnPop").addEventListener("click",openPiP);
+ $("btnPop").addEventListener("click",()=>{ pipDismissed=false; openPiP().catch(()=>{}); });
 }
 
 /* ---------------- interface language ---------------- */
