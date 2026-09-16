@@ -295,6 +295,7 @@ function makeBookRow(book, totalWidth){
   const isOpen = expanded.has(book.name);
   const row = document.createElement("div");
   row.className = "row" + (isOpen ? " expanded" : "");
+  row.dataset.order = book.order;
 
   const label = document.createElement("div"); label.className = "label-cell";
   label.innerHTML = `<span class="chevron">▸</span><span class="group-dot" style="background:${colorFor(book)}"></span>${book.name}`;
@@ -418,5 +419,24 @@ document.getElementById("expandAll").addEventListener("click", () => {
 });
 
 renderAll();
+
+// Deep link from the Listening Console: timeline.html?book=<slug> expands and scrolls to that book.
+(function openBookFromLink(){
+ const slug=new URLSearchParams(location.search).get("book");
+ if(!slug) return;
+ const book=BOOKS.find(b=>b.name.toLowerCase().replace(/\s+/g,"-")===slug);
+ if(!book) return;
+ expanded.add(book.name);
+ renderRows();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+  const row=document.querySelector(`.row[data-order="${book.order}"]`);
+  if(row){
+   row.scrollIntoView({behavior:"smooth",block:"center"});
+   row.style.transition="background-color .3s";
+   row.style.backgroundColor="var(--soft)";
+   setTimeout(()=>{ row.style.backgroundColor=""; },1600);
+  }
+ }));
+})();
 </script>
 </body></html>

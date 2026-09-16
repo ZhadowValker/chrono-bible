@@ -56,7 +56,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .cover-art{position:absolute;inset:0;border-radius:16px;background:var(--cover,linear-gradient(140deg,#4036a8,#7b6fe0));color:#fff;padding:18px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 10px 30px -8px rgba(53,44,124,.55);transition:opacity .34s ease,transform .34s ease}
 .cover-art.swap{opacity:0;transform:scale(.94)}
 .cover-part{font-size:10px;font-weight:700;letter-spacing:.16em;opacity:.78}
-.cover-book{font-family:var(--serif);font-size:23px;line-height:1.15;text-shadow:0 2px 10px rgba(30,22,80,.35)}
+.cover-book{font-family:var(--serif);font-size:23px;line-height:1.15;text-shadow:0 2px 10px rgba(30,22,80,.35);cursor:pointer}
 .cover-ch{font-family:var(--serif);font-size:58px;line-height:.95;letter-spacing:-.02em}
 .cover-ch small{font-size:15px;opacity:.75;letter-spacing:.04em}
 
@@ -109,6 +109,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .q.playing .q-num{color:var(--accent)}
 .q.playing .q-go{background:var(--accent);color:#fff}
 .none{display:none;padding:56px;text-align:center;color:var(--muted)}
+.book-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 4px 6px;margin-top:4px}
+.book-head:first-child{margin-top:0}
+.book-head-name{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+.book-head-name:hover{color:var(--accent)}
+.book-chip{font-size:11px;font-weight:700;color:var(--soft-ink);background:var(--soft);border-radius:99px;padding:4px 10px;white-space:nowrap;cursor:pointer}
+.book-chip.done{color:#fff;background:var(--accent)}
 
 @media(max-width:1000px){
  .app{grid-template-columns:1fr;gap:20px;padding:4px 14px 48px}
@@ -214,6 +220,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    <input id="search" type="search" placeholder="Search event, reference, date…">
    <select id="period"><option value="">All periods</option><option value="Old Testament">Old Testament</option><option value="New Testament">New Testament</option></select>
    <select id="sort">
+    <option value="canon">Canonical order</option>
     <option value="chron">Chronological order</option>
     <option value="part">By Part</option>
     <option value="title">By Part-Title</option>
@@ -279,7 +286,7 @@ const I18N={
   timelineLink:"Timeline chart →",
   searchPh:"Search event, reference, date…",
   allPeriods:"All periods", periodOT:"Old Testament", periodNT:"New Testament",
-  sortChron:"Chronological order", sortPart:"By Part", sortTitle:"By Part-Title",
+  sortCanon:"Canonical order", sortChron:"Chronological order", sortPart:"By Part", sortTitle:"By Part-Title",
   sortBook:"By Bible book", sortDate:"By Date",
   noMatch:"No matching events.",
   continuousTitle:"Continuous play", openOn:"Open this chapter on Sajeeva Vahini",
@@ -297,7 +304,7 @@ const I18N={
   timelineLink:"కాలరేఖ చార్ట్ →",
   searchPh:"సంఘటన, రిఫరెన్స్, తేదీ శోధించండి…",
   allPeriods:"అన్ని కాలాలు", periodOT:"పాత నిబంధన", periodNT:"కొత్త నిబంధన",
-  sortChron:"కాలానుక్రమం", sortPart:"భాగం వారీగా", sortTitle:"భాగం-శీర్షిక వారీగా",
+  sortCanon:"కానానికల్ క్రమం", sortChron:"కాలానుక్రమం", sortPart:"భాగం వారీగా", sortTitle:"భాగం-శీర్షిక వారీగా",
   sortBook:"బైబిల్ గ్రంథం వారీగా", sortDate:"తేదీ వారీగా",
   noMatch:"సరిపోలే సంఘటనలు లేవు.",
   continuousTitle:"నిరంతర ప్లే", openOn:"ఈ అధ్యాయాన్ని సజీవ వాహినిలో తెరవండి",
@@ -315,7 +322,7 @@ const I18N={
   timelineLink:"समयरेखा चार्ट →",
   searchPh:"घटना, संदर्भ, तारीख खोजें…",
   allPeriods:"सभी काल", periodOT:"पुराना नियम", periodNT:"नया नियम",
-  sortChron:"कालानुक्रमिक क्रम", sortPart:"भाग के अनुसार", sortTitle:"भाग-शीर्षक के अनुसार",
+  sortCanon:"कैननिकल क्रम", sortChron:"कालानुक्रमिक क्रम", sortPart:"भाग के अनुसार", sortTitle:"भाग-शीर्षक के अनुसार",
   sortBook:"बाइबिल पुस्तक के अनुसार", sortDate:"तारीख के अनुसार",
   noMatch:"कोई मेल खाती घटना नहीं है।",
   continuousTitle:"निरंतर प्ले", openOn:"इस अध्याय को सजीव वाहिनी पर खोलें",
@@ -363,6 +370,10 @@ function chaptersOf(r){
 const CH=new Map(DATA.map(r=>[r["#"],chaptersOf(r)]));
 const REC=new Map(DATA.map(r=>[r["#"],r]));
 const BOOK=new Map(DATA.map(r=>[r["#"],(r.Reference.match(/^((?:[1-3] )?[A-Za-z]+(?: [A-Za-z]+)?)/)||["",""])[1]]));
+const BOOK_ORDER=new Map(DATA.map(r=>{
+ const slug=(BOOK.get(r["#"])||"").toLowerCase().replace(/\s+/g,"-");
+ return [r["#"],BOOK_NUM[slug]||999];
+}));
 const HAY=new Map(DATA.map(r=>[r["#"],[r.Date,r.Period,r["Part-Title"],r.Event,r.Reference].join(" ").toLowerCase()]));
 const coverFor=part=>`linear-gradient(140deg,hsl(247 62% ${28+part*1.7}%),hsl(256 58% ${52+part*1.1}%))`;
 
@@ -374,6 +385,25 @@ let QUEUE=[];        // one entry per chapter, flattened across the visible even
 let qi=-1;           // index into QUEUE
 let continuous=true;
 
+// ---- resume-where-you-left-off + per-chapter completion, cached in the browser ----
+function loadProgress(){
+ try{ return JSON.parse(localStorage.getItem("cbProgress"))||{completed:{},last:null}; }
+ catch(_){ return {completed:{},last:null}; }
+}
+function saveProgress(){ try{ localStorage.setItem("cbProgress",JSON.stringify(progress)); }catch(_){} }
+const progress=loadProgress();
+function chapKey(id,chapter){ return id+"-"+chapter; }
+let lastSaveAt=0;
+function saveCurrentPosition(force){
+ if(qi<0) return;
+ const now=Date.now();
+ if(!force && now-lastSaveAt<3000) return;
+ lastSaveAt=now;
+ const item=QUEUE[qi];
+ progress.last={id:item.id,chapter:item.chapter,time:audio.currentTime};
+ saveProgress();
+}
+
 /* ---------------- list + queue ---------------- */
 function visible(){
  const q=$("search").value.trim().toLowerCase(), p=$("period").value, mode=$("sort").value;
@@ -382,11 +412,21 @@ function visible(){
  if(mode==="part") a.sort((x,y)=>Number(x.Part)-Number(y.Part)||n(x,y));
  else if(mode==="title") a.sort((x,y)=>x["Part-Title"].localeCompare(y["Part-Title"])||n(x,y));
  else if(mode==="book") a.sort((x,y)=>BOOK.get(x["#"]).localeCompare(BOOK.get(y["#"]))||n(x,y));
+ else if(mode==="canon") a.sort((x,y)=>BOOK_ORDER.get(x["#"])-BOOK_ORDER.get(y["#"])||n(x,y));
  else if(mode==="date") a.sort((x,y)=>x.Date.localeCompare(y.Date)||n(x,y));
  else a.sort(n);
  return a;
 }
 
+function chapterCompletion(id,total){
+ let done=0;
+ for(let c=1;c<=total;c++){
+  const chs=CH.get(id);
+  const ch=chs[c-1]; if(!ch) continue;
+  if(progress.completed[chapKey(id,ch.chapter)]) done++;
+ }
+ return done;
+}
 function buildQueue(){
  const keep=qi>-1?QUEUE[qi]:null;
  const list=visible();
@@ -396,17 +436,56 @@ function buildQueue(){
   chs.forEach((c,i)=>QUEUE.push({id:r["#"],chapter:c.chapter,book:c.book,bookNum:c.bookNum,url:c.url,page:c.page,pos:i+1,of:chs.length}));
  });
 
- $("queue").innerHTML=list.map(r=>{
-  const chs=CH.get(r["#"]);
-  return `<button class="q" data-id="${esc(r["#"])}">
-   <span class="q-num">#${esc(r["#"])}</span>
-   <span>
-    <span class="q-title">${esc(r.Event)}</span>
-    <span class="q-meta">${esc(r.Reference)} · ${chs.length} ${chapterWord(chs.length)} · ${esc(r.Date)}</span>
-   </span>
-   <span class="q-go">▶</span>
-  </button>`;
- }).join("");
+ const grouped=$("sort").value==="book"||$("sort").value==="canon";
+ let html="", prevBook=null;
+
+ if(grouped){
+  // Pre-compute per-book chapter totals/completions over the currently visible list.
+  const totalsByBook=new Map(), doneByBook=new Map();
+  list.forEach(r=>{
+   const b=BOOK.get(r["#"]); const chs=CH.get(r["#"]);
+   totalsByBook.set(b,(totalsByBook.get(b)||0)+chs.length);
+   doneByBook.set(b,(doneByBook.get(b)||0)+chapterCompletion(r["#"],chs.length));
+  });
+  list.forEach(r=>{
+   const b=BOOK.get(r["#"]), chs=CH.get(r["#"]);
+   if(b!==prevBook){
+    prevBook=b;
+    const slug=b.toLowerCase().replace(/\s+/g,"-");
+    const done=doneByBook.get(b)||0, total=totalsByBook.get(b)||0;
+    const complete=total>0&&done===total;
+    html+=`<div class="book-head" data-book="${esc(slug)}">
+     <span class="book-head-name">${esc(b)}</span>
+     <span class="book-chip${complete?" done":""}">${complete?"✓ ":""}${done}/${total}</span>
+    </div>`;
+   }
+   html+=`<button class="q" data-id="${esc(r["#"])}">
+    <span class="q-num">#${esc(r["#"])}</span>
+    <span>
+     <span class="q-title">${esc(r.Event)}</span>
+     <span class="q-meta">${esc(r.Reference)} · ${chs.length} ${chapterWord(chs.length)} · ${esc(r.Date)}</span>
+    </span>
+    <span class="q-go">▶</span>
+   </button>`;
+  });
+ } else {
+  html=list.map(r=>{
+   const chs=CH.get(r["#"]);
+   return `<button class="q" data-id="${esc(r["#"])}">
+    <span class="q-num">#${esc(r["#"])}</span>
+    <span>
+     <span class="q-title">${esc(r.Event)}</span>
+     <span class="q-meta">${esc(r.Reference)} · ${chs.length} ${chapterWord(chs.length)} · ${esc(r.Date)}</span>
+    </span>
+    <span class="q-go">▶</span>
+   </button>`;
+  }).join("");
+ }
+ $("queue").innerHTML=html;
+ $("queue").querySelectorAll(".book-head").forEach(h=>{
+  h.addEventListener("click",()=>{ location.href="timeline.html?book="+h.dataset.book; });
+ });
+
  $("count").textContent=list.length+" "+eventWord(list.length);
  $("countCh").textContent=QUEUE.length+" "+chapterWord(QUEUE.length);
  $("inQueueText").textContent=" "+I18N[uiLang].inQueueSuffix;
@@ -478,11 +557,18 @@ audio.addEventListener("loadedmetadata",()=>{$("nowDur").textContent=clock(audio
 audio.addEventListener("timeupdate",()=>{
  $("nowTime").textContent=clock(audio.currentTime);
  $("barFill").style.width=(audio.duration?(audio.currentTime/audio.duration)*100:0)+"%";
+ saveCurrentPosition(false);
 });
 audio.addEventListener("play",()=>{$("btnPlay").textContent="❚❚";$("btnPlay").title=I18N[uiLang].pause;$("btnPlay").setAttribute("aria-label",I18N[uiLang].pause)});
-audio.addEventListener("pause",()=>{$("btnPlay").textContent="▶";$("btnPlay").title=I18N[uiLang].play;$("btnPlay").setAttribute("aria-label",I18N[uiLang].play)});
+audio.addEventListener("pause",()=>{$("btnPlay").textContent="▶";$("btnPlay").title=I18N[uiLang].play;$("btnPlay").setAttribute("aria-label",I18N[uiLang].play);saveCurrentPosition(true)});
 audio.addEventListener("error",()=>{if(audio.src){$("err").textContent=I18N[uiLang].loadError;$("err").hidden=false}});
 audio.addEventListener("ended",()=>{
+ if(qi>-1){
+  const item=QUEUE[qi];
+  progress.completed[chapKey(item.id,item.chapter)]=true;
+  progress.last=null;
+  saveProgress();
+ }
  if(!continuous){
   const next=QUEUE[qi+1];
   if(next&&next.id===QUEUE[qi].id) load(qi+1,true);   // finish this event, then stop
@@ -646,7 +732,7 @@ function applyLang(lang){
  document.querySelector(".hero-nav a").textContent=t.timelineLink;
  $("search").placeholder=t.searchPh;
  const po=$("period").options; po[0].textContent=t.allPeriods; po[1].textContent=t.periodOT; po[2].textContent=t.periodNT;
- const so=$("sort").options; so[0].textContent=t.sortChron; so[1].textContent=t.sortPart; so[2].textContent=t.sortTitle; so[3].textContent=t.sortBook; so[4].textContent=t.sortDate;
+ const so=$("sort").options; so[0].textContent=t.sortCanon; so[1].textContent=t.sortChron; so[2].textContent=t.sortPart; so[3].textContent=t.sortTitle; so[4].textContent=t.sortBook; so[5].textContent=t.sortDate;
  $("none").textContent=t.noMatch;
  $("btnAuto").title=t.continuousTitle;
  $("btnLink").title=t.openOn;
@@ -662,7 +748,22 @@ function applyLang(lang){
 }
 $("uiLang").value=uiLang;
 $("uiLang").addEventListener("change",()=>applyLang($("uiLang").value));
+$("coverBook").addEventListener("click",()=>{
+ if(qi<0) return;
+ const slug=QUEUE[qi].book.toLowerCase().replace(/\s+/g,"-");
+ location.href="timeline.html?book="+slug;
+});
 
 applyLang(uiLang);
+
+// Resume where the person left off, if the browser remembers a chapter and there's a matching row.
+(function resumeFromCache(){
+ if(!progress.last) return;
+ const i=QUEUE.findIndex(x=>x.id===progress.last.id&&x.chapter===progress.last.chapter);
+ if(i<0) return;
+ load(i,false);
+ const t=progress.last.time||0;
+ audio.addEventListener("loadedmetadata",()=>{ if(t>0&&t<(audio.duration||Infinity)) audio.currentTime=t; },{once:true});
+})();
 </script>
 </body></html>
