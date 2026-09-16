@@ -739,7 +739,7 @@ if("mediaSession" in navigator){
 /* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
 let pipWin=null;
 let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
-let pipRAF=null, pipPhase=0;
+let pipRAF=null;
 function maybeAutoPip(){
  if(pipDismissed||pipWin||!("documentPictureInPicture" in window)) return;
  openPiP().catch(()=>{}); // browser may refuse if this click didn't carry enough "user activation" — fine, just skip
@@ -774,17 +774,6 @@ function pipSyncProgress(){
  playBtn.innerHTML=audio.paused?"▶":"❚❚";
  playBtn.classList.toggle("live",!audio.paused);
 }
-function pipDrawVisualizer(){
- if(!pipWin) return;
- const bars=pipWin.document.querySelectorAll(".pip-vis span");
- const playing=!audio.paused;
- pipPhase+=0.14;
- bars.forEach((bar,i)=>{
-  const v=playing?(0.25+0.55*Math.abs(Math.sin(pipPhase+i*0.35))+0.2*Math.random()):0.08;
-  bar.style.transform=`scaleY(${Math.min(1,Math.max(0.08,v))})`;
- });
- pipRAF=pipWin.requestAnimationFrame(pipDrawVisualizer);
-}
 async function openPiP(){
  if(!("documentPictureInPicture" in window)) return;
  pipWin=await window.documentPictureInPicture.requestWindow({width:340,height:280});
@@ -803,9 +792,7 @@ async function openPiP(){
   .pip-title{font-family:'Iowan Old Style',Palatino,serif;font-size:18px;font-weight:700;line-height:1.15;
    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px}
-  .pip-vis{flex:1;display:flex;align-items:flex-end;justify-content:center;gap:3px;min-height:48px;padding:2px 0}
-  .pip-vis span{flex:1;max-width:5px;height:100%;border-radius:3px 3px 0 0;background:rgba(255,255,255,.85);
-   transform:scaleY(.08);transform-origin:bottom;transition:transform .09s ease-out}
+  .pip-spacer{flex:1;min-height:10px}
   .pip-progress{display:flex;align-items:center;gap:8px}
   .pip-time{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:30px}
   #pipDur{text-align:right}
@@ -824,13 +811,12 @@ async function openPiP(){
   @keyframes pipPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.25)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
  `;
  pipWin.document.head.appendChild(style);
- const barCount=24;
  pipWin.document.body.innerHTML=`
   <div class="pip-card">
    <div class="pip-topline"><span class="pip-badge" id="pipBadge"></span><span class="pip-partno" id="pipPartNo"></span></div>
    <div class="pip-title" id="pipTitle"></div>
    <div class="pip-sub" id="pipSub"></div>
-   <div class="pip-vis" id="pipVis">${"<span></span>".repeat(barCount)}</div>
+   <div class="pip-spacer"></div>
    <div class="pip-progress">
     <span class="pip-time" id="pipCur">0:00</span>
     <div class="pip-bar" id="pipBar"><div class="pip-fill" id="pipFill"></div><div class="pip-knob" id="pipKnob"></div></div>
@@ -845,17 +831,33 @@ async function openPiP(){
  pipWin.document.getElementById("pipPlay").onclick=()=>{ audio.paused? play() : audio.pause(); };
  pipWin.document.getElementById("pipPrev").onclick=()=>step(-1);
  pipWin.document.getElementById("pipNext").onclick=()=>step(1);
- pipWin.document.getElementById("pipBar").addEventListener("click",e=>{
+ const pipBarEl=pipWin.document.getElementById("pipBar");
+ let pipSeeking=false;
+ function pipSeek(e){
   if(!audio.duration) return;
-  const box=e.currentTarget.getBoundingClientRect();
+  const box=pipBarEl.getBoundingClientRect();
   const ratio=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width));
   audio.currentTime=ratio*audio.duration;
+  pipWin.document.getElementById("pipFill").style.width=ratio*100+"%";
+  pipWin.document.getElementById("pipKnob").style.left=ratio*100+"%";
+ }
+ pipBarEl.addEventListener("pointerdown",e=>{
+  pipSeeking=true;
+  try{pipBarEl.setPointerCapture(e.pointerId);}catch(_){}
+  pipSeek(e);
  });
+ pipBarEl.addEventListener("pointermove",e=>{ if(pipSeeking) pipSeek(e); });
+ function pipEndSeek(e){
+  if(!pipSeeking) return;
+  pipSeeking=false;
+  try{pipBarEl.releasePointerCapture(e.pointerId);}catch(_){}
+ }
+ pipBarEl.addEventListener("pointerup",pipEndSeek);
+ pipBarEl.addEventListener("pointercancel",pipEndSeek);
  pipSyncMeta(); pipSyncProgress();
  audio.addEventListener("timeupdate",pipSyncProgress);
  audio.addEventListener("play",pipSyncProgress);
  audio.addEventListener("pause",pipSyncProgress);
- pipDrawVisualizer();
  pipWin.addEventListener("pagehide",()=>{
   audio.removeEventListener("timeupdate",pipSyncProgress);
   audio.removeEventListener("play",pipSyncProgress);
