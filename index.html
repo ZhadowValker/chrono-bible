@@ -80,6 +80,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .bar-foot{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .bar-tools{display:flex;gap:6px}
 .chip-speed{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:4px 9px;font-size:11px;font-weight:600;color:var(--ink);cursor:pointer}
+.vol-control{display:flex;align-items:center;gap:5px}
+.vol-icon{font-size:13px;cursor:pointer;user-select:none;width:16px;text-align:center}
+.vol-slider{width:64px;accent-color:var(--accent);cursor:pointer}
 .upnext{margin-top:14px;padding-top:13px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);line-height:1.45}
 .upnext b{color:var(--ink);font-weight:650}
 .err{margin-top:10px;font-size:12px;color:#b42318}
@@ -206,6 +209,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    <div class="bar-foot">
     <span id="nowTime">0:00</span>
     <div class="bar-tools">
+     <div class="vol-control">
+      <span class="vol-icon" id="volIcon">🔊</span>
+      <input type="range" class="vol-slider" id="volume" min="0" max="1" step="0.01" value="1" title="Volume" aria-label="Volume">
+     </div>
      <select class="chip-speed" id="version" title="Audio version" aria-label="Audio version">
       <option value="telugu" selected>Telugu</option>
       <option value="hindi">Hindi</option>
@@ -675,6 +682,33 @@ $("btnLink").onclick=()=>{
  if(item) window.open(item.page,"_blank","noopener");
 };
 $("speed").onchange=()=>{audio.playbackRate=Number($("speed").value)};
+
+/* ---------------- volume ---------------- */
+let lastVolume=1;
+(function initVolume(){
+ let v=1;
+ try{ const saved=localStorage.getItem("cbVolume"); if(saved!==null) v=Number(saved); }catch(_){}
+ if(!Number.isFinite(v)) v=1;
+ audio.volume=v; $("volume").value=v; lastVolume=v||1;
+ updateVolIcon();
+})();
+function updateVolIcon(){
+ $("volIcon").textContent = audio.volume===0 ? "🔇" : audio.volume<0.5 ? "🔉" : "🔊";
+ if(pipWin) pipSyncVolume();
+}
+$("volume").addEventListener("input",()=>{
+ const v=Number($("volume").value);
+ audio.volume=v;
+ if(v>0) lastVolume=v;
+ try{ localStorage.setItem("cbVolume",String(v)); }catch(_){}
+ updateVolIcon();
+});
+$("volIcon").addEventListener("click",()=>{
+ if(audio.volume>0){ audio.volume=0; $("volume").value=0; }
+ else { audio.volume=lastVolume||1; $("volume").value=audio.volume; }
+ try{ localStorage.setItem("cbVolume",String(audio.volume)); }catch(_){}
+ updateVolIcon();
+});
 $("version").addEventListener("change",()=>{
  currentVersion=$("version").value;
  if(qi>-1){
@@ -747,13 +781,14 @@ function pipSyncMeta(){
  if(!pipWin) return;
  const item=qi>-1?QUEUE[qi]:null;
  const d=pipWin.document;
+ const sel=d.getElementById("pipVersionSel");
+ if(sel) sel.value=currentVersion;
  if(!item){
   d.getElementById("pipPart").textContent="";
   d.getElementById("pipBook").textContent=I18N[uiLang].nothingQueued;
   d.getElementById("pipChNum").textContent="";
   d.getElementById("pipChOf").textContent="";
   d.getElementById("pipSub").textContent="";
-  d.getElementById("pipBadge").textContent="—";
   return;
  }
  const r=REC.get(item.id);
@@ -762,8 +797,15 @@ function pipSyncMeta(){
  d.getElementById("pipChNum").textContent=item.chapter;
  d.getElementById("pipChOf").textContent=item.of>1?" of "+item.of:"";
  d.getElementById("pipSub").textContent=r.Event;
- d.getElementById("pipBadge").textContent=VERSIONS[currentVersion].label.split(" ")[0];
  d.querySelector(".pip-card").style.setProperty("--pip-cover",coverFor(Number(r.Part)));
+}
+function pipSyncVolume(){
+ if(!pipWin) return;
+ const d=pipWin.document;
+ const s=d.getElementById("pipVolume"), i=d.getElementById("pipVolIcon");
+ if(!s) return;
+ s.value=audio.volume;
+ i.textContent=audio.volume===0?"🔇":audio.volume<0.5?"🔉":"🔊";
 }
 function pipSyncProgress(){
  if(!pipWin) return;
@@ -789,31 +831,33 @@ async function openPiP(){
   .pip-card{position:relative;overflow:hidden;height:100%;display:flex;flex-direction:column;padding:16px 18px;gap:10px;
    background:var(--pip-cover);background-size:180% 180%;animation:pipDrift 14s ease-in-out infinite}
   @keyframes pipDrift{0%,100%{background-position:0% 0%}50%{background-position:100% 60%}}
-  .pip-topline{display:flex;align-items:center;justify-content:space-between}
+  .pip-topline{display:flex;align-items:center;justify-content:flex-end}
   .pip-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;
-   background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:3px 9px}
+   background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:4px 10px;
+   cursor:pointer;appearance:none;-webkit-appearance:none}
+  .pip-badge option{color:#1d2536;background:#fff;text-transform:none}
   .pip-part{font-size:10px;font-weight:700;letter-spacing:.16em;opacity:.78;margin-top:2px}
-  .pip-book{font-family:'Iowan Old Style',Palatino,serif;font-size:17px;line-height:1.15;
+  .pip-book{font-family:'Iowan Old Style',Palatino,serif;font-size:22px;line-height:1.15;
    text-shadow:0 2px 10px rgba(30,22,80,.35);margin-top:6px}
-  .pip-chnum{font-family:'Iowan Old Style',Palatino,serif;font-size:40px;line-height:.95;letter-spacing:-.02em}
-  .pip-chnum small{font-size:12px;opacity:.75;letter-spacing:.04em;font-family:Inter,system-ui,sans-serif}
+  .pip-chnum{font-family:'Iowan Old Style',Palatino,serif;font-size:52px;line-height:.95;letter-spacing:-.02em}
+  .pip-chnum small{font-size:15px;opacity:.75;letter-spacing:.04em;font-family:Inter,system-ui,sans-serif}
   .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
   .pip-blobs{position:absolute;inset:0;overflow:hidden;z-index:0}
   .pip-blob{position:absolute;width:130%;padding-top:130%;border-radius:38%;
-   background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.30),rgba(255,255,255,0) 62%);
-   animation:pipSpin 26s linear infinite}
+   background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.16),rgba(255,255,255,0) 62%);
+   animation:pipSpin 46s linear infinite}
   .pip-blob.b2{width:105%;padding-top:105%;top:15%;left:20%;
-   background:radial-gradient(circle at 60% 65%,rgba(122,108,230,.55),rgba(122,108,230,0) 60%);
-   animation-duration:34s;animation-direction:reverse}
+   background:radial-gradient(circle at 60% 65%,rgba(122,108,230,.30),rgba(122,108,230,0) 60%);
+   animation-duration:58s;animation-direction:reverse}
   .pip-blob.b3{width:85%;padding-top:85%;top:-10%;left:35%;
-   background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.18),rgba(255,255,255,0) 65%);
-   animation-duration:42s}
+   background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.10),rgba(255,255,255,0) 65%);
+   animation-duration:70s}
   @keyframes pipSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .pip-card.playing .pip-blob{animation-duration:4.5s}
-  .pip-card.playing .pip-blob.b2{animation-duration:5.5s}
-  .pip-card.playing .pip-blob.b3{animation-duration:7s}
+  .pip-card.playing .pip-blob{animation-duration:9s}
+  .pip-card.playing .pip-blob.b2{animation-duration:11s}
+  .pip-card.playing .pip-blob.b3{animation-duration:14s}
   .pip-card>:not(.pip-blobs){position:relative;z-index:1}
-  .pip-spacer{flex:1;min-height:10px}
+  .pip-spacer{flex:1;min-height:6px}
   .pip-progress{display:flex;align-items:center;gap:8px}
   .pip-time{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:30px}
   #pipDur{text-align:right}
@@ -829,19 +873,21 @@ async function openPiP(){
   #pipPlay{font-size:15px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.16);
    border:1px solid rgba(255,255,255,.34);display:flex;align-items:center;justify-content:center}
   #pipPlay.live{animation:pipPulse 1.8s ease-in-out infinite}
+  .pip-vol{display:flex;align-items:center;gap:6px;justify-content:center;padding-top:2px}
+  .pip-vol-icon{font-size:12px;cursor:pointer}
+  .pip-vol-slider{width:80px;accent-color:#fff;cursor:pointer}
   @keyframes pipPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.25)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
  `;
  pipWin.document.head.appendChild(style);
  pipWin.document.body.innerHTML=`
   <div class="pip-card">
    <div class="pip-blobs"><span class="pip-blob b1"></span><span class="pip-blob b2"></span><span class="pip-blob b3"></span></div>
-   <div class="pip-topline"><span class="pip-badge" id="pipBadge"></span></div>
+   <div class="pip-topline"><select class="pip-badge" id="pipVersionSel"></select></div>
    <div class="pip-part" id="pipPart"></div>
    <div class="pip-book" id="pipBook"></div>
    <div class="pip-chnum"><span id="pipChNum"></span><small id="pipChOf"></small></div>
    <div class="pip-sub" id="pipSub"></div>
    <div class="pip-spacer"></div>
-   <div class="pip-vis" id="pipVis">${"<span></span>".repeat(24)}</div>
    <div class="pip-progress">
     <span class="pip-time" id="pipCur">0:00</span>
     <div class="pip-bar" id="pipBar"><div class="pip-fill" id="pipFill"></div><div class="pip-knob" id="pipKnob"></div></div>
@@ -852,7 +898,26 @@ async function openPiP(){
     <button id="pipPlay" title="${esc(I18N[uiLang].play)}">▶</button>
     <button id="pipNext" title="${esc(I18N[uiLang].nextCh)}">⏭</button>
    </div>
+   <div class="pip-vol">
+    <span class="pip-vol-icon" id="pipVolIcon">🔊</span>
+    <input type="range" class="pip-vol-slider" id="pipVolume" min="0" max="1" step="0.01" value="1">
+   </div>
   </div>`;
+ for(const[k,v]of Object.entries(VERSIONS)){
+  const o=pipWin.document.createElement("option"); o.value=k; o.textContent=v.label.split(" ")[0];
+  pipWin.document.getElementById("pipVersionSel").appendChild(o);
+ }
+ pipWin.document.getElementById("pipVersionSel").addEventListener("change",e=>{
+  $("version").value=e.target.value;
+  $("version").dispatchEvent(new Event("change"));
+ });
+ pipWin.document.getElementById("pipVolume").addEventListener("input",e=>{
+  const v=Number(e.target.value);
+  audio.volume=v; if(v>0) lastVolume=v;
+  try{ localStorage.setItem("cbVolume",String(v)); }catch(_){}
+  $("volume").value=v; updateVolIcon();
+ });
+ pipWin.document.getElementById("pipVolIcon").addEventListener("click",()=>{ $("volIcon").click(); });
  pipWin.document.getElementById("pipPlay").onclick=()=>{ audio.paused? play() : audio.pause(); };
  pipWin.document.getElementById("pipPrev").onclick=()=>step(-1);
  pipWin.document.getElementById("pipNext").onclick=()=>step(1);
@@ -879,7 +944,7 @@ async function openPiP(){
  }
  pipBarEl.addEventListener("pointerup",pipEndSeek);
  pipBarEl.addEventListener("pointercancel",pipEndSeek);
- pipSyncMeta(); pipSyncProgress();
+ pipSyncMeta(); pipSyncProgress(); pipSyncVolume();
  audio.addEventListener("timeupdate",pipSyncProgress);
  audio.addEventListener("play",pipSyncProgress);
  audio.addEventListener("pause",pipSyncProgress);
