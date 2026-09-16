@@ -37,9 +37,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .hero h1{margin:0;font-family:var(--serif);font-weight:600;font-size:clamp(28px,4.4vw,40px);
  line-height:1.04;letter-spacing:-.022em}
 .hero p{margin:7px 0 0;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.76);max-width:46ch}
-.hero-nav{margin-left:auto;flex:0 0 auto}
+.hero-nav{flex:0 0 auto}
+.hero-actions{margin-left:auto;display:flex;gap:8px;flex:0 0 auto}
 .hero-nav a{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#fff;text-decoration:none;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:9px 15px;backdrop-filter:blur(6px);transition:background .2s,transform .2s;white-space:nowrap}
 .hero-nav a:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
+.hero-lang{font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:9px 12px;backdrop-filter:blur(6px);cursor:pointer}
+.hero-lang option{color:#1d2536;background:#fff}
 
 .app{max-width:1320px;margin:auto;padding:4px 24px 56px;display:grid;grid-template-columns:392px minmax(0,1fr);gap:26px;align-items:start}
 
@@ -137,7 +140,14 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <h1>Bible Chronology</h1>
       <p>Two hundred and thirty-six events, in order, read aloud in Telugu</p>
     </div>
-    <nav class="hero-nav"><a href="timeline.html">Timeline chart →</a></nav>
+    <div class="hero-actions">
+     <nav class="hero-nav"><a href="timeline.html">Timeline chart →</a></nav>
+     <select id="uiLang" class="hero-lang" title="Interface language" aria-label="Interface language">
+      <option value="en" selected>English</option>
+      <option value="te">తెలుగు</option>
+      <option value="hi">हिन्दी</option>
+     </select>
+    </div>
   </div>
 </header>
 
@@ -159,6 +169,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
      <button id="btnLink" title="Open this chapter on Sajeeva Vahini">↗</button>
      <button id="btnPrev" title="Previous chapter">⏮</button>
      <button id="btnNext" title="Next chapter">⏭</button>
+     <button id="btnPop" title="Pop out player" hidden>⧉</button>
      <button id="btnPlay" class="big" title="Play" aria-label="Play">▶</button>
     </div>
    </div>
@@ -201,7 +212,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
  <main class="library">
   <div class="tools">
    <input id="search" type="search" placeholder="Search event, reference, date…">
-   <select id="period"><option value="">All periods</option><option>Old Testament</option><option>New Testament</option></select>
+   <select id="period"><option value="">All periods</option><option value="Old Testament">Old Testament</option><option value="New Testament">New Testament</option></select>
    <select id="sort">
     <option value="chron">Chronological order</option>
     <option value="part">By Part</option>
@@ -210,7 +221,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     <option value="date">By Date</option>
    </select>
   </div>
-  <p class="count"><b id="count">0 events</b> · <span id="countCh">0 chapters</span> in the queue</p>
+  <p class="count"><b id="count">0 events</b> · <span id="countCh">0 chapters</span><span id="inQueueText"> in the queue</span></p>
   <div class="queue" id="queue"></div>
   <div class="none" id="none">No matching events.</div>
  </main>
@@ -258,6 +269,80 @@ const VERSIONS={
  nlt:   {label:"NLT (English)",url:it=>"https://content.swncdn.com/biblestudytools/audio/nlt-mp3/"+pad2(it.bookNum)+"_"+ESV_NLT_ABBR[it.bookNum]+"_"+pad3(it.chapter)+".mp3"}
 };
 let currentVersion="telugu";
+
+// UI-chrome translations. Note: this translates the page's own labels/buttons/messages only —
+// the 236 event titles/dates pulled from DATA stay in English regardless of this setting.
+const I18N={
+ en:{
+  title:"Bible Chronology",
+  subtitle:"Two hundred and thirty-six events, in order, read aloud in Telugu",
+  timelineLink:"Timeline chart →",
+  searchPh:"Search event, reference, date…",
+  allPeriods:"All periods", periodOT:"Old Testament", periodNT:"New Testament",
+  sortChron:"Chronological order", sortPart:"By Part", sortTitle:"By Part-Title",
+  sortBook:"By Bible book", sortDate:"By Date",
+  noMatch:"No matching events.",
+  continuousTitle:"Continuous play", openOn:"Open this chapter on Sajeeva Vahini",
+  prevCh:"Previous chapter", nextCh:"Next chapter", play:"Play", pause:"Pause",
+  loadError:"That chapter wouldn't load. Check the connection and try again.",
+  versionLabel:"Audio version", speedLabel:"Playback speed", langLabel:"Interface language",
+  popOut:"Pop out player",
+  nothingQueued:"Nothing queued", pickEvent:"Pick an event from the list",
+  upNextNothing:"Up next — nothing queued", upNextPrefix:"Up next — ", endOfQueue:"End of the queue",
+  inQueueSuffix:"in the queue", ofWord:"of"
+ },
+ te:{
+  title:"బైబిల్ కాలక్రమం",
+  subtitle:"రెండు వందల ముప్పై ఆరు సంఘటనలు, క్రమంలో, తెలుగులో చదివి వినిపించబడ్డాయి",
+  timelineLink:"కాలరేఖ చార్ట్ →",
+  searchPh:"సంఘటన, రిఫరెన్స్, తేదీ శోధించండి…",
+  allPeriods:"అన్ని కాలాలు", periodOT:"పాత నిబంధన", periodNT:"కొత్త నిబంధన",
+  sortChron:"కాలానుక్రమం", sortPart:"భాగం వారీగా", sortTitle:"భాగం-శీర్షిక వారీగా",
+  sortBook:"బైబిల్ గ్రంథం వారీగా", sortDate:"తేదీ వారీగా",
+  noMatch:"సరిపోలే సంఘటనలు లేవు.",
+  continuousTitle:"నిరంతర ప్లే", openOn:"ఈ అధ్యాయాన్ని సజీవ వాహినిలో తెరవండి",
+  prevCh:"మునుపటి అధ్యాయం", nextCh:"తర్వాతి అధ్యాయం", play:"ప్లే", pause:"పాజ్",
+  loadError:"ఆ అధ్యాయం లోడ్ కాలేదు. కనెక్షన్‌ను తనిఖీ చేసి మళ్లీ ప్రయత్నించండి.",
+  versionLabel:"ఆడియో వెర్షన్", speedLabel:"ప్లేబ్యాక్ వేగం", langLabel:"ఇంటర్‌ఫేస్ భాష",
+  popOut:"ప్లేయర్‌ను బయటకు తీయండి",
+  nothingQueued:"క్యూలో ఏమీ లేదు", pickEvent:"జాబితా నుండి ఒక సంఘటనను ఎంచుకోండి",
+  upNextNothing:"తర్వాత — క్యూలో ఏమీ లేదు", upNextPrefix:"తర్వాత — ", endOfQueue:"క్యూ ముగింపు",
+  inQueueSuffix:"క్యూలో", ofWord:"/"
+ },
+ hi:{
+  title:"बाइबिल कालक्रम",
+  subtitle:"दो सौ छत्तीस घटनाएं, क्रम में, तेलुगु में पढ़कर सुनाई गई हैं",
+  timelineLink:"समयरेखा चार्ट →",
+  searchPh:"घटना, संदर्भ, तारीख खोजें…",
+  allPeriods:"सभी काल", periodOT:"पुराना नियम", periodNT:"नया नियम",
+  sortChron:"कालानुक्रमिक क्रम", sortPart:"भाग के अनुसार", sortTitle:"भाग-शीर्षक के अनुसार",
+  sortBook:"बाइबिल पुस्तक के अनुसार", sortDate:"तारीख के अनुसार",
+  noMatch:"कोई मेल खाती घटना नहीं है।",
+  continuousTitle:"निरंतर प्ले", openOn:"इस अध्याय को सजीव वाहिनी पर खोलें",
+  prevCh:"पिछला अध्याय", nextCh:"अगला अध्याय", play:"प्ले", pause:"रोकें",
+  loadError:"वह अध्याय लोड नहीं हुआ। कनेक्शन जांचें और फिर से प्रयास करें।",
+  versionLabel:"ऑडियो संस्करण", speedLabel:"प्लेबैक गति", langLabel:"इंटरफ़ेस भाषा",
+  popOut:"प्लेयर को बाहर निकालें",
+  nothingQueued:"कतार में कुछ नहीं है", pickEvent:"सूची से एक घटना चुनें",
+  upNextNothing:"आगे — कतार में कुछ नहीं है", upNextPrefix:"आगे — ", endOfQueue:"कतार का अंत",
+  inQueueSuffix:"कतार में", ofWord:"/"
+ }
+};
+let uiLang=(function(){ try{return localStorage.getItem("uiLang")||"en";}catch(_){return "en";} })();
+function eventWord(n){
+ if(uiLang==="te") return n===1?"సంఘటన":"సంఘటనలు";
+ if(uiLang==="hi") return n===1?"घटना":"घटनाएं";
+ return n===1?"event":"events";
+}
+function chapterWord(n){
+ if(uiLang==="te") return n===1?"అధ్యాయం":"అధ్యాయాలు";
+ if(uiLang==="hi") return "अध्याय";
+ return n===1?"chapter":"chapters";
+}
+function chapterPosText(pos,of){
+ const t=I18N[uiLang];
+ return uiLang==="en" ? `${chapterWord(1)} ${pos} ${t.ofWord} ${of}` : `${chapterWord(1)} ${pos}${t.ofWord}${of}`;
+}
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -317,13 +402,14 @@ function buildQueue(){
    <span class="q-num">#${esc(r["#"])}</span>
    <span>
     <span class="q-title">${esc(r.Event)}</span>
-    <span class="q-meta">${esc(r.Reference)} · ${chs.length} chapter${chs.length===1?"":"s"} · ${esc(r.Date)}</span>
+    <span class="q-meta">${esc(r.Reference)} · ${chs.length} ${chapterWord(chs.length)} · ${esc(r.Date)}</span>
    </span>
    <span class="q-go">▶</span>
   </button>`;
  }).join("");
- $("count").textContent=list.length+(list.length===1?" event":" events");
- $("countCh").textContent=QUEUE.length+" chapters";
+ $("count").textContent=list.length+" "+eventWord(list.length);
+ $("countCh").textContent=QUEUE.length+" "+chapterWord(QUEUE.length);
+ $("inQueueText").textContent=" "+I18N[uiLang].inQueueSuffix;
  $("statEvents").textContent=list.length;
  $("statCh").textContent=QUEUE.length;
  $("none").style.display=list.length?"none":"block";
@@ -362,20 +448,20 @@ function paintNow(){
  const item=qi>-1?QUEUE[qi]:null;
  document.querySelectorAll(".q.playing").forEach(el=>el.classList.remove("playing"));
  if(!item){
-  $("nowEvent").textContent="Nothing queued";
-  $("nowSub").textContent="Pick an event from the list";
-  $("upnext").textContent="Up next — nothing queued";
+  $("nowEvent").textContent=I18N[uiLang].nothingQueued;
+  $("nowSub").textContent=I18N[uiLang].pickEvent;
+  $("upnext").textContent=I18N[uiLang].upNextNothing;
   $("statPos").textContent="—";
   return;
  }
  const r=REC.get(item.id);
  $("nowEvent").textContent=r.Event;
- $("nowSub").textContent=`${item.book} ${item.chapter} · chapter ${item.pos} of ${item.of} · ${r["Part-Title"]}`;
+ $("nowSub").textContent=`${item.book} ${item.chapter} · ${chapterPosText(item.pos,item.of)} · ${r["Part-Title"]}`;
  $("statPos").textContent=`${qi+1}/${QUEUE.length}`;
  const nxt=QUEUE[qi+1];
  $("upnext").innerHTML=nxt
-  ? `Up next — <b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`
-  : "End of the queue";
+  ? `${esc(I18N[uiLang].upNextPrefix)}<b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`
+  : I18N[uiLang].endOfQueue;
  const row=$("queue").querySelector(`.q[data-id="${item.id}"]`);
  if(row) row.classList.add("playing");
  if("mediaSession" in navigator){
@@ -393,9 +479,9 @@ audio.addEventListener("timeupdate",()=>{
  $("nowTime").textContent=clock(audio.currentTime);
  $("barFill").style.width=(audio.duration?(audio.currentTime/audio.duration)*100:0)+"%";
 });
-audio.addEventListener("play",()=>{$("btnPlay").textContent="❚❚";$("btnPlay").title="Pause";$("btnPlay").setAttribute("aria-label","Pause")});
-audio.addEventListener("pause",()=>{$("btnPlay").textContent="▶";$("btnPlay").title="Play";$("btnPlay").setAttribute("aria-label","Play")});
-audio.addEventListener("error",()=>{if(audio.src){$("err").textContent="That chapter wouldn't load. Check the connection and try again.";$("err").hidden=false}});
+audio.addEventListener("play",()=>{$("btnPlay").textContent="❚❚";$("btnPlay").title=I18N[uiLang].pause;$("btnPlay").setAttribute("aria-label",I18N[uiLang].pause)});
+audio.addEventListener("pause",()=>{$("btnPlay").textContent="▶";$("btnPlay").title=I18N[uiLang].play;$("btnPlay").setAttribute("aria-label",I18N[uiLang].play)});
+audio.addEventListener("error",()=>{if(audio.src){$("err").textContent=I18N[uiLang].loadError;$("err").hidden=false}});
 audio.addEventListener("ended",()=>{
  if(!continuous){
   const next=QUEUE[qi+1];
@@ -475,8 +561,102 @@ document.addEventListener("keydown",e=>{
 if("mediaSession" in navigator){
  navigator.mediaSession.setActionHandler("previoustrack",()=>step(-1));
  navigator.mediaSession.setActionHandler("nexttrack",()=>step(1));
+ try{ navigator.mediaSession.setActionHandler("play",()=>play()); }catch(_){}
+ try{ navigator.mediaSession.setActionHandler("pause",()=>audio.pause()); }catch(_){}
+ try{ navigator.mediaSession.setActionHandler("seekbackward",d=>{audio.currentTime=Math.max(0,audio.currentTime-(d.seekOffset||10));}); }catch(_){}
+ try{ navigator.mediaSession.setActionHandler("seekforward",d=>{audio.currentTime=Math.min(audio.duration||0,audio.currentTime+(d.seekOffset||10));}); }catch(_){}
+ try{ navigator.mediaSession.setActionHandler("seekto",d=>{ if(d.seekTime!=null) audio.currentTime=d.seekTime; }); }catch(_){}
 }
 
-buildQueue();
+/* ---------------- pop-out (Document Picture-in-Picture) player ---------------- */
+let pipWin=null;
+function pipSyncMeta(){
+ if(!pipWin) return;
+ const item=qi>-1?QUEUE[qi]:null;
+ pipWin.document.getElementById("pipTitle").textContent = item ? `${item.book} ${item.chapter}` : I18N[uiLang].nothingQueued;
+ pipWin.document.getElementById("pipSub").textContent = item ? REC.get(item.id).Event : "";
+}
+function pipSyncProgress(){
+ if(!pipWin) return;
+ pipWin.document.getElementById("pipFill").style.width=(audio.duration?(audio.currentTime/audio.duration)*100:0)+"%";
+ pipWin.document.getElementById("pipPlay").textContent=audio.paused?"▶":"❚❚";
+}
+async function openPiP(){
+ if(!("documentPictureInPicture" in window)) return;
+ pipWin=await window.documentPictureInPicture.requestWindow({width:300,height:110});
+ const style=pipWin.document.createElement("style");
+ style.textContent=`
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:#1d2536;color:#fff;
+   display:flex;flex-direction:column;height:100vh;box-sizing:border-box;padding:12px 14px;gap:8px}
+  .pipTitle{font-family:'Iowan Old Style',Palatino,serif;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pipSub{font-size:11px;opacity:.72;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pipBar{margin-top:auto;height:5px;border-radius:99px;background:rgba(255,255,255,.25);position:relative;cursor:pointer}
+  .pipFill{height:100%;border-radius:99px;background:#7a6ce6;width:0%}
+  .pipRow{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:4px}
+  .pipRow button{background:none;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;padding:4px}
+ `;
+ pipWin.document.head.appendChild(style);
+ pipWin.document.body.innerHTML=`
+  <div class="pipTitle" id="pipTitle"></div>
+  <div class="pipSub" id="pipSub"></div>
+  <div class="pipBar" id="pipBar"><div class="pipFill" id="pipFill"></div></div>
+  <div class="pipRow">
+   <button id="pipPrev" title="${esc(I18N[uiLang].prevCh)}">⏮</button>
+   <button id="pipPlay" title="${esc(I18N[uiLang].play)}">${audio.paused?"▶":"❚❚"}</button>
+   <button id="pipNext" title="${esc(I18N[uiLang].nextCh)}">⏭</button>
+  </div>`;
+ pipWin.document.getElementById("pipPlay").onclick=()=>{ audio.paused? play() : audio.pause(); };
+ pipWin.document.getElementById("pipPrev").onclick=()=>step(-1);
+ pipWin.document.getElementById("pipNext").onclick=()=>step(1);
+ pipWin.document.getElementById("pipBar").addEventListener("click",e=>{
+  if(!audio.duration) return;
+  const box=e.currentTarget.getBoundingClientRect();
+  const ratio=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width));
+  audio.currentTime=ratio*audio.duration;
+ });
+ pipSyncMeta(); pipSyncProgress();
+ audio.addEventListener("timeupdate",pipSyncProgress);
+ audio.addEventListener("play",pipSyncProgress);
+ audio.addEventListener("pause",pipSyncProgress);
+ pipWin.addEventListener("pagehide",()=>{
+  audio.removeEventListener("timeupdate",pipSyncProgress);
+  audio.removeEventListener("play",pipSyncProgress);
+  audio.removeEventListener("pause",pipSyncProgress);
+  pipWin=null;
+ },{once:true});
+}
+if("documentPictureInPicture" in window){
+ $("btnPop").hidden=false;
+ $("btnPop").addEventListener("click",openPiP);
+}
+
+/* ---------------- interface language ---------------- */
+function applyLang(lang){
+ uiLang=lang;
+ try{ localStorage.setItem("uiLang",lang); }catch(_){}
+ const t=I18N[lang];
+ document.querySelector(".hero-text h1").textContent=t.title;
+ document.querySelector(".hero-text p").textContent=t.subtitle;
+ document.querySelector(".hero-nav a").textContent=t.timelineLink;
+ $("search").placeholder=t.searchPh;
+ const po=$("period").options; po[0].textContent=t.allPeriods; po[1].textContent=t.periodOT; po[2].textContent=t.periodNT;
+ const so=$("sort").options; so[0].textContent=t.sortChron; so[1].textContent=t.sortPart; so[2].textContent=t.sortTitle; so[3].textContent=t.sortBook; so[4].textContent=t.sortDate;
+ $("none").textContent=t.noMatch;
+ $("btnAuto").title=t.continuousTitle;
+ $("btnLink").title=t.openOn;
+ $("btnPrev").title=t.prevCh;
+ $("btnNext").title=t.nextCh;
+ $("version").title=t.versionLabel; $("version").setAttribute("aria-label",t.versionLabel);
+ $("speed").title=t.speedLabel; $("speed").setAttribute("aria-label",t.speedLabel);
+ $("uiLang").title=t.langLabel; $("uiLang").setAttribute("aria-label",t.langLabel);
+ if($("btnPop")){ $("btnPop").title=t.popOut; $("btnPop").setAttribute("aria-label",t.popOut); }
+ $("btnPlay").title=audio.paused?t.play:t.pause;
+ $("btnPlay").setAttribute("aria-label",audio.paused?t.play:t.pause);
+ buildQueue();
+}
+$("uiLang").value=uiLang;
+$("uiLang").addEventListener("change",()=>applyLang($("uiLang").value));
+
+applyLang(uiLang);
 </script>
 </body></html>
