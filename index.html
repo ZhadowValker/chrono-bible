@@ -473,6 +473,73 @@ function loadProgress(){
 function saveProgress(){ try{ localStorage.setItem("cbProgress",JSON.stringify(progress)); }catch(_){} }
 const progress=loadProgress();
 let pipWin=null;
+
+/* ---------------- mobile fallback: canvas-drawn "video" so we can use the video-element
+   Picture-in-Picture API, which — unlike Document PiP — actually works on phones (iOS Safari,
+   Chrome Android) and floats over other apps, not just other tabs. It never touches the real
+   <audio> element, so there's no risk to playback: it's a second, silent, purely visual stream.
+   The floating window's native tap controls route through the mediaSession handlers already
+   registered above, which drive real playback. */
+let mobilePipCanvas=null, mobilePipCtx=null, mobilePipVideo=null, mobilePipTimer=null;
+function ensureMobilePipVideo(){
+ if(mobilePipVideo) return mobilePipVideo;
+ mobilePipCanvas=document.createElement("canvas");
+ mobilePipCanvas.width=480; mobilePipCanvas.height=270;
+ mobilePipCtx=mobilePipCanvas.getContext("2d");
+ drawMobilePipFrame();
+ const stream=mobilePipCanvas.captureStream(6);
+ mobilePipVideo=document.createElement("video");
+ mobilePipVideo.muted=true; mobilePipVideo.playsInline=true; mobilePipVideo.srcObject=stream;
+ mobilePipVideo.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";
+ document.body.appendChild(mobilePipVideo);
+ mobilePipVideo.addEventListener("enterpictureinpicture",()=>{
+  if(mobilePipTimer) clearInterval(mobilePipTimer);
+  mobilePipTimer=setInterval(drawMobilePipFrame,300);
+ });
+ mobilePipVideo.addEventListener("leavepictureinpicture",()=>{
+  if(mobilePipTimer){ clearInterval(mobilePipTimer); mobilePipTimer=null; }
+ });
+ return mobilePipVideo;
+}
+function drawMobilePipFrame(){
+ if(!mobilePipCtx) return;
+ const c=mobilePipCtx, w=mobilePipCanvas.width, h=mobilePipCanvas.height;
+ const g=c.createLinearGradient(0,0,w,h);
+ g.addColorStop(0,"#241d63"); g.addColorStop(1,"#5146d8");
+ c.fillStyle=g; c.fillRect(0,0,w,h);
+ const item=qi>-1?QUEUE[qi]:null;
+ if(!item){
+  c.fillStyle="#fff"; c.font="600 26px Inter,sans-serif"; c.textBaseline="middle";
+  c.fillText(I18N[uiLang].nothingQueued,24,h/2);
+  return;
+ }
+ const r=REC.get(item.id);
+ c.fillStyle="rgba(255,255,255,.7)"; c.font="700 14px Inter,sans-serif";
+ c.fillText("PART "+r.Part,24,34);
+ c.fillStyle="#fff"; c.font="600 30px Georgia,serif";
+ c.fillText(item.book+" "+item.chapter,24,78);
+ c.fillStyle="rgba(255,255,255,.85)"; c.font="500 16px Inter,sans-serif";
+ c.fillText(r.Event,24,112,w-48);
+ // play/pause glyph
+ c.fillStyle="rgba(255,255,255,.9)";
+ const cx=w-56, cy=h-56;
+ c.beginPath(); c.arc(cx,cy,26,0,Math.PI*2); c.fillStyle="rgba(255,255,255,.16)"; c.fill();
+ c.fillStyle="#fff";
+ if(audio.paused){
+  c.beginPath(); c.moveTo(cx-7,cy-11); c.lineTo(cx-7,cy+11); c.lineTo(cx+12,cy); c.closePath(); c.fill();
+ } else {
+  c.fillRect(cx-9,cy-11,6,22); c.fillRect(cx+3,cy-11,6,22);
+ }
+ // progress bar
+ const pct=audio.duration?audio.currentTime/audio.duration:0;
+ c.fillStyle="rgba(255,255,255,.25)"; c.fillRect(24,h-24,w-48,4);
+ c.fillStyle="#fff"; c.fillRect(24,h-24,(w-48)*pct,4);
+}
+async function openMobilePip(){
+ const v=ensureMobilePipVideo();
+ try{ await v.play(); }catch(_){}
+ try{ await v.requestPictureInPicture(); }catch(_){}
+}
 let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
 
 // ---- inline "this book's timeline" panel, populated from timeline.html's BOOKS data on demand ----
@@ -1194,6 +1261,9 @@ async function openPiP(){
 if("documentPictureInPicture" in window){
  $("btnPop").hidden=false;
  $("btnPop").addEventListener("click",()=>{ pipDismissed=false; openPiP().catch(()=>{}); });
+} else if(document.pictureInPictureEnabled && typeof HTMLVideoElement!=="undefined" && HTMLVideoElement.prototype.requestPictureInPicture){
+ $("btnPop").hidden=false;
+ $("btnPop").addEventListener("click",()=>{ openMobilePip(); });
 }
 
 /* ---------------- interface language ---------------- */
