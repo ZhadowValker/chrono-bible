@@ -167,7 +167,6 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
      <nav class="hero-nav"><a href="timeline.html">Timeline chart →</a></nav>
      <select id="uiLang" class="hero-lang" title="Interface language" aria-label="Interface language">
       <option value="en" selected>English</option>
-      <option value="te">తెలుగు</option>
       <option value="hi">हिन्दी</option>
      </select>
     </div>
@@ -214,10 +213,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <input type="range" class="vol-slider" id="volume" min="0" max="1" step="0.01" value="1" title="Volume" aria-label="Volume">
      </div>
      <select class="chip-speed" id="version" title="Audio version" aria-label="Audio version">
-      <option value="telugu" selected>Telugu</option>
+      <option value="telugu">Telugu</option>
       <option value="hindi">Hindi</option>
       <option value="esv">ESV (English)</option>
-      <option value="nlt">NLT (English)</option>
+      <option value="nlt" selected>NLT (English)</option>
      </select>
      <select class="chip-speed" id="speed" title="Playback speed" aria-label="Playback speed">
       <option value="0.8">0.8x</option><option value="1" selected>1x</option>
@@ -296,7 +295,7 @@ const VERSIONS={
  esv:   {label:"ESV (English)",url:it=>"https://content.swncdn.com/biblestudytools/audio/esv-mp3/"+pad2(it.bookNum)+"_"+ESV_NLT_ABBR[it.bookNum]+"_"+pad3(it.chapter)+".mp3"},
  nlt:   {label:"NLT (English)",url:it=>"https://content.swncdn.com/biblestudytools/audio/nlt-mp3/"+pad2(it.bookNum)+"_"+ESV_NLT_ABBR[it.bookNum]+"_"+pad3(it.chapter)+".mp3"}
 };
-let currentVersion="telugu";
+let currentVersion="nlt";
 
 // UI-chrome translations. Note: this translates the page's own labels/buttons/messages only —
 // the 236 event titles/dates pulled from DATA stay in English regardless of this setting.
@@ -802,6 +801,7 @@ function pipSyncMeta(){
   d.getElementById("pipChNum").textContent="";
   d.getElementById("pipChOf").textContent="";
   d.getElementById("pipSub").textContent="";
+  d.getElementById("pipChips").innerHTML="";
   return;
  }
  const r=REC.get(item.id);
@@ -811,6 +811,14 @@ function pipSyncMeta(){
  d.getElementById("pipChOf").textContent=item.of>1?" of "+item.of:"";
  d.getElementById("pipSub").textContent=r.Event;
  d.querySelector(".pip-card").style.setProperty("--pip-cover",coverFor(Number(r.Part)));
+ // Chapter chips grid — one chip per chapter of this event, green=complete, white=current, dim=not yet done
+ const chs=CH.get(item.id)||[];
+ d.getElementById("pipChips").innerHTML=chs.map(c=>{
+  const done=progress.completed[chapKey(item.id,c.chapter)];
+  const current=c.chapter===item.chapter;
+  const cls=current?"pip-ch cur":done?"pip-ch done":"pip-ch";
+  return `<span class="${cls}" data-ch="${c.chapter}">${c.chapter}</span>`;
+ }).join("");
 }
 function pipSyncVolume(){
  if(!pipWin) return;
@@ -855,6 +863,14 @@ async function openPiP(){
   .pip-chnum{font-family:'Iowan Old Style',Palatino,serif;font-size:52px;line-height:.95;letter-spacing:-.02em}
   .pip-chnum small{font-size:15px;opacity:.75;letter-spacing:.04em;font-family:Inter,system-ui,sans-serif}
   .pip-sub{font-size:12px;color:rgba(255,255,255,.75);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:2px}
+  .pip-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .pip-ch{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;cursor:pointer;
+   background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:rgba(255,255,255,.75);
+   transition:background .15s}
+  .pip-ch:hover{background:rgba(255,255,255,.28)}
+  .pip-ch.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent}
+  .pip-ch.done{background:rgba(80,210,120,.30);border-color:rgba(80,210,120,.55);color:#c8ffe0}
+  .pip-ch.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
   .pip-blobs{position:absolute;inset:0;overflow:hidden;z-index:0}
   .pip-blob{position:absolute;width:130%;padding-top:130%;border-radius:38%;
    background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.16),rgba(255,255,255,0) 62%);
@@ -900,6 +916,7 @@ async function openPiP(){
    <div class="pip-book" id="pipBook"></div>
    <div class="pip-chnum"><span id="pipChNum"></span><small id="pipChOf"></small></div>
    <div class="pip-sub" id="pipSub"></div>
+   <div class="pip-chips" id="pipChips"></div>
    <div class="pip-spacer"></div>
    <div class="pip-progress">
     <span class="pip-time" id="pipCur">0:00</span>
@@ -932,6 +949,14 @@ async function openPiP(){
  });
  pipWin.document.getElementById("pipVolIcon").addEventListener("click",()=>{ $("volIcon").click(); });
  pipWin.document.getElementById("pipPlay").onclick=()=>{ audio.paused? play() : audio.pause(); };
+ pipWin.document.getElementById("pipChips").addEventListener("click",e=>{
+  const chip=e.target.closest(".pip-ch");
+  if(!chip||qi<0) return;
+  const cur=QUEUE[qi];
+  const ch=Number(chip.dataset.ch);
+  const idx=QUEUE.findIndex(x=>x.id===cur.id&&x.chapter===ch);
+  if(idx>-1){ load(idx,true); }
+ });
  pipWin.document.getElementById("pipPrev").onclick=()=>step(-1);
  pipWin.document.getElementById("pipNext").onclick=()=>step(1);
  const pipBarEl=pipWin.document.getElementById("pipBar");
