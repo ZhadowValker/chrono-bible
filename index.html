@@ -485,11 +485,15 @@ function ensureMobilePipVideo(){
  if(mobilePipVideo) return mobilePipVideo;
  mobilePipCanvas=document.createElement("canvas");
  mobilePipCanvas.width=480; mobilePipCanvas.height=270;
+ mobilePipCanvas.style.cssText="position:fixed;left:-9999px;top:-9999px";
+ document.body.appendChild(mobilePipCanvas); // captureStream() is unreliable on a detached canvas in some browsers
  mobilePipCtx=mobilePipCanvas.getContext("2d");
  drawMobilePipFrame();
  const stream=mobilePipCanvas.captureStream(6);
  mobilePipVideo=document.createElement("video");
- mobilePipVideo.muted=true; mobilePipVideo.playsInline=true; mobilePipVideo.srcObject=stream;
+ mobilePipVideo.muted=true; mobilePipVideo.playsInline=true; mobilePipVideo.setAttribute("webkit-playsinline","");
+ mobilePipVideo.width=480; mobilePipVideo.height=270;
+ mobilePipVideo.srcObject=stream;
  mobilePipVideo.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";
  document.body.appendChild(mobilePipVideo);
  mobilePipVideo.addEventListener("enterpictureinpicture",()=>{
@@ -500,6 +504,14 @@ function ensureMobilePipVideo(){
   if(mobilePipTimer){ clearInterval(mobilePipTimer); mobilePipTimer=null; }
  });
  return mobilePipVideo;
+}
+function waitForVideoReady(v){
+ return new Promise(resolve=>{
+  if(v.readyState>=2) return resolve(); // HAVE_CURRENT_DATA — enough for PiP
+  const onReady=()=>{ v.removeEventListener("loadeddata",onReady); resolve(); };
+  v.addEventListener("loadeddata",onReady);
+  setTimeout(()=>{ v.removeEventListener("loadeddata",onReady); resolve(); },1500); // don't hang forever
+ });
 }
 function drawMobilePipFrame(){
  if(!mobilePipCtx) return;
@@ -538,7 +550,17 @@ function drawMobilePipFrame(){
 async function openMobilePip(){
  const v=ensureMobilePipVideo();
  try{ await v.play(); }catch(_){}
- try{ await v.requestPictureInPicture(); }catch(_){}
+ await waitForVideoReady(v);
+ try{
+  await v.requestPictureInPicture();
+ }catch(err){
+  // Older Safari uses its own presentation-mode API instead of the standard one.
+  if(typeof v.webkitSetPresentationMode==="function" && v.webkitSupportsPresentationMode && v.webkitSupportsPresentationMode("picture-in-picture")){
+   try{ v.webkitSetPresentationMode("picture-in-picture"); return; }catch(_){}
+  }
+  $("err").textContent="Couldn't open the floating player on this browser ("+(err&&err.message?err.message:"unknown error")+").";
+  $("err").hidden=false;
+ }
 }
 let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
 
