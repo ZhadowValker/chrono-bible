@@ -30,6 +30,21 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:96px;pointer-events:none;
  background:linear-gradient(180deg,rgba(230,234,242,0) 0%,rgba(230,234,242,.55) 58%,var(--bg) 100%)}
 .hero-inner{max-width:1320px;margin:auto;padding:40px 24px 62px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.sticky-player{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;gap:12px;
+ padding:9px 20px;background:#1d2536;color:#fff;box-shadow:0 6px 18px -6px rgba(20,20,40,.5);
+ transform:translateY(-100%);opacity:0;transition:transform .25s ease,opacity .25s ease;pointer-events:none}
+.sticky-player.show{transform:translateY(0);opacity:1;pointer-events:auto}
+.sp-swatch{width:8px;height:34px;border-radius:4px;flex:0 0 auto;background:var(--accent)}
+.sticky-player button{background:none;border:none;color:#fff;cursor:pointer;padding:5px;line-height:1;
+ opacity:.85;transition:opacity .15s,transform .15s;flex:0 0 auto}
+.sticky-player button:hover{opacity:1;transform:scale(1.08)}
+.sp-play{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.14);
+ border:1px solid rgba(255,255,255,.28)!important;display:flex;align-items:center;justify-content:center}
+.sp-text{flex:1;min-width:0;overflow:hidden}
+.sp-title{font-family:var(--serif);font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-sub{font-size:11px;color:rgba(255,255,255,.65);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-bar{position:absolute;left:0;right:0;bottom:0;height:2px;background:rgba(255,255,255,.15)}
+.sp-fill{height:100%;width:0%;background:var(--accent-ring)}
 .hero-mark{flex:0 0 auto;width:52px;height:52px;display:grid;place-items:center;border-radius:15px;
  background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(6px)}
 .hero-mark svg{width:27px;height:27px}
@@ -187,6 +202,18 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     </div>
   </div>
 </header>
+
+<div class="sticky-player" id="stickyPlayer">
+ <div class="sp-swatch" id="spSwatch"></div>
+ <button id="spPrev" title="Previous chapter"></button>
+ <button id="spPlay" class="sp-play" title="Play" aria-label="Play"></button>
+ <button id="spNext" title="Next chapter"></button>
+ <div class="sp-text">
+  <div class="sp-title" id="spTitle">Nothing queued</div>
+  <div class="sp-sub" id="spSub"></div>
+ </div>
+ <div class="sp-bar" id="spBar"><div class="sp-fill" id="spFill"></div></div>
+</div>
 
 <div class="app">
  <aside class="console">
@@ -649,6 +676,7 @@ function load(i,autoplay){
 function paintNow(){
  const item=qi>-1?QUEUE[qi]:null;
  document.querySelectorAll(".q.playing").forEach(el=>el.classList.remove("playing"));
+ syncStickyPlayer();
  if(!item){
   $("nowEvent").textContent=I18N[uiLang].nothingQueued;
   $("nowSub").textContent=I18N[uiLang].pickEvent;
@@ -1206,6 +1234,47 @@ $("btnPrev").innerHTML=ICONS.prev;
 $("btnNext").innerHTML=ICONS.next;
 $("btnPop").innerHTML=ICONS.popout;
 $("btnPlay").innerHTML=ICONS.play;
+
+/* ---------------- sticky mini-player (shows once the main player scrolls out of view) ---------------- */
+$("spPrev").innerHTML=ICONS.prev;
+$("spPlay").innerHTML=ICONS.play;
+$("spNext").innerHTML=ICONS.next;
+$("spPrev").addEventListener("click",()=>step(-1));
+$("spNext").addEventListener("click",()=>step(1));
+$("spPlay").addEventListener("click",()=>{
+ if(qi<0){ load(0,true); return; }
+ audio.paused?play():audio.pause();
+});
+function syncStickyPlayer(){
+ const item=qi>-1?QUEUE[qi]:null;
+ if(!item){
+  $("spTitle").textContent=I18N[uiLang].nothingQueued;
+  $("spSub").textContent="";
+  return;
+ }
+ const r=REC.get(item.id);
+ $("spTitle").textContent=`${item.book} ${item.chapter}`;
+ $("spSub").textContent=r.Event;
+ $("spSwatch").style.background=coverFor(Number(r.Part));
+}
+audio.addEventListener("play",()=>{ $("spPlay").innerHTML=ICONS.pause; });
+audio.addEventListener("pause",()=>{ $("spPlay").innerHTML=ICONS.play; });
+audio.addEventListener("timeupdate",()=>{
+ $("spFill").style.width=(audio.duration?(audio.currentTime/audio.duration)*100:0)+"%";
+});
+if("IntersectionObserver" in window){
+ const stickyObs=new IntersectionObserver(entries=>{
+  entries.forEach(en=>{ $("stickyPlayer").classList.toggle("show", !en.isIntersecting); });
+ },{threshold:0});
+ stickyObs.observe(document.querySelector(".player"));
+} else {
+ // Fallback for browsers without IntersectionObserver: plain scroll-position check.
+ const playerEl=document.querySelector(".player");
+ window.addEventListener("scroll",()=>{
+  const r=playerEl.getBoundingClientRect();
+  $("stickyPlayer").classList.toggle("show", r.bottom<0);
+});
+}
 
 applyLang(uiLang);
 
