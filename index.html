@@ -884,6 +884,7 @@ function pipSyncMeta(){
   d.getElementById("pipChOf").textContent="";
   d.getElementById("pipSub").textContent="";
   d.getElementById("pipChips").innerHTML="";
+  d.getElementById("pipUpNext").textContent="";
   return;
  }
  const r=REC.get(item.id);
@@ -893,6 +894,10 @@ function pipSyncMeta(){
  d.getElementById("pipChOf").textContent=item.of>1?" of "+item.of:"";
  d.getElementById("pipSub").textContent=r.Event;
  d.querySelector(".pip-card").style.setProperty("--pip-cover",coverFor(Number(r.Part)));
+ const nxt=QUEUE[qi+1];
+ d.getElementById("pipUpNext").innerHTML=nxt
+  ? `UP NEXT — <b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`
+  : "END OF QUEUE";
  // Chapter chips grid — one chip per chapter of this event, green=complete, white=current, dim=not yet done
  const chs=CH.get(item.id)||[];
  d.getElementById("pipChips").innerHTML=chs.map(c=>{
@@ -975,6 +980,7 @@ async function openPiP(){
    text-shadow:0 2px 10px rgba(30,22,80,.35);margin-top:4px}
   .pip-chnum{font-family:'Iowan Old Style',Palatino,serif;font-size:56px;line-height:.95;letter-spacing:-.02em;margin-top:4px}
   .pip-chnum small{font-size:16px;opacity:.75;letter-spacing:.04em;font-family:Inter,system-ui,sans-serif}
+  .pip-header{font-size:9.5px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.55);margin-bottom:2px}
   .pip-sub{font-size:14px;font-weight:600;color:#fff;margin-top:8px;line-height:1.3;
    background:rgba(255,255,255,.14);border-left:3px solid rgba(255,255,255,.7);
    padding:5px 8px;border-radius:0 6px 6px 0}
@@ -989,6 +995,8 @@ async function openPiP(){
   .pip-ch.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent;font-weight:700}
   .pip-ch.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.50);color:#c8ffe0}
   .pip-ch.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
+  .pip-upnext{font-size:11px;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+  .pip-upnext b{color:#fff;font-weight:600}
   .pip-progress{display:flex;align-items:center;gap:8px}
   .pip-time{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:30px}
   #pipDur{text-align:right}
@@ -1034,6 +1042,7 @@ async function openPiP(){
    </div>
    <div class="pip-main">
     <div class="pip-left">
+     <div class="pip-header">NOW PLAYING</div>
      <div class="pip-book" id="pipBook"></div>
      <div class="pip-chnum"><span id="pipChNum"></span><small id="pipChOf"></small></div>
      <div class="pip-sub" id="pipSub"></div>
@@ -1042,6 +1051,7 @@ async function openPiP(){
      <div class="pip-chips" id="pipChips"></div>
     </div>
    </div>
+   <div class="pip-upnext" id="pipUpNext"></div>
    <div class="pip-progress">
     <span class="pip-time" id="pipCur">0:00</span>
     <div class="pip-bar" id="pipBar"><div class="pip-fill" id="pipFill"></div><div class="pip-knob" id="pipKnob"></div></div>
