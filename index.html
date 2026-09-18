@@ -176,11 +176,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* ══ Inline PiP panel — live video stream ══ */
-.inline-pip{overflow:hidden;max-height:0;opacity:0;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease}
-.inline-pip.open{max-height:900px;opacity:1}
-.ipip-video-wrap{position:relative;width:100%;background:#000;line-height:0}
-.ipip-video-wrap video{width:100%;display:block;max-height:75vh;object-fit:contain}
+/* ══ Inline video stream — YouTube-style fullwidth frame ══ */
+.inline-pip{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s cubic-bezier(.4,0,.2,1),opacity .28s ease}
+.inline-pip.open{max-height:100vw;opacity:1}
+.ipip-frame{position:relative;width:100%;background:#000;aspect-ratio:16/9;overflow:hidden;cursor:pointer}
+.ipip-frame video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 </style>
 </head><body>
 
@@ -209,9 +209,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   </div>
 </header>
 
-<!-- Inline PiP panel — live video stream -->
+<!-- Inline video stream — YouTube-style -->
 <div class="inline-pip" id="inlinePip">
- <div class="ipip-video-wrap" id="ipipVideoWrap"></div>
+ <div class="ipip-frame">
+  <video id="ipipVideoEl" muted playsinline webkit-playsinline controls></video>
+ </div>
 </div>
 
 
@@ -1726,7 +1728,7 @@ if("IntersectionObserver" in window){
 }
 
 
-/* ══ Inline PiP panel — shows the same live <video> as the PiP stream ══ */
+/* ══ Inline video stream — shares captureStream with PiP video ══ */
 let ipipOpen=false;
 
 $("btnInlinePip").addEventListener("click",()=>{
@@ -1735,24 +1737,11 @@ $("btnInlinePip").addEventListener("click",()=>{
  $("btnInlinePip").classList.toggle("on",ipipOpen);
  $("btnInlinePip").setAttribute("aria-pressed",String(ipipOpen));
  if(ipipOpen){
-  // Ensure the canvas+video stream is set up
-  const v=_ensurePipVideo();
-  // Move (or clone reference) into the inline wrap so it shows here
-  const wrap=$("ipipVideoWrap");
-  if(!wrap.contains(v)){
-   // Make a visible clone that shares the same srcObject
-   let iv=document.getElementById("ipipVideoEl");
-   if(!iv){
-    iv=document.createElement("video");
-    iv.id="ipipVideoEl";
-    iv.muted=true;
-    iv.playsInline=true;
-    iv.setAttribute("webkit-playsinline","");
-    iv.setAttribute("controls","");
-    iv.style.cssText="width:100%;display:block;max-height:75vh;object-fit:contain;background:#000";
-    wrap.appendChild(iv);
-   }
-   // Share the exact same captureStream
+  // Ensure canvas+stream pipeline is running
+  _ensurePipVideo();
+  // Point the visible <video> at the same live stream
+  const iv=$("ipipVideoEl");
+  if(iv.srcObject!==_pipStream){
    iv.srcObject=_pipStream;
    iv.play().catch(()=>{});
   }
