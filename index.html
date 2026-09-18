@@ -176,34 +176,62 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* ── Inline PiP panel ── */
-.inline-pip{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .28s ease,margin .28s ease;margin-top:0}
-.inline-pip.open{max-height:600px;opacity:1;margin-top:14px}
-.ipip{background:linear-gradient(140deg,#241d63,#5146d8);border-radius:18px;padding:20px 22px 16px;color:#fff;display:flex;flex-direction:column;gap:12px}
-.ipip-top{display:flex;align-items:flex-start;gap:14px}
-.ipip-left{flex:1;min-width:0}
-.ipip-label{font-size:10px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.5);margin-bottom:4px}
-.ipip-title{font-family:var(--serif);font-size:17px;font-weight:700;line-height:1.3;color:#fff;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ipip-sub{font-size:12px;color:rgba(255,255,255,.65)}
-.ipip-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
-.ipip-chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.75);cursor:pointer;transition:background .15s}
-.ipip-chip:hover{background:rgba(255,255,255,.26)}
-.ipip-chip.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent}
+/* ── Inline PiP panel — full-width hero-style ── */
+.inline-pip{
+ overflow:hidden;max-height:0;opacity:0;
+ transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease;
+ position:relative;isolation:isolate;
+}
+.inline-pip.open{max-height:340px;opacity:1}
+.ipip{
+ position:relative;overflow:hidden;
+ background:linear-gradient(118deg,#241d63 0%,#3d33a8 38%,#5146d8 68%,#7a6ce6 100%);
+ color:#fff;padding:28px 0 24px;transition:background .5s ease;
+}
+.ipip::before{
+ content:"";position:absolute;inset:-60% -10% auto;height:380px;z-index:0;
+ background:radial-gradient(52% 58% at 26% 100%,rgba(255,255,255,.22),transparent 68%);
+}
+.ipip-inner{
+ position:relative;z-index:1;
+ max-width:1320px;margin:auto;padding:0 24px;
+ display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
+}
+.ipip-left{min-width:0}
+.ipip-label{font-size:10px;font-weight:700;letter-spacing:.16em;color:rgba(255,255,255,.5);margin-bottom:5px;text-transform:uppercase}
+.ipip-title{font-family:var(--serif);font-size:clamp(18px,2.4vw,28px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ipip-sub{font-size:13px;color:rgba(255,255,255,.65);margin-bottom:10px}
+.ipip-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;max-height:74px;overflow:hidden}
+.ipip-chip{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.78);cursor:pointer;transition:background .14s,transform .14s;line-height:1.4}
+.ipip-chip:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
+.ipip-chip.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent;font-weight:800}
 .ipip-chip.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.5);color:#c8ffe0}
 .ipip-chip.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
-.ipip-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
-.ipip-controls{display:flex;align-items:center;gap:10px}
-.ipip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:4px;font-size:16px;opacity:.85;transition:opacity .15s,transform .15s}
-.ipip-controls button:hover{opacity:1;transform:scale(1.1)}
-.ipip-play{width:44px!important;height:44px!important;border-radius:50%!important;background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.30)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:18px!important}
-.ipip-bar-wrap{display:flex;align-items:center;gap:8px}
-.ipip-times{font-size:11px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ipip-bar-wrap{display:flex;align-items:center;gap:10px}
+.ipip-times{font-size:12px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:36px}
 .ipip-bar{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.22);cursor:pointer;position:relative;touch-action:none}
-.ipip-fill{height:100%;border-radius:99px;background:#fff;width:0%}
-.ipip-knob{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);left:0%}
-.ipip-upnext{font-size:11px;color:rgba(255,255,255,.50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ipip-upnext b{color:rgba(255,255,255,.80);font-weight:600}
-.ipip-kbd{font-size:10px;color:rgba(255,255,255,.30);text-align:center;margin-top:2px}
+.ipip-bar:hover .ipip-fill{background:rgba(255,255,255,.95)}
+.ipip-fill{height:100%;border-radius:99px;background:#fff;width:0%;transition:width .25s linear}
+.ipip-knob{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);left:0%;transition:left .25s linear}
+.ipip-bar:active .ipip-knob,.ipip-bar:hover .ipip-knob{width:17px;height:17px}
+.ipip-meta-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.ipip-upnext{font-size:11.5px;color:rgba(255,255,255,.48);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ipip-upnext b{color:rgba(255,255,255,.78);font-weight:600}
+.ipip-kbd{font-size:10px;color:rgba(255,255,255,.28);white-space:nowrap}
+/* right column — controls */
+.ipip-right{display:flex;flex-direction:column;align-items:center;gap:14px;padding-right:8px}
+.ipip-controls{display:flex;align-items:center;gap:14px}
+.ipip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:20px;opacity:.85;transition:opacity .15s,transform .15s;line-height:1}
+.ipip-controls button:hover{opacity:1;transform:scale(1.1)}
+.ipip-play{width:56px!important;height:56px!important;border-radius:50%!important;
+ background:rgba(255,255,255,.16)!important;border:1.5px solid rgba(255,255,255,.34)!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;font-size:22px!important}
+.ipip-play:hover{background:rgba(255,255,255,.26)!important}
+@media(max-width:640px){
+ .ipip-inner{grid-template-columns:1fr;gap:14px}
+ .ipip-right{flex-direction:row;justify-content:center}
+ .ipip-title{font-size:17px}
+}
 </style>
 </head><body>
 
@@ -231,6 +259,39 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     </div>
   </div>
 </header>
+
+<!-- Inline PiP panel — full-width, hero-style, between header and content -->
+<div class="inline-pip" id="inlinePip">
+ <div class="ipip" id="ipipCard">
+  <div class="ipip-inner">
+   <div class="ipip-left">
+    <div class="ipip-label">Now Playing</div>
+    <div class="ipip-title" id="ipipTitle">Nothing queued</div>
+    <div class="ipip-sub" id="ipipSub">Pick an event from the list</div>
+    <div class="ipip-chips" id="ipipChips"></div>
+    <div class="ipip-bar-wrap">
+     <span class="ipip-times" id="ipipCur">0:00</span>
+     <div class="ipip-bar" id="ipipBar">
+      <div class="ipip-fill" id="ipipFill"></div>
+      <div class="ipip-knob" id="ipipKnob"></div>
+     </div>
+     <span class="ipip-times" id="ipipDur">--:--</span>
+    </div>
+    <div class="ipip-meta-row">
+     <div class="ipip-upnext" id="ipipUpNext"></div>
+     <div class="ipip-kbd">⌨ Space · ← → to control</div>
+    </div>
+   </div>
+   <div class="ipip-right">
+    <div class="ipip-controls">
+     <button id="ipipPrev" title="Previous chapter"></button>
+     <button id="ipipPlay" class="ipip-play" title="Play" aria-label="Play"></button>
+     <button id="ipipNext" title="Next chapter"></button>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
 
 <div class="sticky-player" id="stickyPlayer">
  <div class="sp-swatch" id="spSwatch"></div>
@@ -309,34 +370,6 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    <div class="stat"><b id="statEvents">0</b><span>events</span></div>
    <div class="stat"><b id="statCh">0</b><span>chapters</span></div>
    <div class="stat"><b id="statPos">—</b><span>position</span></div>
-
-  <!-- Inline PiP panel — toggles open below the console -->
-  <div class="inline-pip" id="inlinePip">
-   <div class="ipip" id="ipipCard">
-    <div class="ipip-top">
-     <div class="ipip-left">
-      <div class="ipip-label">NOW PLAYING</div>
-      <div class="ipip-title" id="ipipTitle">Nothing queued</div>
-      <div class="ipip-sub" id="ipipSub">Pick an event from the list</div>
-      <div class="ipip-chips" id="ipipChips"></div>
-     </div>
-     <div class="ipip-right">
-      <div class="ipip-controls">
-       <button id="ipipPrev" title="Previous chapter"></button>
-       <button id="ipipPlay" class="ipip-play" title="Play" aria-label="Play"></button>
-       <button id="ipipNext" title="Next chapter"></button>
-      </div>
-     </div>
-    </div>
-    <div class="ipip-bar-wrap">
-     <span class="ipip-times" id="ipipCur">0:00</span>
-     <div class="ipip-bar" id="ipipBar"><div class="ipip-fill" id="ipipFill"></div><div class="ipip-knob" id="ipipKnob"></div></div>
-     <span class="ipip-times" id="ipipDur">--:--</span>
-    </div>
-    <div class="ipip-upnext" id="ipipUpNext"></div>
-    <div class="ipip-kbd">⌨ &nbsp;Space &nbsp;·&nbsp; ← → &nbsp;·&nbsp; Use keyboard to control</div>
-   </div>
-  </div>
   </div>
  </aside>
 
@@ -1787,6 +1820,7 @@ function ipipSync(){
   const r=REC.get(item.id);
   const partNum=Number(r.Part);
   $("ipipCard").style.background=covers[(partNum-1)%covers.length];
+  $("ipipCard").style.backgroundSize="180% 180%";
   $("ipipTitle").textContent=r.Event;
   $("ipipSub").textContent="· "+item.book+" "+item.chapter+(item.of>1?" of "+item.of:"");
   // Chips
