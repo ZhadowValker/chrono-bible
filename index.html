@@ -475,97 +475,101 @@ function saveProgress(){ try{ localStorage.setItem("cbProgress",JSON.stringify(p
 const progress=loadProgress();
 let pipWin=null;
 
-/* ---------------- mobile fallback: canvas-drawn "video" so we can use the video-element
-   Picture-in-Picture API, which — unlike Document PiP — actually works on phones (iOS Safari,
-   Chrome Android) and floats over other apps, not just other tabs. It never touches the real
-   <audio> element, so there's no risk to playback: it's a second, silent, purely visual stream.
-   The floating window's native tap controls route through the mediaSession handlers already
-   registered above, which drive real playback. */
-let mobilePipCanvas=null, mobilePipCtx=null, mobilePipVideo=null, mobilePipTimer=null, mobilePipTrack=null;
-function ensureMobilePipVideo(){
- if(mobilePipVideo) return mobilePipVideo;
- mobilePipCanvas=document.createElement("canvas");
- mobilePipCanvas.width=480; mobilePipCanvas.height=270;
- mobilePipCanvas.style.cssText="position:fixed;left:-9999px;top:-9999px";
- document.body.appendChild(mobilePipCanvas); // captureStream() is unreliable on a detached canvas in some browsers
- mobilePipCtx=mobilePipCanvas.getContext("2d");
- drawMobilePipFrame();
- const stream=mobilePipCanvas.captureStream(6);
- mobilePipTrack=stream.getVideoTracks()[0];
- mobilePipVideo=document.createElement("video");
- mobilePipVideo.muted=true; mobilePipVideo.playsInline=true; mobilePipVideo.setAttribute("webkit-playsinline","");
- mobilePipVideo.width=480; mobilePipVideo.height=270;
- mobilePipVideo.srcObject=stream;
- // Off-screen with real dimensions, NOT opacity:0/1x1 — some mobile browsers stop decoding frames for
- // elements they consider invisible, which is exactly what showed up as a blank black/gray PiP window.
- mobilePipVideo.style.cssText="position:fixed;left:-9999px;top:-9999px;width:480px;height:270px";
- document.body.appendChild(mobilePipVideo);
- // Keep frames flowing continuously (not just once PiP opens) — captureStream() on some browsers only
- // reliably pushes a new frame when the canvas is actually redrawn, so a single static draw can end up
- // stale or never get delivered before the PiP window opens.
- if(mobilePipTimer) clearInterval(mobilePipTimer);
- mobilePipTimer=setInterval(drawMobilePipFrame,500);
- return mobilePipVideo;
-}
-function waitForVideoReady(v){
- return new Promise(resolve=>{
-  if(v.readyState>=2) return resolve(); // HAVE_CURRENT_DATA — enough for PiP
-  const onReady=()=>{ v.removeEventListener("loadeddata",onReady); resolve(); };
-  v.addEventListener("loadeddata",onReady);
-  setTimeout(()=>{ v.removeEventListener("loadeddata",onReady); resolve(); },1500); // don't hang forever
- });
-}
-function drawMobilePipFrame(){
- if(!mobilePipCtx) return;
- const c=mobilePipCtx, w=mobilePipCanvas.width, h=mobilePipCanvas.height;
- const g=c.createLinearGradient(0,0,w,h);
- g.addColorStop(0,"#241d63"); g.addColorStop(1,"#5146d8");
- c.fillStyle=g; c.fillRect(0,0,w,h);
+let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
+
+/* ---- mobile PiP: popup window with same styled card as Document PiP ----
+   documentPictureInPicture is desktop-Chrome-only. On mobile we open a plain
+   window.open() popup and sync it every 250ms via setInterval. Buttons post
+   messages back to the opener so no cross-window function refs are needed. */
+let mobilePipPopup=null, mobilePipInterval=null;
+function mobilePipSyncAll(){
+ if(!mobilePipPopup||mobilePipPopup.closed){ clearInterval(mobilePipInterval); mobilePipInterval=null; mobilePipPopup=null; return; }
+ const d=mobilePipPopup.document;
  const item=qi>-1?QUEUE[qi]:null;
+ const sel=d.getElementById("mpipVersionSel");
+ if(sel) sel.value=currentVersion;
  if(!item){
-  c.fillStyle="#fff"; c.font="600 26px Inter,sans-serif"; c.textBaseline="middle";
-  c.fillText(I18N[uiLang].nothingQueued,24,h/2);
+  d.getElementById("mpipPart").textContent="";
+  d.getElementById("mpipBook").textContent=I18N[uiLang].nothingQueued;
+  d.getElementById("mpipChNum").textContent="";
+  d.getElementById("mpipChOf").textContent="";
+  d.getElementById("mpipSub").textContent="";
+  d.getElementById("mpipChips").innerHTML="";
+  d.getElementById("mpipUpNext").textContent="";
+  d.getElementById("mpipCur").textContent="0:00";
+  d.getElementById("mpipDur").textContent="--:--";
   return;
  }
  const r=REC.get(item.id);
- c.fillStyle="rgba(255,255,255,.7)"; c.font="700 14px Inter,sans-serif";
- c.fillText("PART "+r.Part,24,34);
- c.fillStyle="#fff"; c.font="600 30px Georgia,serif";
- c.fillText(item.book+" "+item.chapter,24,78);
- c.fillStyle="rgba(255,255,255,.85)"; c.font="500 16px Inter,sans-serif";
- c.fillText(r.Event,24,112,w-48);
- // play/pause glyph
- c.fillStyle="rgba(255,255,255,.9)";
- const cx=w-56, cy=h-56;
- c.beginPath(); c.arc(cx,cy,26,0,Math.PI*2); c.fillStyle="rgba(255,255,255,.16)"; c.fill();
- c.fillStyle="#fff";
- if(audio.paused){
-  c.beginPath(); c.moveTo(cx-7,cy-11); c.lineTo(cx-7,cy+11); c.lineTo(cx+12,cy); c.closePath(); c.fill();
- } else {
-  c.fillRect(cx-9,cy-11,6,22); c.fillRect(cx+3,cy-11,6,22);
- }
- // progress bar
- const pct=audio.duration?audio.currentTime/audio.duration:0;
- c.fillStyle="rgba(255,255,255,.25)"; c.fillRect(24,h-24,w-48,4);
- c.fillStyle="#fff"; c.fillRect(24,h-24,(w-48)*pct,4);
- if(mobilePipTrack && typeof mobilePipTrack.requestFrame==="function"){ try{ mobilePipTrack.requestFrame(); }catch(_){} }
+ d.getElementById("mpipPart").textContent="PART "+r.Part;
+ d.getElementById("mpipBook").textContent=item.book;
+ d.getElementById("mpipChNum").textContent=item.chapter;
+ d.getElementById("mpipChOf").textContent=item.of>1?" of "+item.of:"";
+ d.getElementById("mpipSub").textContent=r.Event;
+ d.querySelector(".mpip-card").style.setProperty("--mpip-cover",coverFor(Number(r.Part)));
+ const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
+ d.getElementById("mpipUpNext").innerHTML=nxt
+  ? `UP NEXT — <b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`
+  : "END OF QUEUE";
+ const chs=CH.get(item.id)||[];
+ d.getElementById("mpipChips").innerHTML=chs.map(c=>{
+  const done=progress.completed[chapKey(item.id,c.chapter)];
+  const current=c.chapter===item.chapter;
+  const cls=current?"mpip-ch cur":done?"mpip-ch done":"mpip-ch";
+  return `<span class="${cls}" data-ch="${c.chapter}">${c.chapter}</span>`;
+ }).join("");
+ const pct=audio.duration?(audio.currentTime/audio.duration)*100:0;
+ d.getElementById("mpipFill").style.width=pct+"%";
+ d.getElementById("mpipKnob").style.left=pct+"%";
+ d.getElementById("mpipCur").textContent=clock(audio.currentTime);
+ d.getElementById("mpipDur").textContent=audio.duration?clock(audio.duration):"--:--";
+ const playBtn=d.getElementById("mpipPlay");
+ if(playBtn){ playBtn.innerHTML=audio.paused?ICONS.play:ICONS.pause; playBtn.classList.toggle("live",!audio.paused); }
+ d.querySelector(".mpip-card").classList.toggle("playing",!audio.paused);
 }
 async function openMobilePip(){
- const v=ensureMobilePipVideo();
- try{ await v.play(); }catch(_){}
- await waitForVideoReady(v);
- try{
-  await v.requestPictureInPicture();
- }catch(err){
-  // Older Safari uses its own presentation-mode API instead of the standard one.
-  if(typeof v.webkitSetPresentationMode==="function" && v.webkitSupportsPresentationMode && v.webkitSupportsPresentationMode("picture-in-picture")){
-   try{ v.webkitSetPresentationMode("picture-in-picture"); return; }catch(_){}
-  }
-  $("err").textContent="Couldn't open the floating player on this browser ("+(err&&err.message?err.message:"unknown error")+").";
-  $("err").hidden=false;
- }
+ if(mobilePipPopup&&!mobilePipPopup.closed){ mobilePipPopup.focus(); return; }
+ const CSS=`:root{--mpip-cover:linear-gradient(140deg,#241d63,#5146d8)}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{margin:0;font-family:Inter,system-ui,sans-serif;background:#11162a;color:#fff;height:100vh;overflow:hidden;user-select:none}.mpip-card{position:relative;overflow:hidden;height:100%;display:flex;flex-direction:column;padding:14px 16px 10px;gap:8px;background:var(--mpip-cover);background-size:180% 180%;animation:mpipDrift 14s ease-in-out infinite}@keyframes mpipDrift{0%,100%{background-position:0% 0%}50%{background-position:100% 60%}}.mpip-blobs{position:absolute;inset:0;overflow:hidden;z-index:0}.mpip-blob{position:absolute;width:130%;padding-top:130%;border-radius:38%;background:radial-gradient(circle at 34% 30%,rgba(255,255,255,.16),rgba(255,255,255,0) 62%);animation:mpipSpin 46s linear infinite}.mpip-blob.b2{width:105%;padding-top:105%;top:15%;left:20%;background:radial-gradient(circle at 60% 65%,rgba(122,108,230,.30),rgba(122,108,230,0) 60%);animation-duration:58s;animation-direction:reverse}.mpip-blob.b3{width:85%;padding-top:85%;top:-10%;left:35%;background:radial-gradient(circle at 40% 40%,rgba(255,255,255,.10),rgba(255,255,255,0) 65%);animation-duration:70s}@keyframes mpipSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}.mpip-card.playing .mpip-blob{animation-duration:9s}.mpip-card.playing .mpip-blob.b2{animation-duration:11s}.mpip-card.playing .mpip-blob.b3{animation-duration:14s}.mpip-card>:not(.mpip-blobs){position:relative;z-index:1}.mpip-topline{display:flex;align-items:center;justify-content:space-between}.mpip-main{flex:1;display:flex;gap:12px;min-height:0;overflow:hidden}.mpip-left{flex:0 0 44%;display:flex;flex-direction:column;min-width:0;overflow:hidden}.mpip-header{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.55);margin-bottom:4px}.mpip-sub{font-family:'Iowan Old Style',Palatino,serif;font-size:22px;font-weight:700;color:#fff;line-height:1.2;text-shadow:0 2px 10px rgba(30,22,80,.4)}.mpip-meta{font-size:13px;color:rgba(255,255,255,.72);margin-top:10px;display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 6px}.mpip-part{font-size:11px;font-weight:700;letter-spacing:.1em;opacity:.85;text-transform:uppercase}.mpip-book{font-family:'Iowan Old Style',Palatino,serif;font-size:14px;color:#fff}.mpip-chnum{font-size:13px;color:rgba(255,255,255,.72)}.mpip-chnum small{opacity:.8}.mpip-badge{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:4px 10px;cursor:pointer;appearance:none;-webkit-appearance:none;text-align:center;text-align-last:center}.mpip-badge option{color:#1d2536;background:#fff;text-transform:none}.mpip-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}.mpip-chips{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;overflow-y:auto;align-content:start;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent;padding-right:4px}.mpip-ch{font-size:13px;font-weight:600;padding:7px 2px;border-radius:8px;cursor:pointer;text-align:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.75)}.mpip-ch:active{background:rgba(255,255,255,.28)}.mpip-ch.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent;font-weight:700}.mpip-ch.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.50);color:#c8ffe0}.mpip-ch.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}.mpip-upnext{font-size:12px;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}.mpip-upnext b{color:#fff;font-weight:600}.mpip-progress{display:flex;align-items:center;gap:8px}.mpip-time{font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:32px}#mpipDur{text-align:right}.mpip-bar{position:relative;flex:1;height:6px;border-radius:99px;background:rgba(255,255,255,.28);cursor:pointer;touch-action:none}.mpip-fill{position:absolute;top:0;left:0;height:100%;border-radius:99px;background:#fff;width:0%}.mpip-knob{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.4);transform:translate(-50%,-50%);left:0%}.mpip-bottom{display:flex;align-items:center;gap:10px}.mpip-controls{display:flex;align-items:center;justify-content:center;gap:20px;flex:1}.mpip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:8px;line-height:1;opacity:.9}.mpip-controls button:active{opacity:.6;transform:scale(.94)}#mpipPrev,#mpipNext{font-size:22px}#mpipPlay{font-size:18px;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.34);display:flex;align-items:center;justify-content:center}#mpipPlay.live{animation:mpipPulse 1.8s ease-in-out infinite}@keyframes mpipPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.25)}50%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}`;
+ const vOpts=Object.entries(VERSIONS).map(([k,v])=>`<option value="${k}">${v.label.split(" ")[0]}</option>`).join("");
+ mobilePipPopup=window.open("","_blank","width=360,height=420,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no");
+ if(!mobilePipPopup){ $("err").textContent="Popup blocked — please allow popups for this site."; $("err").hidden=false; return; }
+ mobilePipPopup.document.write(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Now Playing</title><style>${CSS}</style></head><body><div class="mpip-card"><div class="mpip-blobs"><span class="mpip-blob b1"></span><span class="mpip-blob b2"></span><span class="mpip-blob b3"></span></div><div class="mpip-topline"><div class="mpip-part" id="mpipPart"></div><select class="mpip-badge" id="mpipVersionSel">${vOpts}</select></div><div class="mpip-main"><div class="mpip-left"><div class="mpip-header">NOW PLAYING</div><div class="mpip-sub" id="mpipSub"></div><div class="mpip-meta"><span id="mpipPart"></span> &middot; <span class="mpip-book" id="mpipBook"></span><span class="mpip-chnum"><span id="mpipChNum"></span><small id="mpipChOf"></small></span></div></div><div class="mpip-right"><div class="mpip-chips" id="mpipChips"></div></div></div><div class="mpip-upnext" id="mpipUpNext"></div><div class="mpip-progress"><span class="mpip-time" id="mpipCur">0:00</span><div class="mpip-bar" id="mpipBar"><div class="mpip-fill" id="mpipFill"></div><div class="mpip-knob" id="mpipKnob"></div></div><span class="mpip-time" id="mpipDur">--:--</span></div><div class="mpip-bottom"><div class="mpip-controls"><button id="mpipPrev">${ICONS.prev}</button><button id="mpipPlay">${ICONS.play}</button><button id="mpipNext">${ICONS.next}</button></div></div></div></body></html>`);
+ mobilePipPopup.document.close();
+ mobilePipPopup.document.getElementById("mpipPlay").onclick=()=>mobilePipPopup.opener.postMessage("mpip:toggle","*");
+ mobilePipPopup.document.getElementById("mpipPrev").onclick=()=>mobilePipPopup.opener.postMessage("mpip:prev","*");
+ mobilePipPopup.document.getElementById("mpipNext").onclick=()=>mobilePipPopup.opener.postMessage("mpip:next","*");
+ mobilePipPopup.document.getElementById("mpipVersionSel").addEventListener("change",e=>{
+  mobilePipPopup.opener.postMessage("mpip:version:"+e.target.value,"*");
+ });
+ mobilePipPopup.document.getElementById("mpipChips").addEventListener("click",e=>{
+  const chip=e.target.closest(".mpip-ch");
+  if(chip) mobilePipPopup.opener.postMessage("mpip:chapter:"+chip.dataset.ch,"*");
+ });
+ const barEl=mobilePipPopup.document.getElementById("mpipBar");
+ let mpipSeeking=false;
+ function mpipSeek(e){ const box=barEl.getBoundingClientRect(); const r=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width)); mobilePipPopup.opener.postMessage("mpip:seek:"+r,"*"); }
+ barEl.addEventListener("pointerdown",e=>{ mpipSeeking=true; try{barEl.setPointerCapture(e.pointerId);}catch(_){} mpipSeek(e); });
+ barEl.addEventListener("pointermove",e=>{ if(mpipSeeking) mpipSeek(e); });
+ barEl.addEventListener("pointerup",()=>mpipSeeking=false);
+ barEl.addEventListener("pointercancel",()=>mpipSeeking=false);
+ if(mobilePipInterval) clearInterval(mobilePipInterval);
+ mobilePipInterval=setInterval(mobilePipSyncAll,250);
+ mobilePipSyncAll();
 }
-let pipDismissed=false; // true once the person closes the pop-out themselves; stops us re-opening it uninvited
+window.addEventListener("message",e=>{
+ if(!e.data||typeof e.data!=="string"||!e.data.startsWith("mpip:")) return;
+ const cmd=e.data.slice(5);
+ if(cmd==="toggle"){ audio.paused?play():audio.pause(); }
+ else if(cmd==="prev"){ step(-1); }
+ else if(cmd==="next"){ step(1); }
+ else if(cmd.startsWith("version:")){ const v=cmd.slice(8); $("version").value=v; $("version").dispatchEvent(new Event("change")); }
+ else if(cmd.startsWith("seek:")){ const r=parseFloat(cmd.slice(5)); if(!isNaN(r)&&audio.duration) audio.currentTime=r*audio.duration; }
+ else if(cmd.startsWith("chapter:")){
+  const ch=Number(cmd.slice(8)); if(qi<0) return;
+  const cur=QUEUE[qi]; const idx=QUEUE.findIndex(x=>x.id===cur.id&&x.chapter===ch);
+  if(idx>-1) load(idx,true);
+ }
+});
 
 // ---- inline "this book's timeline" panel, populated from timeline.html's BOOKS data on demand ----
 let expandedBooksInline=new Set(); // stores book slugs
@@ -1301,13 +1305,16 @@ async function openPiP(){
   pipDismissed=true;
  },{once:true});
 }
-if("documentPictureInPicture" in window){
- $("btnPop").hidden=false;
- $("btnPop").addEventListener("click",()=>{ pipDismissed=false; openPiP().catch(()=>{}); });
-} else if(document.pictureInPictureEnabled && typeof HTMLVideoElement!=="undefined" && HTMLVideoElement.prototype.requestPictureInPicture){
- $("btnPop").hidden=false;
- $("btnPop").addEventListener("click",()=>{ openMobilePip(); });
-}
+// Always show the pop-out button — route to Document PiP (desktop Chrome) or
+// popup-window fallback (mobile / all other browsers) detected at tap time.
+$("btnPop").hidden=false;
+$("btnPop").addEventListener("click",()=>{
+ if("documentPictureInPicture" in window){
+  pipDismissed=false; openPiP().catch(()=>{});
+ } else {
+  openMobilePip();
+ }
+});
 
 /* ---------------- interface language ---------------- */
 function applyLang(lang){
