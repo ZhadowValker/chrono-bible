@@ -626,7 +626,7 @@ function _pipDrawFrame(){
   c.fillText("Loading timeline…",RX+RW/2,(PAD+H-90)/2);
   _pipLoadBooks();
  } else {
-  _pipDrawTimeline(c, RX, PAD, RW, H-PAD-90, bookName, c1, c2);
+  _pipDrawTimeline(c, RX, PAD, RW, H-PAD-90, bookName);
  }
 
  // ═══ UP NEXT ═══
@@ -665,105 +665,126 @@ function _pipDrawFrame(){
  } else { c.fillRect(pcx-7,pcy-8,4,16); c.fillRect(pcx+3,pcy-8,4,16); }
 }
 
-// ── Timeline drawing helper ──
-function _pipDrawTimeline(c, X, Y, W2, H2, bookName, c1, c2){
- const book=_PIP_BOOKS.find(b=>b.name===bookName);
+// ── Timeline drawing helper — matches timeline.html visuals exactly ──
+function _pipDrawTimeline(c, X, Y, W2, H2, bookName){
+ const book=_PIP_BOOKS&&_PIP_BOOKS.find(b=>b.name===bookName);
  if(!book||!book.events||book.events.length===0){
-  c.fillStyle="rgba(255,255,255,0.25)"; c.font="500 19px Inter,system-ui,sans-serif";
-  c.textBaseline="middle"; c.textAlign="center"; c.fillText("No timeline data",X+W2/2,Y+H2/2); return;
+  c.fillStyle="rgba(255,255,255,0.30)"; c.font="500 18px Inter,system-ui,sans-serif";
+  c.textBaseline="middle"; c.textAlign="center";
+  c.fillText(bookName?" No timeline data for "+bookName:"No timeline data",X+W2/2,Y+H2/2); return;
  }
- const evts=book.events;
- // Compute time axis bounds from events with real years (skip undated)
- const dated=evts.filter(e=>e[4]!==null&&e[5]!==null);
- if(dated.length===0){
-  c.fillStyle="rgba(255,255,255,0.25)"; c.font="500 19px Inter,system-ui,sans-serif";
-  c.textBaseline="middle"; c.textAlign="center"; c.fillText("Timeline undated",X+W2/2,Y+H2/2); return;
- }
- const allYears=dated.flatMap(e=>[e[4],e[5]]);
- let tMin=Math.min(...allYears), tMax=Math.max(...allYears);
- const span=tMax-tMin||1; const pad2=span*0.08;
- tMin-=pad2; tMax+=pad2;
- const toX=y=>X+((y-tMin)/(tMax-tMin))*W2;
 
- // Section heading
- c.fillStyle="rgba(255,255,255,0.42)"; c.font="700 17px Inter,system-ui,sans-serif";
+ // ── Colours matching timeline.html ──
+ // Light card background
+ c.fillStyle="rgba(255,255,255,0.93)";
+ _roundRect(c,X,Y,W2,H2,14); c.fill();
+
+ // Clip drawing to card
+ c.save(); c.beginPath(); _roundRect(c,X,Y,W2,H2,14); c.clip();
+
+ const PAD_X=20, PAD_Y=16;
+ const CX=X+PAD_X, CW=W2-PAD_X*2;  // content x and width
+
+ // ── Header: "Narrative: … · Written: …" ──
+ function fmtY(y){ if(y===null||y===undefined) return "?"; return (y<0?Math.abs(y)+" BC":"AD "+y); }
+ const narStr="Narrative: "+fmtY(book.spanStart)+" – "+fmtY(book.spanEnd)+
+               " · Written: "+fmtY(book.writtenStart)+" – "+fmtY(book.writtenEnd);
+ c.fillStyle="#888"; c.font="500 13px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
- c.fillText(bookName.toUpperCase()+" TIMELINE",X,Y);
+ c.fillText(narStr,CX,Y+PAD_Y);
 
- // Time axis line
- const axisY=Y+30, rowH=34, labelH=20;
- c.strokeStyle="rgba(255,255,255,0.18)"; c.lineWidth=1;
- c.beginPath(); c.moveTo(X,axisY); c.lineTo(X+W2,axisY); c.stroke();
+ // ── Time axis ──
+ // Use spanStart/spanEnd as the axis bounds (same as timeline.html)
+ const tMin=book.spanStart, tMax=book.spanEnd;
+ const tSpan=tMax-tMin||1;
+ // Track zone — left edge after event name column, right edge before date label
+ const LABEL_COL=190;   // px reserved for event name on left
+ const DATE_COL=130;    // px reserved for date label on right
+ const TX=CX+LABEL_COL, TW=CW-LABEL_COL-DATE_COL;
+ const toTX=y=>TX+((y-tMin)/tSpan)*TW;
 
- // Axis tick labels (pick ~4 ticks)
- const nTicks=4;
- for(let ti=0;ti<=nTicks;ti++){
-  const yr=tMin+ti*(tMax-tMin)/nTicks;
-  const tx=toX(yr);
-  c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=1;
-  c.beginPath(); c.moveTo(tx,axisY-4); c.lineTo(tx,axisY+4); c.stroke();
-  const label=yr<0?Math.round(Math.abs(yr))+" BC":"AD "+Math.round(yr);
-  c.fillStyle="rgba(255,255,255,0.35)"; c.font="500 13px Inter,system-ui,sans-serif";
-  c.textBaseline="top"; c.textAlign="center"; c.fillText(label,tx,axisY+6);
- }
+ // Axis row: left date | right date
+ const axisY=Y+PAD_Y+22;
+ c.fillStyle="#aaa"; c.font="500 12px Inter,system-ui,sans-serif";
+ c.textAlign="left";  c.fillText(fmtY(tMin),TX,axisY);
+ c.textAlign="right"; c.fillText(fmtY(tMax),TX+TW,axisY);
 
- // Draw each event row
- const rowStart=axisY+labelH+8;
- evts.forEach((ev,idx)=>{
-  const [name,type,,,startY,endY]=ev;
-  const ry=rowStart+idx*rowH;
-  if(ry+rowH>Y+H2) return; // clip
+ // Axis separator line
+ c.strokeStyle="#e0e0e0"; c.lineWidth=1;
+ c.beginPath(); c.moveTo(CX,axisY+16); c.lineTo(CX+CW,axisY+16); c.stroke();
 
-  const isRange=type==="Range";
-  const isUndated=startY===null||endY===null;
+ // ── Event rows ──
+ const ROW_H=46, BAR_H=10, ROW_START=axisY+22;
+ const TRACK_COL="#e8e8ee";       // grey track behind every bar
+ const BAR_COL="#5146d8";         // indigo bar (matches timeline.html .span-bar)
+ const UNDATED_BG="#ebebeb";
+ const UNDATED_TEXT="#999";
 
-  // Event name label
-  c.fillStyle="rgba(255,255,255,0.75)"; c.font="500 14px Inter,system-ui,sans-serif";
-  c.textBaseline="middle"; c.textAlign="left";
-  const shortName=name.length>28?name.slice(0,26)+"…":name;
-  c.fillText(shortName,X,ry+rowH/2);
+ book.events.forEach((ev,idx)=>{
+  const [name,type,,, startY,endY]=ev;
+  const ry=ROW_START+idx*ROW_H;
+  if(ry+ROW_H>Y+H2-PAD_Y) return; // clip overflow
 
-  if(isUndated){
-   c.fillStyle="rgba(255,255,255,0.22)"; c.font="italic 12px Inter,system-ui,sans-serif";
-   c.fillText("undated",X+W2-60,ry+rowH/2);
-   return;
+  const isUndated=(startY===null||endY===null);
+  const isRange=(type==="Range");
+
+  // Separator line above row (except first)
+  if(idx>0){
+   c.strokeStyle="#eeeeee"; c.lineWidth=1;
+   c.beginPath(); c.moveTo(CX,ry); c.lineTo(CX+CW,ry); c.stroke();
   }
 
-  const barX=toX(startY), barX2=toX(endY);
-  const barY=ry+rowH/2-5, barH2=10;
-  const BAR_OFFSET=W2*0.32; // push bars right of event name
+  // ── Event name (top-left of row) ──
+  c.fillStyle="#1d2536"; c.font="600 14px Inter,system-ui,sans-serif";
+  c.textBaseline="top"; c.textAlign="left";
+  const shortName=name.length>24?name.slice(0,22)+"…":name;
+  c.fillText(shortName,CX,ry+7);
 
-  // Measure date label first so we can reserve space and never let bars overlap it
-  const dateStr=startY===endY?(Math.abs(Math.round(startY))+(startY<0?" BC":" AD")):
-   (Math.abs(Math.round(startY))+(startY<0?" BC":" AD")+" – "+Math.abs(Math.round(endY))+(endY<0?" BC":" AD"));
-  c.font="500 12px Inter,system-ui,sans-serif";
-  const dateW=c.measureText(dateStr).width;
-  const DATE_PAD=8; // gap between bar right edge and date label
-  const BAR_RIGHT=X+W2-dateW-DATE_PAD; // bars must not exceed this x
-
-  if(isRange){
-   const bx=Math.max(X+BAR_OFFSET,barX);
-   const bx2=Math.min(BAR_RIGHT, Math.max(bx+4,barX2)); // clamp right edge
-   const bw2=Math.max(4,bx2-bx);
-   c.beginPath(); _roundRect(c,bx,barY,bw2,barH2,4);
-   const gr=c.createLinearGradient(bx,0,bx+bw2,0);
-   gr.addColorStop(0,"rgba(255,255,255,0.75)"); gr.addColorStop(1,"rgba(255,255,255,0.40)");
-   c.fillStyle=gr; c.fill();
+  // ── Date label (top-right of row) ──
+  if(!isUndated){
+   const dStr=startY===endY
+    ? fmtY(startY)
+    : fmtY(startY)+" – "+fmtY(endY);
+   c.fillStyle="#aaa"; c.font="500 12px Inter,system-ui,sans-serif";
+   c.textAlign="right"; c.textBaseline="top";
+   c.fillText(dStr,CX+CW,ry+7);
   } else {
-   // Point — diamond, also clamped so it doesn't enter the date zone
-   const px=Math.min(BAR_RIGHT-6, Math.max(X+BAR_OFFSET+6,barX));
-   c.save(); c.translate(px,ry+rowH/2); c.rotate(Math.PI/4);
-   c.fillStyle="rgba(255,255,255,0.85)";
-   c.fillRect(-5,-5,10,10); c.restore();
+   c.fillStyle=UNDATED_TEXT; c.font="500 12px Inter,system-ui,sans-serif";
+   c.textAlign="right"; c.textBaseline="top";
+   c.fillText("undated",CX+CW,ry+7);
   }
 
-  // Date label — always at right edge, always clear of bars
-  c.fillStyle="rgba(255,255,255,0.45)"; c.font="500 12px Inter,system-ui,sans-serif";
-  c.textAlign="right"; c.textBaseline="middle";
-  c.fillText(dateStr,X+W2,ry+rowH/2);
- });
-}
+  // ── Full-width grey track ──
+  const trackY=ry+ROW_H-BAR_H-8;
+  c.beginPath(); _roundRect(c,TX,trackY,TW,BAR_H,5);
+  c.fillStyle=TRACK_COL; c.fill();
 
+  // ── Coloured bar / point on track ──
+  if(!isUndated){
+   if(isRange){
+    const bx=Math.max(TX, toTX(startY));
+    const bx2=Math.min(TX+TW, toTX(endY));
+    const bw=Math.max(6, bx2-bx);
+    c.beginPath(); _roundRect(c,bx,trackY,bw,BAR_H,5);
+    c.fillStyle=BAR_COL; c.fill();
+   } else {
+    // Point — small vertical bar centred on date
+    const px=Math.min(TX+TW-4, Math.max(TX+4, toTX(startY)));
+    c.beginPath(); _roundRect(c,px-4,trackY-1,8,BAR_H+2,3);
+    c.fillStyle=BAR_COL; c.fill();
+   }
+  } else {
+   // Undated chip below name (like the screenshot)
+   c.beginPath(); _roundRect(c,CX,ry+24,58,18,99);
+   c.fillStyle=UNDATED_BG; c.fill();
+   c.fillStyle=UNDATED_TEXT; c.font="500 11px Inter,system-ui,sans-serif";
+   c.textAlign="center"; c.textBaseline="middle";
+   c.fillText("undated",CX+29,ry+33);
+  }
+ });
+
+ c.restore(); // end clip
+}
 // ── Lazy-load BOOKS data from timeline.html once ──
 let _PIP_BOOKS=null, _pipBooksLoading=false;
 function _pipLoadBooks(){
