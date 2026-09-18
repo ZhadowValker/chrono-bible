@@ -175,6 +175,35 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
  .rail .big{margin-top:0;margin-left:auto;width:66px;height:66px;font-size:28px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ── Inline PiP panel ── */
+.inline-pip{overflow:hidden;max-height:0;opacity:0;transition:max-height .35s ease,opacity .28s ease,margin .28s ease;margin-top:0}
+.inline-pip.open{max-height:600px;opacity:1;margin-top:14px}
+.ipip{background:linear-gradient(140deg,#241d63,#5146d8);border-radius:18px;padding:20px 22px 16px;color:#fff;display:flex;flex-direction:column;gap:12px}
+.ipip-top{display:flex;align-items:flex-start;gap:14px}
+.ipip-left{flex:1;min-width:0}
+.ipip-label{font-size:10px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.5);margin-bottom:4px}
+.ipip-title{font-family:var(--serif);font-size:17px;font-weight:700;line-height:1.3;color:#fff;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ipip-sub{font-size:12px;color:rgba(255,255,255,.65)}
+.ipip-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.ipip-chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.75);cursor:pointer;transition:background .15s}
+.ipip-chip:hover{background:rgba(255,255,255,.26)}
+.ipip-chip.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent}
+.ipip-chip.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.5);color:#c8ffe0}
+.ipip-chip.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
+.ipip-right{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:6px}
+.ipip-controls{display:flex;align-items:center;gap:10px}
+.ipip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:4px;font-size:16px;opacity:.85;transition:opacity .15s,transform .15s}
+.ipip-controls button:hover{opacity:1;transform:scale(1.1)}
+.ipip-play{width:44px!important;height:44px!important;border-radius:50%!important;background:rgba(255,255,255,.16)!important;border:1px solid rgba(255,255,255,.30)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:18px!important}
+.ipip-bar-wrap{display:flex;align-items:center;gap:8px}
+.ipip-times{font-size:11px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;white-space:nowrap}
+.ipip-bar{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.22);cursor:pointer;position:relative;touch-action:none}
+.ipip-fill{height:100%;border-radius:99px;background:#fff;width:0%}
+.ipip-knob{position:absolute;top:50%;width:11px;height:11px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);left:0%}
+.ipip-upnext{font-size:11px;color:rgba(255,255,255,.50);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ipip-upnext b{color:rgba(255,255,255,.80);font-weight:600}
+.ipip-kbd{font-size:10px;color:rgba(255,255,255,.30);text-align:center;margin-top:2px}
 </style>
 </head><body>
 
@@ -234,6 +263,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
      <button id="btnPrev" title="Previous chapter"></button>
      <button id="btnNext" title="Next chapter"></button>
      <button id="btnPop" title="Pop out player" hidden></button>
+     <button id="btnInlinePip" title="Show inline player panel" aria-pressed="false"></button>
      <div class="vol-control">
       <input type="range" id="volume" min="0" max="1" step="0.01" value="1" hidden>
       <div class="vol-wrap" id="volWrap">
@@ -279,6 +309,34 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
    <div class="stat"><b id="statEvents">0</b><span>events</span></div>
    <div class="stat"><b id="statCh">0</b><span>chapters</span></div>
    <div class="stat"><b id="statPos">—</b><span>position</span></div>
+
+  <!-- Inline PiP panel — toggles open below the console -->
+  <div class="inline-pip" id="inlinePip">
+   <div class="ipip" id="ipipCard">
+    <div class="ipip-top">
+     <div class="ipip-left">
+      <div class="ipip-label">NOW PLAYING</div>
+      <div class="ipip-title" id="ipipTitle">Nothing queued</div>
+      <div class="ipip-sub" id="ipipSub">Pick an event from the list</div>
+      <div class="ipip-chips" id="ipipChips"></div>
+     </div>
+     <div class="ipip-right">
+      <div class="ipip-controls">
+       <button id="ipipPrev" title="Previous chapter"></button>
+       <button id="ipipPlay" class="ipip-play" title="Play" aria-label="Play"></button>
+       <button id="ipipNext" title="Next chapter"></button>
+      </div>
+     </div>
+    </div>
+    <div class="ipip-bar-wrap">
+     <span class="ipip-times" id="ipipCur">0:00</span>
+     <div class="ipip-bar" id="ipipBar"><div class="ipip-fill" id="ipipFill"></div><div class="ipip-knob" id="ipipKnob"></div></div>
+     <span class="ipip-times" id="ipipDur">--:--</span>
+    </div>
+    <div class="ipip-upnext" id="ipipUpNext"></div>
+    <div class="ipip-kbd">⌨ &nbsp;Space &nbsp;·&nbsp; ← → &nbsp;·&nbsp; Use keyboard to control</div>
+   </div>
+  </div>
   </div>
  </aside>
 
@@ -427,6 +485,7 @@ const ICONS={
  next:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor"><path d="M16 5h2v14h-2zM4 5l10 7-10 7z"/></svg>`,
  loop:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>`,
  external:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>`,
+ inlinepip:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><rect x="7" y="8" width="10" height="6" rx="1" fill="currentColor" stroke="none"/></svg>`,
  popout:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><rect x="12" y="11" width="9" height="6" rx="1" fill="currentColor" stroke="none"/></svg>`,
  volHigh:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/><path d="M20 6a9 9 0 0 1 0 12"/></svg>`,
  volLow:`<svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 5V4L8 9H4z"/><path d="M17.5 8.5a5 5 0 0 1 0 7"/></svg>`,
@@ -1667,6 +1726,7 @@ $("btnLink").innerHTML=ICONS.external;
 $("btnPrev").innerHTML=ICONS.prev;
 $("btnNext").innerHTML=ICONS.next;
 $("btnPop").innerHTML=ICONS.popout;
+$("btnInlinePip").innerHTML=ICONS.inlinepip;
 $("btnPlay").innerHTML=ICONS.play;
 
 /* ---------------- sticky mini-player (shows once the main player scrolls out of view) ---------------- */
@@ -1709,6 +1769,88 @@ if("IntersectionObserver" in window){
   $("stickyPlayer").classList.toggle("show", r.bottom<0);
 });
 }
+
+
+/* ──────────── Inline PiP panel ──────────── */
+let ipipOpen=false;
+function ipipSync(){
+ const item=qi>-1?QUEUE[qi]:null;
+ const panel=$("inlinePip");
+ if(!ipipOpen||!panel) return;
+ // gradient bg matches part colour
+ const covers=["linear-gradient(140deg,#241d63,#4a3fc0)","linear-gradient(140deg,#1a3a6b,#2d6bbf)",
+  "linear-gradient(140deg,#1e4a2a,#2e8b57)","linear-gradient(140deg,#5a1a1a,#c0392b)",
+  "linear-gradient(140deg,#4a2a0a,#d4890a)","linear-gradient(140deg,#2a1a4a,#7b4fa6)",
+  "linear-gradient(140deg,#1a3a4a,#1a7a8a)","linear-gradient(140deg,#3a2a10,#8a6020)",
+  "linear-gradient(140deg,#1a2a3a,#2a5a8a)","linear-gradient(140deg,#3a1a3a,#8a2a8a)"];
+ if(item){
+  const r=REC.get(item.id);
+  const partNum=Number(r.Part);
+  $("ipipCard").style.background=covers[(partNum-1)%covers.length];
+  $("ipipTitle").textContent=r.Event;
+  $("ipipSub").textContent="· "+item.book+" "+item.chapter+(item.of>1?" of "+item.of:"");
+  // Chips
+  const chs=CH.get(item.id)||[];
+  $("ipipChips").innerHTML=chs.map(ch=>{
+   const done=progress.completed[chapKey(item.id,ch.chapter)];
+   const cur=ch.chapter===item.chapter;
+   return `<span class="ipip-chip${cur?" cur":done?" done":""}" data-ch="${ch.chapter}">${ch.chapter}</span>`;
+  }).join("");
+  // Up next
+  const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
+  $("ipipUpNext").innerHTML=nxt?`UP NEXT — <b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`:"";
+ } else {
+  $("ipipTitle").textContent="Nothing queued";
+  $("ipipSub").textContent="Pick an event from the list";
+  $("ipipChips").innerHTML="";
+  $("ipipUpNext").textContent="";
+ }
+ // Progress
+ const pct=audio.duration?(audio.currentTime/audio.duration)*100:0;
+ $("ipipFill").style.width=pct+"%";
+ $("ipipKnob").style.left=pct+"%";
+ $("ipipCur").textContent=clock(audio.currentTime);
+ $("ipipDur").textContent=audio.duration?clock(audio.duration):"--:--";
+ $("ipipPlay").innerHTML=audio.paused?ICONS.play:ICONS.pause;
+}
+// Toggle open/close
+$("btnInlinePip").addEventListener("click",()=>{
+ ipipOpen=!ipipOpen;
+ $("inlinePip").classList.toggle("open",ipipOpen);
+ $("btnInlinePip").classList.toggle("on",ipipOpen);
+ $("btnInlinePip").setAttribute("aria-pressed",String(ipipOpen));
+ if(ipipOpen) ipipSync();
+});
+// Controls
+$("ipipPlay").addEventListener("click",()=>{ if(qi<0){load(0,true);return;} audio.paused?play():audio.pause(); });
+$("ipipPrev").addEventListener("click",()=>step(-1));
+$("ipipNext").addEventListener("click",()=>step(1));
+$("ipipChips").addEventListener("click",e=>{
+ const chip=e.target.closest(".ipip-chip");
+ if(!chip||qi<0) return;
+ const ch=Number(chip.dataset.ch);
+ const idx=QUEUE.findIndex(x=>x.id===QUEUE[qi].id&&x.chapter===ch);
+ if(idx>-1) load(idx,true);
+});
+// Seek bar
+const ipipBarEl=$("ipipBar");
+let ipipSeeking=false;
+function ipipSeek(e){
+ const box=ipipBarEl.getBoundingClientRect();
+ const r=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width));
+ if(audio.duration) audio.currentTime=r*audio.duration;
+}
+ipipBarEl.addEventListener("pointerdown",e=>{ ipipSeeking=true; try{ipipBarEl.setPointerCapture(e.pointerId);}catch(_){} ipipSeek(e); });
+ipipBarEl.addEventListener("pointermove",e=>{ if(ipipSeeking) ipipSeek(e); });
+ipipBarEl.addEventListener("pointerup",()=>ipipSeeking=false);
+ipipBarEl.addEventListener("pointercancel",()=>ipipSeeking=false);
+// Keep panel live
+$("ipipPrev").innerHTML=ICONS.prev;
+$("ipipPlay").innerHTML=ICONS.play;
+$("ipipNext").innerHTML=ICONS.next;
+audio.addEventListener("timeupdate",ipipSync);
+audio.addEventListener("play",ipipSync);
+audio.addEventListener("pause",ipipSync);
 
 applyLang(uiLang);
 
