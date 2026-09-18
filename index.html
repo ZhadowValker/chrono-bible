@@ -487,28 +487,27 @@ let _pipCanvas=null, _pipCtx=null, _pipVideo=null, _pipRAF=null, _pipStream=null
 
 function _ensurePipVideo(){
  if(_pipVideo) return _pipVideo;
- // Canvas — sized 16:9 for best PiP aspect ratio
+ // Canvas — 16:9, kept VISIBLE to the compositor so captureStream gets real frames.
+ // We hide it visually with opacity:0 but keep it at real dimensions in the viewport.
+ // left:-9999px tricks cause mobile browsers (Safari, Brave) to stop delivering frames.
  _pipCanvas=document.createElement("canvas");
  _pipCanvas.width=480; _pipCanvas.height=270;
- // Keep it in the DOM but off-screen with real dimensions — captureStream needs a
- // rendered element; opacity:0 or 1x1 makes some browsers drop frames.
- _pipCanvas.style.cssText="position:fixed;left:-9999px;top:-9999px;width:480px;height:270px;pointer-events:none";
+ _pipCanvas.style.cssText="position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1";
  document.body.appendChild(_pipCanvas);
  _pipCtx=_pipCanvas.getContext("2d");
- // Start the RAF draw loop immediately so frames are ready before PiP opens
- _pipDrawLoop();
- // Capture a live stream from the canvas
- _pipStream=_pipCanvas.captureStream(30);
- // Video element — muted (audio comes from the main <audio>), plays inline
+ // captureStream FIRST — then start drawing so the stream captures every frame
+ _pipStream=_pipCanvas.captureStream(0); // 0 = manual frame push via requestFrame()
+ // Video element
  _pipVideo=document.createElement("video");
  _pipVideo.muted=true;
  _pipVideo.playsInline=true;
  _pipVideo.setAttribute("webkit-playsinline","");
  _pipVideo.srcObject=_pipStream;
- _pipVideo.style.cssText="position:fixed;left:-9999px;top:-9999px;width:480px;height:270px;pointer-events:none";
+ _pipVideo.style.cssText="position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1";
  document.body.appendChild(_pipVideo);
- // When the user closes native PiP, mark dismissed
  _pipVideo.addEventListener("leavepictureinpicture",()=>{ pipDismissed=true; });
+ // Start draw loop AFTER stream is set up
+ _pipDrawLoop();
  return _pipVideo;
 }
 
@@ -589,21 +588,32 @@ function _pipDrawFrame(){
 
 function _pipDrawLoop(){
  _pipDrawFrame();
+ // Explicitly push the drawn frame into the captureStream track.
+ // Without requestFrame(), captureStream(0) never delivers anything.
+ if(_pipStream){
+  const track=_pipStream.getVideoTracks()[0];
+  if(track&&typeof track.requestFrame==="function") track.requestFrame();
+ }
  _pipRAF=requestAnimationFrame(_pipDrawLoop);
 }
 
 async function openMobilePip(){
  const v=_ensurePipVideo();
- // Must play() before requestPictureInPicture — browser requires the video to be playing
- try{ await v.play(); }catch(_){}
- // Wait until video has data (readyState >= HAVE_CURRENT_DATA)
- if(v.readyState<2){
-  await new Promise(resolve=>{
-   const h=()=>{ v.removeEventListener("loadeddata",h); resolve(); };
-   v.addEventListener("loadeddata",h);
-   setTimeout(resolve,1500); // safety timeout
-  });
+ // Draw and push at least one frame before play() so the video has content immediately
+ _pipDrawFrame();
+ if(_pipStream){
+  const track=_pipStream.getVideoTracks()[0];
+  if(track&&typeof track.requestFrame==="function") track.requestFrame();
  }
+ // play() is required before requestPictureInPicture
+ try{ await v.play(); }catch(_){}
+ // Wait for video to have at least one frame (readyState >= HAVE_CURRENT_DATA = 2)
+ await new Promise(resolve=>{
+  if(v.readyState>=2) return resolve();
+  const h=()=>{ v.removeEventListener("loadeddata",h); resolve(); };
+  v.addEventListener("loadeddata",h);
+  setTimeout(resolve,2000);
+ });
  try{
   await v.requestPictureInPicture();
   pipDismissed=false;
