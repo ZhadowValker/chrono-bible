@@ -176,61 +176,75 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* ── Inline PiP panel — full-width hero-style ── */
-.inline-pip{
- overflow:hidden;max-height:0;opacity:0;
- transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease;
- position:relative;isolation:isolate;
-}
-.inline-pip.open{max-height:340px;opacity:1}
-.ipip{
- position:relative;overflow:hidden;
- background:linear-gradient(118deg,#241d63 0%,#3d33a8 38%,#5146d8 68%,#7a6ce6 100%);
- color:#fff;padding:28px 0 24px;transition:background .5s ease;
-}
-.ipip::before{
- content:"";position:absolute;inset:-60% -10% auto;height:380px;z-index:0;
- background:radial-gradient(52% 58% at 26% 100%,rgba(255,255,255,.22),transparent 68%);
-}
-.ipip-inner{
- position:relative;z-index:1;
- max-width:1320px;margin:auto;padding:0 24px;
- display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center;
-}
-.ipip-left{min-width:0}
-.ipip-label{font-size:10px;font-weight:700;letter-spacing:.16em;color:rgba(255,255,255,.5);margin-bottom:5px;text-transform:uppercase}
-.ipip-title{font-family:var(--serif);font-size:clamp(18px,2.4vw,28px);font-weight:700;line-height:1.2;color:#fff;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.ipip-sub{font-size:13px;color:rgba(255,255,255,.65);margin-bottom:10px}
-.ipip-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;max-height:74px;overflow:hidden}
-.ipip-chip{font-size:11px;font-weight:700;padding:4px 9px;border-radius:7px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.78);cursor:pointer;transition:background .14s,transform .14s;line-height:1.4}
-.ipip-chip:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
+/* ══ Inline PiP panel — exact replica of PiP video layout ══ */
+.inline-pip{overflow:hidden;max-height:0;opacity:0;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease}
+.inline-pip.open{max-height:560px;opacity:1}
+
+/* Outer gradient shell — same as PiP video BG */
+.ipip{position:relative;overflow:hidden;color:#fff;transition:background .5s ease}
+
+/* Radial blob overlay */
+.ipip::before{content:"";position:absolute;inset:-60% -10% auto;height:380px;z-index:0;
+ background:radial-gradient(52% 58% at 26% 100%,rgba(255,255,255,.18),transparent 68%)}
+
+/* Inner max-width container */
+.ipip-inner{position:relative;z-index:1;max-width:1320px;margin:auto;
+ display:grid;grid-template-columns:30% 1fr;gap:0;min-height:360px}
+
+/* ── LEFT PANEL ── */
+.ipip-left{padding:24px 20px 16px 24px;display:flex;flex-direction:column;gap:0;border-right:1px solid rgba(255,255,255,.12)}
+.ipip-part{font-size:10px;font-weight:700;letter-spacing:.16em;color:rgba(255,255,255,.50);text-transform:uppercase;margin-bottom:2px}
+.ipip-nowlabel{font-size:10px;font-weight:600;letter-spacing:.12em;color:rgba(255,255,255,.40);text-transform:uppercase;margin-bottom:6px}
+.ipip-title{font-family:var(--serif);font-size:clamp(16px,1.8vw,24px);font-weight:700;line-height:1.25;color:#fff;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ipip-sub{font-size:12px;color:rgba(255,255,255,.60);margin-bottom:10px}
+.ipip-chips{display:flex;flex-wrap:wrap;gap:5px;flex:1;align-content:flex-start;overflow:hidden;max-height:180px}
+.ipip-chip{font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;
+ background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.20);
+ color:rgba(255,255,255,.78);cursor:pointer;transition:background .13s;line-height:1.4}
+.ipip-chip:hover{background:rgba(255,255,255,.24)}
 .ipip-chip.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent;font-weight:800}
 .ipip-chip.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.5);color:#c8ffe0}
 .ipip-chip.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
-.ipip-bar-wrap{display:flex;align-items:center;gap:10px}
-.ipip-times{font-size:12px;color:rgba(255,255,255,.55);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:36px}
-.ipip-bar{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.22);cursor:pointer;position:relative;touch-action:none}
-.ipip-bar:hover .ipip-fill{background:rgba(255,255,255,.95)}
-.ipip-fill{height:100%;border-radius:99px;background:#fff;width:0%;transition:width .25s linear}
-.ipip-knob{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);left:0%;transition:left .25s linear}
-.ipip-bar:active .ipip-knob,.ipip-bar:hover .ipip-knob{width:17px;height:17px}
-.ipip-meta-row{display:flex;align-items:center;gap:10px;margin-top:8px}
-.ipip-upnext{font-size:11.5px;color:rgba(255,255,255,.48);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.ipip-upnext b{color:rgba(255,255,255,.78);font-weight:600}
-.ipip-kbd{font-size:10px;color:rgba(255,255,255,.28);white-space:nowrap}
-/* right column — controls */
-.ipip-right{display:flex;flex-direction:column;align-items:center;gap:14px;padding-right:8px}
-.ipip-controls{display:flex;align-items:center;gap:14px}
-.ipip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:6px;font-size:20px;opacity:.85;transition:opacity .15s,transform .15s;line-height:1}
+
+/* ── RIGHT PANEL — timeline card ── */
+.ipip-right{padding:20px 24px 16px 20px;display:flex;flex-direction:column;gap:10px}
+.ipip-tl-head{font-size:10px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.42);text-transform:uppercase;margin-bottom:2px}
+.ipip-tl-card{flex:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.20);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:0;overflow:hidden;min-height:0}
+.ipip-tl-meta{font-size:10px;color:rgba(255,255,255,.45);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ipip-tl-axis{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.40);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.15)}
+.ipip-tl-rows{flex:1;display:flex;flex-direction:column;gap:0;overflow:hidden}
+.ipip-tl-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:3px 0;border-top:1px solid rgba(255,255,255,.08)}
+.ipip-tl-row:first-child{border-top:none}
+.ipip-tl-name{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.ipip-tl-track{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.15)}
+.ipip-tl-bar{position:absolute;top:0;height:100%;border-radius:99px}
+.ipip-tl-date{font-size:9.5px;color:rgba(255,255,255,.38);white-space:nowrap;text-align:right}
+.ipip-tl-undated{font-size:9px;color:rgba(255,255,255,.35);font-style:italic}
+
+/* ── BOTTOM STRIP — full width inside .ipip ── */
+.ipip-bottom{position:relative;z-index:1;max-width:1320px;margin:auto;padding:0 24px 18px;display:flex;flex-direction:column;gap:6px}
+.ipip-sep{height:1px;background:rgba(255,255,255,.14);margin-bottom:2px}
+.ipip-upnext-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.ipip-upnext-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.38);text-transform:uppercase;white-space:nowrap}
+.ipip-upnext{color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.ipip-upnext b{color:rgba(255,255,255,.80);font-weight:600}
+.ipip-kbd{font-size:10px;color:rgba(255,255,255,.26);white-space:nowrap}
+.ipip-controls-row{display:flex;align-items:center;gap:10px}
+.ipip-bar-wrap{flex:1;display:flex;align-items:center;gap:8px}
+.ipip-times{font-size:11px;color:rgba(255,255,255,.52);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:32px}
+.ipip-bar{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.20);cursor:pointer;position:relative;touch-action:none}
+.ipip-fill{height:100%;border-radius:99px;background:rgba(255,255,255,.88);width:0%}
+.ipip-knob{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);left:0%}
+.ipip-controls{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.ipip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:5px;font-size:18px;opacity:.85;line-height:1;transition:opacity .13s,transform .13s}
 .ipip-controls button:hover{opacity:1;transform:scale(1.1)}
-.ipip-play{width:56px!important;height:56px!important;border-radius:50%!important;
- background:rgba(255,255,255,.16)!important;border:1.5px solid rgba(255,255,255,.34)!important;
- display:flex!important;align-items:center!important;justify-content:center!important;font-size:22px!important}
-.ipip-play:hover{background:rgba(255,255,255,.26)!important}
-@media(max-width:640px){
- .ipip-inner{grid-template-columns:1fr;gap:14px}
- .ipip-right{flex-direction:row;justify-content:center}
- .ipip-title{font-size:17px}
+.ipip-play-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.30);display:flex;align-items:center;justify-content:center;font-size:20px}
+.ipip-play-btn:hover{background:rgba(255,255,255,.26)}
+
+@media(max-width:900px){
+ .ipip-inner{grid-template-columns:1fr}
+ .ipip-right{display:none}
+ .ipip-left{border-right:none;padding-bottom:6px}
 }
 </style>
 </head><body>
@@ -260,15 +274,46 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   </div>
 </header>
 
-<!-- Inline PiP panel — full-width, hero-style, between header and content -->
+<!-- Inline PiP panel — full-width, exact PiP video layout -->
 <div class="inline-pip" id="inlinePip">
  <div class="ipip" id="ipipCard">
   <div class="ipip-inner">
+
+   <!-- LEFT: part / now playing / title / sub / chips -->
    <div class="ipip-left">
-    <div class="ipip-label">Now Playing</div>
+    <div class="ipip-part" id="ipipPart"></div>
+    <div class="ipip-nowlabel">Now Playing</div>
     <div class="ipip-title" id="ipipTitle">Nothing queued</div>
     <div class="ipip-sub" id="ipipSub">Pick an event from the list</div>
     <div class="ipip-chips" id="ipipChips"></div>
+   </div>
+
+   <!-- RIGHT: timeline card -->
+   <div class="ipip-right">
+    <div class="ipip-tl-head" id="ipipTlHead">Timeline</div>
+    <div class="ipip-tl-card">
+     <div class="ipip-tl-meta" id="ipipTlMeta"></div>
+     <div class="ipip-tl-axis"><span id="ipipTlMin"></span><span id="ipipTlMax"></span></div>
+     <div class="ipip-tl-rows" id="ipipTlRows"></div>
+    </div>
+   </div>
+
+  </div><!-- /ipip-inner -->
+
+  <!-- BOTTOM: up next · progress · controls -->
+  <div class="ipip-bottom">
+   <div class="ipip-sep"></div>
+   <div class="ipip-upnext-row">
+    <span class="ipip-upnext-label">Up Next</span>
+    <span class="ipip-upnext" id="ipipUpNext">—</span>
+    <span class="ipip-kbd">⌨ Space · ← →</span>
+   </div>
+   <div class="ipip-controls-row">
+    <div class="ipip-controls">
+     <button id="ipipPrev" title="Previous chapter"></button>
+     <button id="ipipPlay" class="ipip-play-btn" title="Play" aria-label="Play"></button>
+     <button id="ipipNext" title="Next chapter"></button>
+    </div>
     <div class="ipip-bar-wrap">
      <span class="ipip-times" id="ipipCur">0:00</span>
      <div class="ipip-bar" id="ipipBar">
@@ -277,21 +322,12 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
      </div>
      <span class="ipip-times" id="ipipDur">--:--</span>
     </div>
-    <div class="ipip-meta-row">
-     <div class="ipip-upnext" id="ipipUpNext"></div>
-     <div class="ipip-kbd">⌨ Space · ← → to control</div>
-    </div>
-   </div>
-   <div class="ipip-right">
-    <div class="ipip-controls">
-     <button id="ipipPrev" title="Previous chapter"></button>
-     <button id="ipipPlay" class="ipip-play" title="Play" aria-label="Play"></button>
-     <button id="ipipNext" title="Next chapter"></button>
-    </div>
    </div>
   </div>
- </div>
-</div>
+
+ </div><!-- /ipip -->
+</div><!-- /inline-pip -->
+
 
 <div class="sticky-player" id="stickyPlayer">
  <div class="sp-swatch" id="spSwatch"></div>
@@ -1804,41 +1840,94 @@ if("IntersectionObserver" in window){
 }
 
 
-/* ──────────── Inline PiP panel ──────────── */
+/* ══ Inline PiP panel ══ */
+const IPIP_COVERS=[
+ "linear-gradient(140deg,#241d63,#4a3fc0)","linear-gradient(140deg,#1a3a6b,#2d6bbf)",
+ "linear-gradient(140deg,#1e4a2a,#2e8b57)","linear-gradient(140deg,#5a1a1a,#c0392b)",
+ "linear-gradient(140deg,#4a2a0a,#d4890a)","linear-gradient(140deg,#2a1a4a,#7b4fa6)",
+ "linear-gradient(140deg,#1a3a4a,#1a7a8a)","linear-gradient(140deg,#3a2a10,#8a6020)",
+ "linear-gradient(140deg,#1a2a3a,#2a5a8a)","linear-gradient(140deg,#3a1a3a,#8a2a8a)"
+];
+const IPIP_BAR_COLOURS=[
+ ["#4a3fc0","#7a6ce6"],["#2d6bbf","#5a9ae0"],["#2e8b57","#52c47a"],["#c0392b","#e06050"],
+ ["#d4890a","#f0b040"],["#7b4fa6","#a97ad0"],["#1a7a8a","#2ab0c8"],["#8a6020","#c09040"],
+ ["#2a5a8a","#4a8ac0"],["#8a2a8a","#c060c0"]
+];
 let ipipOpen=false;
+
+function ipipFmtY(y){ if(y===null||y===undefined) return "?"; return y<0?Math.abs(y)+" BC":"AD "+y; }
+
+function ipipDrawTimeline(book){
+ const tl=$("ipipTlRows");
+ const meta=$("ipipTlMeta");
+ const axMin=$("ipipTlMin");
+ const axMax=$("ipipTlMax");
+ const head=$("ipipTlHead");
+ if(!book){ tl.innerHTML=""; meta.textContent=""; axMin.textContent=""; axMax.textContent=""; return; }
+ head.textContent=book.name.toUpperCase()+" TIMELINE";
+ meta.textContent="Narrative: "+ipipFmtY(book.spanStart)+" – "+ipipFmtY(book.spanEnd)+
+  " · Written: "+ipipFmtY(book.writtenStart)+" – "+ipipFmtY(book.writtenEnd);
+ const tMin=book.spanStart, tMax=book.spanEnd, tSpan=(tMax-tMin)||1;
+ axMin.textContent=ipipFmtY(tMin);
+ axMax.textContent=ipipFmtY(tMax);
+ // bar colour from current part
+ const partNum=qi>-1?Number(REC.get(QUEUE[qi].id).Part):1;
+ const [bc1,bc2]=IPIP_BAR_COLOURS[(partNum-1)%IPIP_BAR_COLOURS.length];
+ tl.innerHTML=book.events.map(ev=>{
+  const [name,type,,,startY,endY]=ev;
+  const isUndated=startY===null||endY===null;
+  const isRange=type==="Range";
+  const shortName=name.length>22?name.slice(0,20)+"…":name;
+  const dateStr=isUndated?"undated":startY===endY?ipipFmtY(startY):ipipFmtY(startY)+" – "+ipipFmtY(endY);
+  let barHTML="";
+  if(!isUndated){
+   const pctL=Math.max(0,((startY-tMin)/tSpan)*100);
+   const pctR=Math.min(100,((endY-tMin)/tSpan)*100);
+   const pctW=Math.max(isRange?pctR-pctL:0,0);
+   if(isRange){
+    barHTML=`<div class="ipip-tl-bar" style="left:${pctL.toFixed(1)}%;width:${pctW.toFixed(1)}%;background:linear-gradient(90deg,${bc1},${bc2})"></div>`;
+   } else {
+    // point: thin 3px bar at exact position
+    barHTML=`<div class="ipip-tl-bar" style="left:calc(${pctL.toFixed(1)}% - 1.5px);width:3px;background:${bc1};border-radius:99px"></div>`;
+   }
+  }
+  return `<div class="ipip-tl-row">
+   <span class="ipip-tl-name">${shortName}</span>
+   <div class="ipip-tl-track">${barHTML}</div>
+   <span class="ipip-tl-date">${isUndated?'<span class="ipip-tl-undated">undated</span>':dateStr}</span>
+  </div>`;
+ }).join("");
+}
+
 function ipipSync(){
+ if(!ipipOpen) return;
  const item=qi>-1?QUEUE[qi]:null;
- const panel=$("inlinePip");
- if(!ipipOpen||!panel) return;
- // gradient bg matches part colour
- const covers=["linear-gradient(140deg,#241d63,#4a3fc0)","linear-gradient(140deg,#1a3a6b,#2d6bbf)",
-  "linear-gradient(140deg,#1e4a2a,#2e8b57)","linear-gradient(140deg,#5a1a1a,#c0392b)",
-  "linear-gradient(140deg,#4a2a0a,#d4890a)","linear-gradient(140deg,#2a1a4a,#7b4fa6)",
-  "linear-gradient(140deg,#1a3a4a,#1a7a8a)","linear-gradient(140deg,#3a2a10,#8a6020)",
-  "linear-gradient(140deg,#1a2a3a,#2a5a8a)","linear-gradient(140deg,#3a1a3a,#8a2a8a)"];
- if(item){
-  const r=REC.get(item.id);
-  const partNum=Number(r.Part);
-  $("ipipCard").style.background=covers[(partNum-1)%covers.length];
-  $("ipipCard").style.backgroundSize="180% 180%";
-  $("ipipTitle").textContent=r.Event;
-  $("ipipSub").textContent="· "+item.book+" "+item.chapter+(item.of>1?" of "+item.of:"");
-  // Chips
-  const chs=CH.get(item.id)||[];
-  $("ipipChips").innerHTML=chs.map(ch=>{
-   const done=progress.completed[chapKey(item.id,ch.chapter)];
-   const cur=ch.chapter===item.chapter;
-   return `<span class="ipip-chip${cur?" cur":done?" done":""}" data-ch="${ch.chapter}">${ch.chapter}</span>`;
-  }).join("");
-  // Up next
-  const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
-  $("ipipUpNext").innerHTML=nxt?`UP NEXT — <b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`:"";
- } else {
-  $("ipipTitle").textContent="Nothing queued";
-  $("ipipSub").textContent="Pick an event from the list";
-  $("ipipChips").innerHTML="";
-  $("ipipUpNext").textContent="";
+ const r=item?REC.get(item.id):null;
+ const partNum=r?Number(r.Part):1;
+ // BG gradient
+ $("ipipCard").style.background=IPIP_COVERS[(partNum-1)%IPIP_COVERS.length];
+ // Left panel
+ $("ipipPart").textContent=r?"PART "+r.Part:"";
+ $("ipipTitle").textContent=r?r.Event:"Nothing queued";
+ $("ipipSub").textContent=item?"· "+item.book+" "+item.chapter+(item.of>1?" of "+item.of:""):"Pick an event from the list";
+ // Chips
+ const chs=item?CH.get(item.id)||[]:[];
+ $("ipipChips").innerHTML=chs.map(ch=>{
+  const done=progress.completed[chapKey(item.id,ch.chapter)];
+  const cur=ch.chapter===item.chapter;
+  return `<span class="ipip-chip${cur?" cur":done?" done":""}" data-ch="${ch.chapter}">${ch.chapter}</span>`;
+ }).join("");
+ // Timeline
+ if(_PIP_BOOKS&&item){
+  const book=_PIP_BOOKS.find(b=>b.name===item.book);
+  ipipDrawTimeline(book||null);
+ } else if(item){
+  $("ipipTlRows").innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.35);padding:8px 0">Loading…</div>`;
+  _pipLoadBooks();
  }
+ // Up next
+ const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item?.id) return QUEUE[i]; } return null; })();
+ $("ipipUpNext").innerHTML=nxt?`<b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`:"End of queue";
  // Progress
  const pct=audio.duration?(audio.currentTime/audio.duration)*100:0;
  $("ipipFill").style.width=pct+"%";
@@ -1847,7 +1936,8 @@ function ipipSync(){
  $("ipipDur").textContent=audio.duration?clock(audio.duration):"--:--";
  $("ipipPlay").innerHTML=audio.paused?ICONS.play:ICONS.pause;
 }
-// Toggle open/close
+
+// Toggle
 $("btnInlinePip").addEventListener("click",()=>{
  ipipOpen=!ipipOpen;
  $("inlinePip").classList.toggle("open",ipipOpen);
@@ -1869,22 +1959,23 @@ $("ipipChips").addEventListener("click",e=>{
 // Seek bar
 const ipipBarEl=$("ipipBar");
 let ipipSeeking=false;
-function ipipSeek(e){
- const box=ipipBarEl.getBoundingClientRect();
- const r=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width));
- if(audio.duration) audio.currentTime=r*audio.duration;
-}
+function ipipSeek(e){ const box=ipipBarEl.getBoundingClientRect(); const r=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width)); if(audio.duration) audio.currentTime=r*audio.duration; }
 ipipBarEl.addEventListener("pointerdown",e=>{ ipipSeeking=true; try{ipipBarEl.setPointerCapture(e.pointerId);}catch(_){} ipipSeek(e); });
 ipipBarEl.addEventListener("pointermove",e=>{ if(ipipSeeking) ipipSeek(e); });
 ipipBarEl.addEventListener("pointerup",()=>ipipSeeking=false);
 ipipBarEl.addEventListener("pointercancel",()=>ipipSeeking=false);
-// Keep panel live
+// Icon init
 $("ipipPrev").innerHTML=ICONS.prev;
 $("ipipPlay").innerHTML=ICONS.play;
 $("ipipNext").innerHTML=ICONS.next;
+// Live sync
 audio.addEventListener("timeupdate",ipipSync);
 audio.addEventListener("play",ipipSync);
 audio.addEventListener("pause",ipipSync);
+// Re-sync when books load
+const _origPipLoadBooks=_pipLoadBooks;
+_pipLoadBooks=function(){ _origPipLoadBooks(); setTimeout(()=>{ if(ipipOpen) ipipSync(); },600); };
+
 
 applyLang(uiLang);
 
