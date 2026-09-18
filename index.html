@@ -480,7 +480,7 @@ let pipWin=null;
    <audio> element, so there's no risk to playback: it's a second, silent, purely visual stream.
    The floating window's native tap controls route through the mediaSession handlers already
    registered above, which drive real playback. */
-let mobilePipCanvas=null, mobilePipCtx=null, mobilePipVideo=null, mobilePipTimer=null;
+let mobilePipCanvas=null, mobilePipCtx=null, mobilePipVideo=null, mobilePipTimer=null, mobilePipTrack=null;
 function ensureMobilePipVideo(){
  if(mobilePipVideo) return mobilePipVideo;
  mobilePipCanvas=document.createElement("canvas");
@@ -490,19 +490,20 @@ function ensureMobilePipVideo(){
  mobilePipCtx=mobilePipCanvas.getContext("2d");
  drawMobilePipFrame();
  const stream=mobilePipCanvas.captureStream(6);
+ mobilePipTrack=stream.getVideoTracks()[0];
  mobilePipVideo=document.createElement("video");
  mobilePipVideo.muted=true; mobilePipVideo.playsInline=true; mobilePipVideo.setAttribute("webkit-playsinline","");
  mobilePipVideo.width=480; mobilePipVideo.height=270;
  mobilePipVideo.srcObject=stream;
- mobilePipVideo.style.cssText="position:fixed;width:1px;height:1px;opacity:0;pointer-events:none";
+ // Off-screen with real dimensions, NOT opacity:0/1x1 — some mobile browsers stop decoding frames for
+ // elements they consider invisible, which is exactly what showed up as a blank black/gray PiP window.
+ mobilePipVideo.style.cssText="position:fixed;left:-9999px;top:-9999px;width:480px;height:270px";
  document.body.appendChild(mobilePipVideo);
- mobilePipVideo.addEventListener("enterpictureinpicture",()=>{
-  if(mobilePipTimer) clearInterval(mobilePipTimer);
-  mobilePipTimer=setInterval(drawMobilePipFrame,300);
- });
- mobilePipVideo.addEventListener("leavepictureinpicture",()=>{
-  if(mobilePipTimer){ clearInterval(mobilePipTimer); mobilePipTimer=null; }
- });
+ // Keep frames flowing continuously (not just once PiP opens) — captureStream() on some browsers only
+ // reliably pushes a new frame when the canvas is actually redrawn, so a single static draw can end up
+ // stale or never get delivered before the PiP window opens.
+ if(mobilePipTimer) clearInterval(mobilePipTimer);
+ mobilePipTimer=setInterval(drawMobilePipFrame,500);
  return mobilePipVideo;
 }
 function waitForVideoReady(v){
@@ -546,6 +547,7 @@ function drawMobilePipFrame(){
  const pct=audio.duration?audio.currentTime/audio.duration:0;
  c.fillStyle="rgba(255,255,255,.25)"; c.fillRect(24,h-24,w-48,4);
  c.fillStyle="#fff"; c.fillRect(24,h-24,(w-48)*pct,4);
+ if(mobilePipTrack && typeof mobilePipTrack.requestFrame==="function"){ try{ mobilePipTrack.requestFrame(); }catch(_){} }
 }
 async function openMobilePip(){
  const v=ensureMobilePipVideo();
