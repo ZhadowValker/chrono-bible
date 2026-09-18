@@ -176,76 +176,31 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
-/* ══ Inline PiP panel — exact replica of PiP video layout ══ */
+/* ══ Inline PiP panel — canvas-based, exactly matches the PiP video ══ */
 .inline-pip{overflow:hidden;max-height:0;opacity:0;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s ease}
-.inline-pip.open{max-height:560px;opacity:1}
-
-/* Outer gradient shell — same as PiP video BG */
-.ipip{position:relative;overflow:hidden;color:#fff;transition:background .5s ease}
-
-/* Radial blob overlay */
-.ipip::before{content:"";position:absolute;inset:-60% -10% auto;height:380px;z-index:0;
- background:radial-gradient(52% 58% at 26% 100%,rgba(255,255,255,.18),transparent 68%)}
-
-/* Inner max-width container */
-.ipip-inner{position:relative;z-index:1;max-width:1320px;margin:auto;
- display:grid;grid-template-columns:30% 1fr;gap:0;min-height:360px}
-
-/* ── LEFT PANEL ── */
-.ipip-left{padding:24px 20px 16px 24px;display:flex;flex-direction:column;gap:0;border-right:1px solid rgba(255,255,255,.12)}
-.ipip-part{font-size:10px;font-weight:700;letter-spacing:.16em;color:rgba(255,255,255,.50);text-transform:uppercase;margin-bottom:2px}
-.ipip-nowlabel{font-size:10px;font-weight:600;letter-spacing:.12em;color:rgba(255,255,255,.40);text-transform:uppercase;margin-bottom:6px}
-.ipip-title{font-family:var(--serif);font-size:clamp(16px,1.8vw,24px);font-weight:700;line-height:1.25;color:#fff;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.ipip-sub{font-size:12px;color:rgba(255,255,255,.60);margin-bottom:10px}
-.ipip-chips{display:flex;flex-wrap:wrap;gap:5px;flex:1;align-content:flex-start;overflow:hidden;max-height:180px}
-.ipip-chip{font-size:11px;font-weight:700;padding:4px 8px;border-radius:7px;
- background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.20);
- color:rgba(255,255,255,.78);cursor:pointer;transition:background .13s;line-height:1.4}
-.ipip-chip:hover{background:rgba(255,255,255,.24)}
-.ipip-chip.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent;font-weight:800}
-.ipip-chip.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.5);color:#c8ffe0}
-.ipip-chip.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
-
-/* ── RIGHT PANEL — timeline card ── */
-.ipip-right{padding:20px 24px 16px 20px;display:flex;flex-direction:column;gap:10px}
-.ipip-tl-head{font-size:10px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.42);text-transform:uppercase;margin-bottom:2px}
-.ipip-tl-card{flex:1;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.20);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:0;overflow:hidden;min-height:0}
-.ipip-tl-meta{font-size:10px;color:rgba(255,255,255,.45);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ipip-tl-axis{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.40);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,.15)}
-.ipip-tl-rows{flex:1;display:flex;flex-direction:column;gap:0;overflow:hidden}
-.ipip-tl-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;padding:3px 0;border-top:1px solid rgba(255,255,255,.08)}
-.ipip-tl-row:first-child{border-top:none}
-.ipip-tl-name{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
-.ipip-tl-track{position:relative;height:7px;border-radius:99px;background:rgba(255,255,255,.15)}
-.ipip-tl-bar{position:absolute;top:0;height:100%;border-radius:99px}
-.ipip-tl-date{font-size:9.5px;color:rgba(255,255,255,.38);white-space:nowrap;text-align:right}
-.ipip-tl-undated{font-size:9px;color:rgba(255,255,255,.35);font-style:italic}
-
-/* ── BOTTOM STRIP — full width inside .ipip ── */
-.ipip-bottom{position:relative;z-index:1;max-width:1320px;margin:auto;padding:0 24px 18px;display:flex;flex-direction:column;gap:6px}
-.ipip-sep{height:1px;background:rgba(255,255,255,.14);margin-bottom:2px}
-.ipip-upnext-row{display:flex;align-items:center;gap:8px;font-size:11px}
-.ipip-upnext-label{font-size:10px;font-weight:700;letter-spacing:.1em;color:rgba(255,255,255,.38);text-transform:uppercase;white-space:nowrap}
-.ipip-upnext{color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.ipip-upnext b{color:rgba(255,255,255,.80);font-weight:600}
-.ipip-kbd{font-size:10px;color:rgba(255,255,255,.26);white-space:nowrap}
-.ipip-controls-row{display:flex;align-items:center;gap:10px}
-.ipip-bar-wrap{flex:1;display:flex;align-items:center;gap:8px}
-.ipip-times{font-size:11px;color:rgba(255,255,255,.52);font-variant-numeric:tabular-nums;white-space:nowrap;min-width:32px}
-.ipip-bar{flex:1;height:5px;border-radius:99px;background:rgba(255,255,255,.20);cursor:pointer;position:relative;touch-action:none}
-.ipip-fill{height:100%;border-radius:99px;background:rgba(255,255,255,.88);width:0%}
-.ipip-knob{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.3);transform:translate(-50%,-50%);left:0%}
-.ipip-controls{display:flex;align-items:center;gap:10px;flex:0 0 auto}
-.ipip-controls button{background:none;border:none;color:#fff;cursor:pointer;padding:5px;font-size:18px;opacity:.85;line-height:1;transition:opacity .13s,transform .13s}
-.ipip-controls button:hover{opacity:1;transform:scale(1.1)}
-.ipip-play-btn{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.30);display:flex;align-items:center;justify-content:center;font-size:20px}
-.ipip-play-btn:hover{background:rgba(255,255,255,.26)}
-
-@media(max-width:900px){
- .ipip-inner{grid-template-columns:1fr}
- .ipip-right{display:none}
- .ipip-left{border-right:none;padding-bottom:6px}
-}
+.inline-pip.open{max-height:800px;opacity:1}
+.ipip-canvas-wrap{position:relative;width:100%;padding-top:56.25%;background:#11162a}
+.ipip-canvas-wrap canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ipip-canvas-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end}
+/* Invisible seek bar overlay at bottom of canvas */
+.ipip-seek-zone{height:52px;display:flex;align-items:center;padding:0 2%;gap:8px;
+ background:linear-gradient(transparent,rgba(0,0,0,.45));opacity:0;transition:opacity .2s}
+.ipip-canvas-wrap:hover .ipip-seek-zone{opacity:1}
+.ipip-seek-times{font-size:12px;color:#fff;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:36px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.ipip-seek-bar{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.3);cursor:pointer;position:relative;touch-action:none;transition:height .15s}
+.ipip-seek-bar:hover{height:7px}
+.ipip-seek-fill{height:100%;border-radius:99px;background:#fff;width:0%}
+.ipip-seek-knob{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);left:0%;opacity:0;transition:opacity .15s}
+.ipip-seek-bar:hover .ipip-seek-knob{opacity:1}
+/* Controls row below canvas */
+.ipip-controls-bar{display:flex;align-items:center;justify-content:center;gap:18px;
+ padding:10px 24px;background:#11162a}
+.ipip-controls-bar button{background:none;border:none;color:#fff;cursor:pointer;
+ font-size:22px;opacity:.85;padding:6px;line-height:1;transition:opacity .15s,transform .15s}
+.ipip-controls-bar button:hover{opacity:1;transform:scale(1.12)}
+.ipip-play-btn{width:52px!important;height:52px!important;border-radius:50%!important;
+ border:2px solid rgba(255,255,255,.35)!important;display:flex!important;
+ align-items:center!important;justify-content:center!important;font-size:22px!important}
 </style>
 </head><body>
 
@@ -274,59 +229,27 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
   </div>
 </header>
 
-<!-- Inline PiP panel — full-width, exact PiP video layout -->
+<!-- Inline PiP panel — canvas mirror of the PiP video -->
 <div class="inline-pip" id="inlinePip">
- <div class="ipip" id="ipipCard">
-  <div class="ipip-inner">
-
-   <!-- LEFT: part / now playing / title / sub / chips -->
-   <div class="ipip-left">
-    <div class="ipip-part" id="ipipPart"></div>
-    <div class="ipip-nowlabel">Now Playing</div>
-    <div class="ipip-title" id="ipipTitle">Nothing queued</div>
-    <div class="ipip-sub" id="ipipSub">Pick an event from the list</div>
-    <div class="ipip-chips" id="ipipChips"></div>
-   </div>
-
-   <!-- RIGHT: timeline card -->
-   <div class="ipip-right">
-    <div class="ipip-tl-head" id="ipipTlHead">Timeline</div>
-    <div class="ipip-tl-card">
-     <div class="ipip-tl-meta" id="ipipTlMeta"></div>
-     <div class="ipip-tl-axis"><span id="ipipTlMin"></span><span id="ipipTlMax"></span></div>
-     <div class="ipip-tl-rows" id="ipipTlRows"></div>
+ <div class="ipip-canvas-wrap">
+  <canvas id="ipipCanvas"></canvas>
+  <div class="ipip-canvas-overlay">
+   <div class="ipip-seek-zone">
+    <span class="ipip-seek-times" id="ipipCur">0:00</span>
+    <div class="ipip-seek-bar" id="ipipBar">
+     <div class="ipip-seek-fill" id="ipipFill"></div>
+     <div class="ipip-seek-knob" id="ipipKnob"></div>
     </div>
-   </div>
-
-  </div><!-- /ipip-inner -->
-
-  <!-- BOTTOM: up next · progress · controls -->
-  <div class="ipip-bottom">
-   <div class="ipip-sep"></div>
-   <div class="ipip-upnext-row">
-    <span class="ipip-upnext-label">Up Next</span>
-    <span class="ipip-upnext" id="ipipUpNext">—</span>
-    <span class="ipip-kbd">⌨ Space · ← →</span>
-   </div>
-   <div class="ipip-controls-row">
-    <div class="ipip-controls">
-     <button id="ipipPrev" title="Previous chapter"></button>
-     <button id="ipipPlay" class="ipip-play-btn" title="Play" aria-label="Play"></button>
-     <button id="ipipNext" title="Next chapter"></button>
-    </div>
-    <div class="ipip-bar-wrap">
-     <span class="ipip-times" id="ipipCur">0:00</span>
-     <div class="ipip-bar" id="ipipBar">
-      <div class="ipip-fill" id="ipipFill"></div>
-      <div class="ipip-knob" id="ipipKnob"></div>
-     </div>
-     <span class="ipip-times" id="ipipDur">--:--</span>
-    </div>
+    <span class="ipip-seek-times" id="ipipDur">--:--</span>
    </div>
   </div>
-
- </div><!-- /ipip -->
-</div><!-- /inline-pip -->
+ </div>
+ <div class="ipip-controls-bar">
+  <button id="ipipPrev" title="Previous chapter"></button>
+  <button id="ipipPlay" class="ipip-play-btn" title="Play" aria-label="Play"></button>
+  <button id="ipipNext" title="Next chapter"></button>
+ </div>
+</div>
 
 
 <div class="sticky-player" id="stickyPlayer">
@@ -1840,101 +1763,45 @@ if("IntersectionObserver" in window){
 }
 
 
-/* ══ Inline PiP panel ══ */
-const IPIP_COVERS=[
- "linear-gradient(140deg,#241d63,#4a3fc0)","linear-gradient(140deg,#1a3a6b,#2d6bbf)",
- "linear-gradient(140deg,#1e4a2a,#2e8b57)","linear-gradient(140deg,#5a1a1a,#c0392b)",
- "linear-gradient(140deg,#4a2a0a,#d4890a)","linear-gradient(140deg,#2a1a4a,#7b4fa6)",
- "linear-gradient(140deg,#1a3a4a,#1a7a8a)","linear-gradient(140deg,#3a2a10,#8a6020)",
- "linear-gradient(140deg,#1a2a3a,#2a5a8a)","linear-gradient(140deg,#3a1a3a,#8a2a8a)"
-];
-const IPIP_BAR_COLOURS=[
- ["#4a3fc0","#7a6ce6"],["#2d6bbf","#5a9ae0"],["#2e8b57","#52c47a"],["#c0392b","#e06050"],
- ["#d4890a","#f0b040"],["#7b4fa6","#a97ad0"],["#1a7a8a","#2ab0c8"],["#8a6020","#c09040"],
- ["#2a5a8a","#4a8ac0"],["#8a2a8a","#c060c0"]
-];
+/* ══ Inline PiP panel — canvas mirror of PiP video ══ */
 let ipipOpen=false;
+let _ipipCanvas=null, _ipipCtx=null, _ipipRAF=null;
 
-function ipipFmtY(y){ if(y===null||y===undefined) return "?"; return y<0?Math.abs(y)+" BC":"AD "+y; }
-
-function ipipDrawTimeline(book){
- const tl=$("ipipTlRows");
- const meta=$("ipipTlMeta");
- const axMin=$("ipipTlMin");
- const axMax=$("ipipTlMax");
- const head=$("ipipTlHead");
- if(!book){ tl.innerHTML=""; meta.textContent=""; axMin.textContent=""; axMax.textContent=""; return; }
- head.textContent=book.name.toUpperCase()+" TIMELINE";
- meta.textContent="Narrative: "+ipipFmtY(book.spanStart)+" – "+ipipFmtY(book.spanEnd)+
-  " · Written: "+ipipFmtY(book.writtenStart)+" – "+ipipFmtY(book.writtenEnd);
- const tMin=book.spanStart, tMax=book.spanEnd, tSpan=(tMax-tMin)||1;
- axMin.textContent=ipipFmtY(tMin);
- axMax.textContent=ipipFmtY(tMax);
- // bar colour from current part
- const partNum=qi>-1?Number(REC.get(QUEUE[qi].id).Part):1;
- const [bc1,bc2]=IPIP_BAR_COLOURS[(partNum-1)%IPIP_BAR_COLOURS.length];
- tl.innerHTML=book.events.map(ev=>{
-  const [name,type,,,startY,endY]=ev;
-  const isUndated=startY===null||endY===null;
-  const isRange=type==="Range";
-  const shortName=name.length>22?name.slice(0,20)+"…":name;
-  const dateStr=isUndated?"undated":startY===endY?ipipFmtY(startY):ipipFmtY(startY)+" – "+ipipFmtY(endY);
-  let barHTML="";
-  if(!isUndated){
-   const pctL=Math.max(0,((startY-tMin)/tSpan)*100);
-   const pctR=Math.min(100,((endY-tMin)/tSpan)*100);
-   const pctW=Math.max(isRange?pctR-pctL:0,0);
-   if(isRange){
-    barHTML=`<div class="ipip-tl-bar" style="left:${pctL.toFixed(1)}%;width:${pctW.toFixed(1)}%;background:linear-gradient(90deg,${bc1},${bc2})"></div>`;
-   } else {
-    // point: thin 3px bar at exact position
-    barHTML=`<div class="ipip-tl-bar" style="left:calc(${pctL.toFixed(1)}% - 1.5px);width:3px;background:${bc1};border-radius:99px"></div>`;
-   }
-  }
-  return `<div class="ipip-tl-row">
-   <span class="ipip-tl-name">${shortName}</span>
-   <div class="ipip-tl-track">${barHTML}</div>
-   <span class="ipip-tl-date">${isUndated?'<span class="ipip-tl-undated">undated</span>':dateStr}</span>
-  </div>`;
- }).join("");
+function _ipipEnsureCanvas(){
+ if(_ipipCanvas) return;
+ _ipipCanvas=$("ipipCanvas");
+ // Match the hidden PiP canvas resolution exactly
+ _ipipCanvas.width=3840; _ipipCanvas.height=2160;
+ _ipipCtx=_ipipCanvas.getContext("2d");
 }
 
-function ipipSync(){
- if(!ipipOpen) return;
- const item=qi>-1?QUEUE[qi]:null;
- const r=item?REC.get(item.id):null;
- const partNum=r?Number(r.Part):1;
- // BG gradient
- $("ipipCard").style.background=IPIP_COVERS[(partNum-1)%IPIP_COVERS.length];
- // Left panel
- $("ipipPart").textContent=r?"PART "+r.Part:"";
- $("ipipTitle").textContent=r?r.Event:"Nothing queued";
- $("ipipSub").textContent=item?"· "+item.book+" "+item.chapter+(item.of>1?" of "+item.of:""):"Pick an event from the list";
- // Chips
- const chs=item?CH.get(item.id)||[]:[];
- $("ipipChips").innerHTML=chs.map(ch=>{
-  const done=progress.completed[chapKey(item.id,ch.chapter)];
-  const cur=ch.chapter===item.chapter;
-  return `<span class="ipip-chip${cur?" cur":done?" done":""}" data-ch="${ch.chapter}">${ch.chapter}</span>`;
- }).join("");
- // Timeline
- if(_PIP_BOOKS&&item){
-  const book=_PIP_BOOKS.find(b=>b.name===item.book);
-  ipipDrawTimeline(book||null);
- } else if(item){
-  $("ipipTlRows").innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.35);padding:8px 0">Loading…</div>`;
-  _pipLoadBooks();
- }
- // Up next
- const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item?.id) return QUEUE[i]; } return null; })();
- $("ipipUpNext").innerHTML=nxt?`<b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`:"End of queue";
- // Progress
+function _ipipDrawLoop(){
+ // Reuse _pipDrawFrame — it reads _pipCtx, so we swap context in temporarily
+ if(!ipipOpen){ _ipipRAF=null; return; }
+ _ipipEnsureCanvas();
+ // Temporarily point _pipCtx at the inline canvas, draw, then restore
+ const savedCtx=_pipCtx;
+ const savedCanvas=_pipCanvas;
+ const savedW=_pipCanvas?_pipCanvas.width:3840;
+ const savedH=_pipCanvas?_pipCanvas.height:2160;
+ _pipCtx=_ipipCtx;
+ _pipCanvas=_ipipCanvas;
+ _pipDrawFrame();
+ _pipCtx=savedCtx;
+ _pipCanvas=savedCanvas;
+ // Update seek bar overlay
  const pct=audio.duration?(audio.currentTime/audio.duration)*100:0;
  $("ipipFill").style.width=pct+"%";
  $("ipipKnob").style.left=pct+"%";
  $("ipipCur").textContent=clock(audio.currentTime);
  $("ipipDur").textContent=audio.duration?clock(audio.duration):"--:--";
  $("ipipPlay").innerHTML=audio.paused?ICONS.play:ICONS.pause;
+ _ipipRAF=requestAnimationFrame(_ipipDrawLoop);
+}
+
+function ipipSync(){
+ if(!ipipOpen) return;
+ if(!_ipipRAF) _ipipRAF=requestAnimationFrame(_ipipDrawLoop);
 }
 
 // Toggle
@@ -1943,38 +1810,36 @@ $("btnInlinePip").addEventListener("click",()=>{
  $("inlinePip").classList.toggle("open",ipipOpen);
  $("btnInlinePip").classList.toggle("on",ipipOpen);
  $("btnInlinePip").setAttribute("aria-pressed",String(ipipOpen));
- if(ipipOpen) ipipSync();
+ if(ipipOpen){
+  _ipipEnsureCanvas();
+  if(!_ipipRAF) _ipipRAF=requestAnimationFrame(_ipipDrawLoop);
+ } else {
+  if(_ipipRAF){ cancelAnimationFrame(_ipipRAF); _ipipRAF=null; }
+ }
 });
+
 // Controls
 $("ipipPlay").addEventListener("click",()=>{ if(qi<0){load(0,true);return;} audio.paused?play():audio.pause(); });
 $("ipipPrev").addEventListener("click",()=>step(-1));
 $("ipipNext").addEventListener("click",()=>step(1));
-$("ipipChips").addEventListener("click",e=>{
- const chip=e.target.closest(".ipip-chip");
- if(!chip||qi<0) return;
- const ch=Number(chip.dataset.ch);
- const idx=QUEUE.findIndex(x=>x.id===QUEUE[qi].id&&x.chapter===ch);
- if(idx>-1) load(idx,true);
-});
+
 // Seek bar
 const ipipBarEl=$("ipipBar");
 let ipipSeeking=false;
-function ipipSeek(e){ const box=ipipBarEl.getBoundingClientRect(); const r=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width)); if(audio.duration) audio.currentTime=r*audio.duration; }
+function ipipSeek(e){
+ const box=ipipBarEl.getBoundingClientRect();
+ const r=Math.min(1,Math.max(0,(e.clientX-box.left)/box.width));
+ if(audio.duration) audio.currentTime=r*audio.duration;
+}
 ipipBarEl.addEventListener("pointerdown",e=>{ ipipSeeking=true; try{ipipBarEl.setPointerCapture(e.pointerId);}catch(_){} ipipSeek(e); });
 ipipBarEl.addEventListener("pointermove",e=>{ if(ipipSeeking) ipipSeek(e); });
 ipipBarEl.addEventListener("pointerup",()=>ipipSeeking=false);
 ipipBarEl.addEventListener("pointercancel",()=>ipipSeeking=false);
+
 // Icon init
 $("ipipPrev").innerHTML=ICONS.prev;
 $("ipipPlay").innerHTML=ICONS.play;
 $("ipipNext").innerHTML=ICONS.next;
-// Live sync
-audio.addEventListener("timeupdate",ipipSync);
-audio.addEventListener("play",ipipSync);
-audio.addEventListener("pause",ipipSync);
-// Re-sync when books load
-const _origPipLoadBooks=_pipLoadBooks;
-_pipLoadBooks=function(){ _origPipLoadBooks(); setTimeout(()=>{ if(ipipOpen) ipipSync(); },600); };
 
 
 applyLang(uiLang);
