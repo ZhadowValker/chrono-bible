@@ -491,7 +491,7 @@ function _ensurePipVideo(){
  // We hide it visually with opacity:0 but keep it at real dimensions in the viewport.
  // left:-9999px tricks cause mobile browsers (Safari, Brave) to stop delivering frames.
  _pipCanvas=document.createElement("canvas");
- _pipCanvas.width=480; _pipCanvas.height=270;
+ _pipCanvas.width=1280; _pipCanvas.height=720;
  _pipCanvas.style.cssText="position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1";
  document.body.appendChild(_pipCanvas);
  _pipCtx=_pipCanvas.getContext("2d");
@@ -513,77 +513,205 @@ function _ensurePipVideo(){
 
 function _pipDrawFrame(){
  if(!_pipCtx) return;
- const c=_pipCtx, W=480, H=270;
+ const c=_pipCtx, W=1280, H=720;
  const item=qi>-1?QUEUE[qi]:null;
  const r=item?REC.get(item.id):null;
- // Background gradient — matches the part colour
  const partNum=r?Number(r.Part):1;
  const covers=[
   ["#241d63","#5146d8"],["#1a3a6b","#2d6bbf"],["#1e4a2a","#2e8b57"],
   ["#5a1a1a","#c0392b"],["#4a2a0a","#d4890a"],["#2a1a4a","#7b4fa6"],
-  ["#1a3a4a","#1a7a8a"],["#3a2a10","#8a6020"],["#1a2a3a","#2a5a8a"],
-  ["#3a1a3a","#8a2a8a"]
+  ["#1a3a4a","#1a7a8a"],["#3a2a10","#8a6020"],["#1a2a3a","#2a5a8a"],["#3a1a3a","#8a2a8a"]
  ];
  const [c1,c2]=covers[(partNum-1)%covers.length];
- const g=c.createLinearGradient(0,0,W,H);
- g.addColorStop(0,c1); g.addColorStop(1,c2);
- c.fillStyle=g; c.fillRect(0,0,W,H);
- // Subtle noise overlay for depth
- c.fillStyle="rgba(255,255,255,0.04)";
- for(let i=0;i<6;i++){ c.beginPath(); c.arc(Math.sin(i*1.7)*W,Math.cos(i*1.3)*H,W*.6,0,Math.PI*2); c.fill(); }
+
+ // ── Background ──
+ const bg=c.createLinearGradient(0,0,W,H);
+ bg.addColorStop(0,c1); bg.addColorStop(1,c2);
+ c.fillStyle=bg; c.fillRect(0,0,W,H);
+ // Soft radial blob
+ const blob=c.createRadialGradient(W*0.25,H*0.3,0,W*0.25,H*0.3,W*0.55);
+ blob.addColorStop(0,"rgba(255,255,255,0.10)"); blob.addColorStop(1,"rgba(255,255,255,0)");
+ c.fillStyle=blob; c.fillRect(0,0,W,H);
+
  if(!item){
-  c.fillStyle="rgba(255,255,255,0.8)";
-  c.font="bold 22px Inter,system-ui,sans-serif";
-  c.textBaseline="middle"; c.textAlign="center";
-  c.fillText("Nothing queued",W/2,H/2);
+  c.fillStyle="rgba(255,255,255,0.8)"; c.font="bold 42px Inter,system-ui,sans-serif";
+  c.textBaseline="middle"; c.textAlign="center"; c.fillText("Nothing queued",W/2,H/2);
   return;
  }
- // Part label
+
+ // ── Layout constants ──
+ const PAD=52, SPLIT=W*0.46;
+ // LEFT COLUMN: Part | Now Playing | Event title | book·ch | chapter chips
+ // RIGHT COLUMN: Up Next | timeline bars
+
+ // ── PART label ──
  c.fillStyle="rgba(255,255,255,0.55)";
- c.font="bold 11px Inter,system-ui,sans-serif";
+ c.font="700 22px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
- c.fillText("PART "+r.Part+" · "+r["Part-Title"],20,18);
- // Book + chapter — big
+ c.fillText("PART "+r.Part,PAD,PAD);
+
+ // ── NOW PLAYING label ──
+ c.fillStyle="rgba(255,255,255,0.45)";
+ c.font="600 18px Inter,system-ui,sans-serif";
+ c.fillText("NOW PLAYING",PAD,PAD+34);
+
+ // ── Event title (word-wrap, up to 3 lines) ──
  c.fillStyle="#fff";
- c.font="bold 28px 'Iowan Old Style',Palatino,Georgia,serif";
+ c.font="700 46px 'Iowan Old Style',Palatino,Georgia,serif";
  c.textBaseline="top";
- c.fillText(item.book,20,40);
- c.font="bold 54px 'Iowan Old Style',Palatino,Georgia,serif";
- c.fillStyle="rgba(255,255,255,0.95)";
- c.fillText(item.chapter,20,68);
- // Event title — wrap to 2 lines max
- c.font="500 14px Inter,system-ui,sans-serif";
- c.fillStyle="rgba(255,255,255,0.80)";
- const words=r.Event.split(" "); let line=""; let y=140;
- for(const w of words){
-  const test=line?line+" "+w:w;
-  if(c.measureText(test).width>W-40&&line){ c.fillText(line,20,y); line=w; y+=20; if(y>165) break; }
-  else line=test;
+ const evWords=r.Event.split(" "); let evLine=""; let evY=PAD+70; const evMax=SPLIT-PAD-20;
+ for(const w of evWords){
+  const test=evLine?evLine+" "+w:w;
+  if(c.measureText(test).width>evMax&&evLine){
+   c.fillText(evLine,PAD,evY); evLine=w; evY+=56; if(evY>PAD+240) break;
+  } else evLine=test;
  }
- if(line) c.fillText(line,20,y);
- // Play/pause glyph — bottom right circle
- const cx=W-44, cy=H-44;
- c.beginPath(); c.arc(cx,cy,28,0,Math.PI*2);
- c.fillStyle="rgba(255,255,255,0.15)"; c.fill();
+ if(evLine) c.fillText(evLine,PAD,evY);
+
+ // ── Book · ch of N ──
+ const chY=evY+70;
+ c.font="600 26px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.55)";
+ c.fillText("·",PAD,chY);
+ c.font="600 26px 'Iowan Old Style',Palatino,Georgia,serif";
+ c.fillStyle="#fff"; c.fillText(item.book,PAD+22,chY);
+ const bw=c.measureText(item.book).width;
+ c.font="700 26px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.9)"; c.fillText(" "+item.chapter,PAD+22+bw,chY);
+ const cw=c.measureText(" "+item.chapter).width;
+ if(item.of>1){
+  c.font="500 20px Inter,system-ui,sans-serif";
+  c.fillStyle="rgba(255,255,255,0.5)";
+  c.fillText(" of "+item.of,PAD+22+bw+cw,chY+3);
+ }
+
+ // ── Chapter chips ──
+ const chs=CH.get(item.id)||[];
+ if(chs.length>0){
+  const chipY=chY+46, chipW=52, chipH=36, chipGap=8, chipsPerRow=Math.floor((SPLIT-PAD)/(chipW+chipGap));
+  chs.forEach((ch,idx)=>{
+   const col=idx%chipsPerRow, row=Math.floor(idx/chipsPerRow);
+   const cx2=PAD+col*(chipW+chipGap), cy2=chipY+row*(chipH+chipGap);
+   if(cy2+chipH>H-100) return; // don't overflow into progress bar area
+   const isDone=progress.completed[chapKey(item.id,ch.chapter)];
+   const isCur=ch.chapter===item.chapter;
+   // chip bg
+   c.beginPath();
+   _roundRect(c,cx2,cy2,chipW,chipH,8);
+   if(isCur) c.fillStyle="rgba(255,255,255,0.92)";
+   else if(isDone) c.fillStyle="rgba(80,210,120,0.32)";
+   else c.fillStyle="rgba(255,255,255,0.14)";
+   c.fill();
+   // chip border
+   c.strokeStyle=isCur?"transparent":isDone?"rgba(80,210,120,0.55)":"rgba(255,255,255,0.22)";
+   c.lineWidth=1.5; c.stroke();
+   // chip number
+   c.font="700 20px Inter,system-ui,sans-serif";
+   c.textBaseline="middle"; c.textAlign="center";
+   c.fillStyle=isCur?"#241d63":isDone?"#c8ffe0":"rgba(255,255,255,0.80)";
+   c.fillText(ch.chapter,cx2+chipW/2,cy2+chipH/2);
+  });
+  c.textBaseline="top"; c.textAlign="left";
+ }
+
+ // ── RIGHT COLUMN ──
+ const RX=SPLIT+PAD*0.6, RW=W-RX-PAD;
+
+ // NLT / version badge top-right
+ c.font="700 20px Inter,system-ui,sans-serif";
+ c.fillStyle="#fff";
+ const vLabel=(VERSIONS[currentVersion]||{label:"?"}).label.split(" ")[0];
+ const vW=c.measureText(vLabel).width+24;
+ c.beginPath(); _roundRect(c,W-PAD-vW,PAD-4,vW,34,99);
+ c.fillStyle="rgba(255,255,255,0.18)"; c.fill();
+ c.strokeStyle="rgba(255,255,255,0.32)"; c.lineWidth=1.5; c.stroke();
+ c.fillStyle="#fff"; c.textBaseline="middle"; c.textAlign="center";
+ c.fillText(vLabel,W-PAD-vW/2,PAD+13);
+ c.textBaseline="top"; c.textAlign="left";
+
+ // ── Timeline bars for current book ──
+ const bookChs=CH.get(item.id)||[];
+ if(bookChs.length>1){
+  const tlLabel="CHAPTERS";
+  c.fillStyle="rgba(255,255,255,0.40)";
+  c.font="700 18px Inter,system-ui,sans-serif";
+  c.fillText(tlLabel,RX,PAD+2);
+  const barH=10, barGap=6;
+  const totalBars=bookChs.length;
+  const barW=Math.min(18, Math.floor((RW-(totalBars-1)*barGap)/totalBars));
+  const tlY=PAD+30;
+  bookChs.forEach((ch,idx)=>{
+   const bx=RX+idx*(barW+barGap), by=tlY;
+   const isDone=progress.completed[chapKey(item.id,ch.chapter)];
+   const isCur=ch.chapter===item.chapter;
+   c.beginPath(); _roundRect(c,bx,by,barW,barH,3);
+   c.fillStyle=isCur?"rgba(255,255,255,0.95)":isDone?"rgba(80,210,120,0.65)":"rgba(255,255,255,0.20)";
+   c.fill();
+  });
+ }
+
+ // ── Up Next ──
+ const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
+ const upY=H-180;
+ c.fillStyle="rgba(255,255,255,0.45)";
+ c.font="700 18px Inter,system-ui,sans-serif";
+ c.textBaseline="top";
+ c.fillText("UP NEXT",RX,upY);
+ if(nxt){
+  const nr=REC.get(nxt.id);
+  c.fillStyle="#fff"; c.font="600 22px 'Iowan Old Style',Palatino,Georgia,serif";
+  // word-wrap up next title
+  const nWords=nr.Event.split(" "); let nLine=""; let nY=upY+26;
+  for(const w of nWords){
+   const test=nLine?nLine+" "+w:w;
+   if(c.measureText(test).width>RW&&nLine){ c.fillText(nLine,RX,nY); nLine=w; nY+=28; if(nY>upY+90) break; }
+   else nLine=test;
+  }
+  if(nLine) c.fillText(nLine,RX,nY);
+  c.font="500 18px Inter,system-ui,sans-serif";
+  c.fillStyle="rgba(255,255,255,0.55)";
+  c.fillText(nxt.book+" "+nxt.chapter,RX,nY+32);
+ } else {
+  c.font="500 20px Inter,system-ui,sans-serif";
+  c.fillStyle="rgba(255,255,255,0.40)"; c.fillText("End of queue",RX,upY+26);
+ }
+
+ // ── Progress bar (full width, near bottom) ──
+ const pct=audio.duration?audio.currentTime/audio.duration:0;
+ const pbY=H-62, pbH=8, pbX=PAD, pbW=W-PAD*2;
+ // track
+ c.beginPath(); _roundRect(c,pbX,pbY,pbW,pbH,4);
+ c.fillStyle="rgba(255,255,255,0.22)"; c.fill();
+ // fill
+ c.beginPath(); _roundRect(c,pbX,pbY,pbW*pct,pbH,4);
+ c.fillStyle="rgba(255,255,255,0.90)"; c.fill();
+ // knob
+ c.beginPath(); c.arc(pbX+pbW*pct,pbY+pbH/2,10,0,Math.PI*2);
+ c.fillStyle="#fff"; c.fill();
+ // times
+ c.font="600 20px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.65)";
+ c.textBaseline="top"; c.textAlign="left"; c.fillText(clock(audio.currentTime),pbX,pbY+18);
+ c.textAlign="right"; c.fillText(audio.duration?clock(audio.duration):"--:--",pbX+pbW,pbY+18);
+
+ // ── Play/Pause glyph bottom-centre ──
+ const pcx=W/2, pcy=H-30;
+ c.beginPath(); c.arc(pcx,pcy,18,0,Math.PI*2);
+ c.fillStyle="rgba(255,255,255,0.14)"; c.fill();
  c.fillStyle="#fff";
  if(audio.paused){
-  c.beginPath(); c.moveTo(cx-8,cy-12); c.lineTo(cx-8,cy+12); c.lineTo(cx+12,cy); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(pcx-6,pcy-9); c.lineTo(pcx-6,pcy+9); c.lineTo(pcx+9,pcy); c.closePath(); c.fill();
  } else {
-  c.fillRect(cx-10,cy-12,7,24); c.fillRect(cx+3,cy-12,7,24);
+  c.fillRect(pcx-8,pcy-9,5,18); c.fillRect(pcx+3,pcy-9,5,18);
  }
- // Progress bar — bottom strip
- const pct=audio.duration?audio.currentTime/audio.duration:0;
- c.fillStyle="rgba(255,255,255,0.20)"; c.fillRect(0,H-6,W,6);
- c.fillStyle="rgba(255,255,255,0.90)"; c.fillRect(0,H-6,W*pct,6);
- // Current time
- c.font="bold 11px Inter,system-ui,sans-serif";
- c.fillStyle="rgba(255,255,255,0.70)";
- c.textAlign="left"; c.textBaseline="bottom";
- c.fillText(clock(audio.currentTime),6,H-9);
- if(audio.duration){
-  c.textAlign="right";
-  c.fillText(clock(audio.duration),W-6,H-9);
- }
+}
+
+// Helper — rounded rect path (polyfill for older Safari that lacks ctx.roundRect)
+function _roundRect(c,x,y,w,h,r){
+ if(w<2*r) r=w/2; if(h<2*r) r=h/2;
+ c.beginPath();
+ c.moveTo(x+r,y); c.arcTo(x+w,y,x+w,y+h,r); c.arcTo(x+w,y+h,x,y+h,r);
+ c.arcTo(x,y+h,x,y,r); c.arcTo(x,y,x+w,y,r); c.closePath();
 }
 
 function _pipDrawLoop(){
