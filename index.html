@@ -491,7 +491,7 @@ function _ensurePipVideo(){
  // We hide it visually with opacity:0 but keep it at real dimensions in the viewport.
  // left:-9999px tricks cause mobile browsers (Safari, Brave) to stop delivering frames.
  _pipCanvas=document.createElement("canvas");
- _pipCanvas.width=1280; _pipCanvas.height=720;
+ _pipCanvas.width=3840; _pipCanvas.height=2160;
  _pipCanvas.style.cssText="position:fixed;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none;z-index:-1";
  document.body.appendChild(_pipCanvas);
  _pipCtx=_pipCanvas.getContext("2d");
@@ -513,7 +513,7 @@ function _ensurePipVideo(){
 
 function _pipDrawFrame(){
  if(!_pipCtx) return;
- const c=_pipCtx, W=1280, H=720;
+ const c=_pipCtx, W=3840, H=2160;
  const item=qi>-1?QUEUE[qi]:null;
  const r=item?REC.get(item.id):null;
  const partNum=r?Number(r.Part):1;
@@ -556,40 +556,40 @@ function _pipDrawFrame(){
  // RIGHT timeline card spans Zone A–D: y=44 to y=584
  // ══════════════════════════════════════════════════════
 
- const PAD=44;
+ const PAD=132;
  const SPLIT=W*0.30;           // 384 — left panel right edge
- const RX=SPLIT+28;            // 412 — timeline card left edge
+ const RX=SPLIT+84;            // 412 — timeline card left edge
  const RW=W-RX-PAD;            // 824 — timeline card width
 
  // ── Zone A: PART label + version badge ──
  c.fillStyle="rgba(255,255,255,0.50)";
- c.font="700 20px Inter,system-ui,sans-serif";
+ c.font="700 60px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
- c.fillText("PART "+r.Part, PAD, 44);
+ c.fillText("PART "+r.Part, PAD, 132);
  c.fillStyle="rgba(255,255,255,0.42)";
- c.font="600 17px Inter,system-ui,sans-serif";
- c.fillText("NOW PLAYING", PAD, 66);
+ c.font="600 51px Inter,system-ui,sans-serif";
+ c.fillText("NOW PLAYING", PAD, 198);
  // Version badge — top-right corner
  const vLabel=(VERSIONS[currentVersion]||{label:"NLT"}).label.split(" ")[0];
- c.font="700 18px Inter,system-ui,sans-serif";
- const vW=c.measureText(vLabel).width+20;
- c.beginPath(); _roundRect(c,W-PAD-vW,44,vW,28,99);
+ c.font="700 54px Inter,system-ui,sans-serif";
+ const vW=c.measureText(vLabel).width+60;
+ c.beginPath(); _roundRect(c,W-PAD-vW,132,vW,84,99);
  c.fillStyle="rgba(255,255,255,0.18)"; c.fill();
- c.strokeStyle="rgba(255,255,255,0.30)"; c.lineWidth=1.5; c.stroke();
+ c.strokeStyle="rgba(255,255,255,0.30)"; c.lineWidth=4.5; c.stroke();
  c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle";
- c.fillText(vLabel, W-PAD-vW/2, 58);
+ c.fillText(vLabel, W-PAD-vW/2, 174);
 
  // ── Zone B: Event title (80–280, max 3 lines × 44px, 36px serif) ──
  c.fillStyle="#fff";
- c.font="700 36px 'Iowan Old Style',Palatino,Georgia,serif";
+ c.font="700 108px 'Iowan Old Style',Palatino,Georgia,serif";
  c.textBaseline="top"; c.textAlign="left";
- const evMax=SPLIT-PAD-10;
+ const evMax=SPLIT-PAD-30;
  const evWords=r.Event.split(" ");
- let evLine="", evY=80, evLines=0;
+ let evLine="", evY=240, evLines=0;
  for(const w of evWords){
   const t2=evLine?evLine+" "+w:w;
   if(c.measureText(t2).width>evMax && evLine){
-   if(evLines<2){ c.fillText(evLine,PAD,evY); evY+=44; evLines++; }
+   if(evLines<2){ c.fillText(evLine,PAD,evY); evY+=132; evLines++; }
    else { c.fillText(evLine+"…",PAD,evY); evLine=""; break; } // hard cap at 3 lines
    evLine=w;
   } else evLine=t2;
@@ -598,36 +598,36 @@ function _pipDrawFrame(){
 
  // ── Zone C: Book · chapter · of N  (y=288–320, fixed) ──
  c.textBaseline="top"; c.textAlign="left";
- c.font="500 20px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.50)";
- c.fillText("·", PAD, 288);
- c.font="600 20px 'Iowan Old Style',Palatino,Georgia,serif"; c.fillStyle="#fff";
- c.fillText(item.book, PAD+18, 288);
+ c.font="500 60px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.50)";
+ c.fillText("·", PAD, 864);
+ c.font="600 60px 'Iowan Old Style',Palatino,Georgia,serif"; c.fillStyle="#fff";
+ c.fillText(item.book, PAD+54, 864);
  const bw=c.measureText(item.book).width;
- c.font="700 20px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.90)";
- c.fillText(" "+item.chapter, PAD+18+bw, 288);
+ c.font="700 60px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.90)";
+ c.fillText(" "+item.chapter, PAD+54+bw, 864);
  if(item.of>1){
   const cw=c.measureText(" "+item.chapter).width;
-  c.font="500 16px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.48)";
-  c.fillText(" of "+item.of, PAD+18+bw+cw, 291);
+  c.font="500 48px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.48)";
+  c.fillText(" of "+item.of, PAD+54+bw+cw, 873);
  }
 
  // ── Zone D: Chapter chips (328–582, hard clip at 582) ──
  const chs=CH.get(item.id)||[];
  if(chs.length>0){
-  const chipW=42, chipH=30, chipGap=6;
+  const chipW=126, chipH=90, chipGap=18;
   const perRow=Math.floor((SPLIT-PAD)/(chipW+chipGap));
   chs.forEach((ch,idx)=>{
    const col=idx%perRow, row=Math.floor(idx/perRow);
-   const cx2=PAD+col*(chipW+chipGap), cy2=328+row*(chipH+chipGap);
-   if(cy2+chipH>582) return; // hard clip — never enter Zone E
+   const cx2=PAD+col*(chipW+chipGap), cy2=984+row*(chipH+chipGap);
+   if(cy2+chipH>1746) return; // hard clip — never enter Zone E
    const isDone=progress.completed[chapKey(item.id,ch.chapter)];
    const isCur=ch.chapter===item.chapter;
-   c.beginPath(); _roundRect(c,cx2,cy2,chipW,chipH,7);
+   c.beginPath(); _roundRect(c,cx2,cy2,chipW,chipH,21);
    c.fillStyle=isCur?"rgba(255,255,255,0.93)":isDone?"rgba(80,210,120,0.30)":"rgba(255,255,255,0.13)";
    c.fill();
    c.strokeStyle=isCur?"transparent":isDone?"rgba(80,210,120,0.55)":"rgba(255,255,255,0.20)";
    c.lineWidth=1.5; c.stroke();
-   c.font="700 16px Inter,system-ui,sans-serif"; c.textBaseline="middle"; c.textAlign="center";
+   c.font="700 48px Inter,system-ui,sans-serif"; c.textBaseline="middle"; c.textAlign="center";
    c.fillStyle=isCur?"#241d63":isDone?"#c8ffe0":"rgba(255,255,255,0.80)";
    c.fillText(ch.chapter, cx2+chipW/2, cy2+chipH/2);
   });
@@ -635,64 +635,64 @@ function _pipDrawFrame(){
 
  // ── Divider line between left and right panels (A–D height) ──
  c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=1;
- c.beginPath(); c.moveTo(SPLIT+14,44); c.lineTo(SPLIT+14,584); c.stroke();
+ c.beginPath(); c.moveTo(SPLIT+42,132); c.lineTo(SPLIT+42,1752); c.stroke();
 
  // ── Right panel: timeline card (y=44 to y=584) ──
  if(typeof _PIP_BOOKS==="undefined"||!_PIP_BOOKS){
   c.fillStyle="rgba(255,255,255,0.30)"; c.font="500 18px Inter,system-ui,sans-serif";
   c.textBaseline="middle"; c.textAlign="center";
-  c.fillText("Loading timeline…", RX+RW/2, 314);
+  c.fillText("Loading timeline…", RX+RW/2, 942);
   _pipLoadBooks();
  } else {
-  _pipDrawTimeline(c, RX, 44, RW, 540, item.book, c1, c2);
+  _pipDrawTimeline(c, RX, 132, RW, 1620, item.book, c1, c2);
  }
 
  // ── Zone E: UP NEXT (y=590–618, full width) ──
  // Separator
  c.strokeStyle="rgba(255,255,255,0.15)"; c.lineWidth=1;
- c.beginPath(); c.moveTo(PAD,587); c.lineTo(W-PAD,587); c.stroke();
- c.fillStyle="rgba(255,255,255,0.38)"; c.font="700 16px Inter,system-ui,sans-serif";
+ c.beginPath(); c.moveTo(PAD,1761); c.lineTo(W-PAD,1761); c.stroke();
+ c.fillStyle="rgba(255,255,255,0.38)"; c.font="700 48px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
- c.fillText("UP NEXT", PAD, 592);
+ c.fillText("UP NEXT", PAD, 1776);
  const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
  if(nxt){
   const nr=REC.get(nxt.id);
   // Measure and truncate so it never hits right edge
-  c.font="600 16px 'Iowan Old Style',Palatino,Georgia,serif";
+  c.font="600 48px 'Iowan Old Style',Palatino,Georgia,serif";
   const suffix=" · "+nxt.book+" "+nxt.chapter;
   const maxW=W-PAD*2-90;
   let nLabel=nr.Event;
   while(c.measureText("— "+nLabel+suffix).width>maxW && nLabel.length>5)
    nLabel=nLabel.slice(0,-1);
   if(nLabel!==nr.Event) nLabel=nLabel.trimEnd()+"…";
-  c.fillStyle="#fff"; c.fillText("— "+nLabel+suffix, PAD+88, 592);
+  c.fillStyle="#fff"; c.fillText("— "+nLabel+suffix, PAD+264, 1776);
  } else {
-  c.fillStyle="rgba(255,255,255,0.38)"; c.font="500 16px Inter,system-ui,sans-serif";
-  c.fillText("— End of queue", PAD+88, 592);
+  c.fillStyle="rgba(255,255,255,0.38)"; c.font="500 48px Inter,system-ui,sans-serif";
+  c.fillText("— End of queue", PAD+264, 1776);
  }
 
  // ── Zone F: Progress track (y=626–634) ──
- const pbX=PAD, pbW=W-PAD*2, pbH=8;
+ const pbX=PAD, pbW=W-PAD*2, pbH=24;
  const pct=audio.duration?audio.currentTime/audio.duration:0;
- c.beginPath(); _roundRect(c,pbX,626,pbW,pbH,4);
+ c.beginPath(); _roundRect(c,pbX,1878,pbW,pbH,12);
  c.fillStyle="rgba(255,255,255,0.20)"; c.fill();
- if(pct>0){ c.beginPath(); _roundRect(c,pbX,626,pbW*pct,pbH,4); c.fillStyle="rgba(255,255,255,0.85)"; c.fill(); }
+ if(pct>0){ c.beginPath(); _roundRect(c,pbX,1878,pbW*pct,pbH,12); c.fillStyle="rgba(255,255,255,0.85)"; c.fill(); }
  // Knob
- c.beginPath(); c.arc(pbX+pbW*pct,630,9,0,Math.PI*2); c.fillStyle="#fff"; c.fill();
+ c.beginPath(); c.arc(pbX+pbW*pct,1890,27,0,Math.PI*2); c.fillStyle="#fff"; c.fill();
 
  // ── Zone G: Timestamps (y=638–658) ──
- c.font="600 17px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.60)";
+ c.font="600 51px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.60)";
  c.textBaseline="top";
- c.textAlign="left";  c.fillText(clock(audio.currentTime), pbX, 638);
- c.textAlign="right"; c.fillText(audio.duration?clock(audio.duration):"--:--", pbX+pbW, 638);
+ c.textAlign="left";  c.fillText(clock(audio.currentTime), pbX, 1914);
+ c.textAlign="right"; c.fillText(audio.duration?clock(audio.duration):"--:--", pbX+pbW, 1914);
 
  // ── Zone H: Play/pause glyph (centre, y=676 ±14) ──
- const pcx=W/2, pcy=676;
- c.beginPath(); c.arc(pcx,pcy,18,0,Math.PI*2); c.fillStyle="rgba(255,255,255,0.13)"; c.fill();
+ const pcx=W/2, pcy=2028;
+ c.beginPath(); c.arc(pcx,pcy,54,0,Math.PI*2); c.fillStyle="rgba(255,255,255,0.13)"; c.fill();
  c.fillStyle="#fff";
  if(audio.paused){
-  c.beginPath(); c.moveTo(pcx-6,pcy-9); c.lineTo(pcx-6,pcy+9); c.lineTo(pcx+9,pcy); c.closePath(); c.fill();
- } else { c.fillRect(pcx-8,pcy-9,5,18); c.fillRect(pcx+3,pcy-9,5,18); }
+  c.beginPath(); c.moveTo(pcx-18,pcy-27); c.lineTo(pcx-18,pcy+27); c.lineTo(pcx+27,pcy); c.closePath(); c.fill();
+ } else { c.fillRect(pcx-24,pcy-27,15,54); c.fillRect(pcx+9,pcy-27,15,54); }
 }
 
 // ── Timeline drawing helper — matches timeline.html visuals exactly ──
@@ -707,21 +707,21 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
  // ── Colours matching timeline.html ──
  // Light card background
  c.fillStyle="rgba(255,255,255,0.18)";
- _roundRect(c,X,Y,W2,H2,14); c.fill();
+ _roundRect(c,X,Y,W2,H2,42); c.fill();
  // Frosted-glass border
  c.strokeStyle="rgba(255,255,255,0.25)"; c.lineWidth=1.5; c.stroke();
 
  // Clip drawing to card
- c.save(); c.beginPath(); _roundRect(c,X,Y,W2,H2,14); c.clip();
+ c.save(); c.beginPath(); _roundRect(c,X,Y,W2,H2,42); c.clip();
 
- const PAD_X=20, PAD_Y=16;
+ const PAD_X=60, PAD_Y=48;
  const CX=X+PAD_X, CW=W2-PAD_X*2;  // content x and width
 
  // ── Header: "Narrative: … · Written: …" ──
  function fmtY(y){ if(y===null||y===undefined) return "?"; return (y<0?Math.abs(y)+" BC":"AD "+y); }
  const narStr="Narrative: "+fmtY(book.spanStart)+" – "+fmtY(book.spanEnd)+
                " · Written: "+fmtY(book.writtenStart)+" – "+fmtY(book.writtenEnd);
- c.fillStyle="rgba(255,255,255,0.55)"; c.font="500 13px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.55)"; c.font="500 39px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
  c.fillText(narStr,CX,Y+PAD_Y);
 
@@ -730,23 +730,23 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
  const tMin=book.spanStart, tMax=book.spanEnd;
  const tSpan=tMax-tMin||1;
  // Track zone — left edge after event name column, right edge before date label
- const LABEL_COL=190;   // px reserved for event name on left
- const DATE_COL=130;    // px reserved for date label on right
+ const LABEL_COL=570;   // px reserved for event name on left
+ const DATE_COL=390;    // px reserved for date label on right
  const TX=CX+LABEL_COL, TW=CW-LABEL_COL-DATE_COL;
  const toTX=y=>TX+((y-tMin)/tSpan)*TW;
 
  // Axis row: left date | right date
  const axisY=Y+PAD_Y+22;
- c.fillStyle="rgba(255,255,255,0.55)"; c.font="500 12px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.55)"; c.font="500 36px Inter,system-ui,sans-serif";
  c.textAlign="left";  c.fillText(fmtY(tMin),TX,axisY);
  c.textAlign="right"; c.fillText(fmtY(tMax),TX+TW,axisY);
 
  // Axis separator line
- c.strokeStyle="rgba(255,255,255,0.20)"; c.lineWidth=1;
- c.beginPath(); c.moveTo(CX,axisY+16); c.lineTo(CX+CW,axisY+16); c.stroke();
+ c.strokeStyle="rgba(255,255,255,0.20)"; c.lineWidth=3;
+ c.beginPath(); c.moveTo(CX,axisY+48); c.lineTo(CX+CW,axisY+48); c.stroke();
 
  // ── Event rows ──
- const ROW_H=46, BAR_H=10, ROW_START=axisY+22;
+ const ROW_H=138, BAR_H=30, ROW_START=axisY+66;
  const TRACK_COL="rgba(255,255,255,0.18)";  // white tint track
  // Bar colour synced with the PiP background gradient
  const _barC1=barC1||"#5146d8", _barC2=barC2||"#7a6ce6";
@@ -763,33 +763,33 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
 
   // Separator line above row (except first)
   if(idx>0){
-   c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=1;
+   c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=3;
    c.beginPath(); c.moveTo(CX,ry); c.lineTo(CX+CW,ry); c.stroke();
   }
 
   // ── Event name (top-left of row) ──
-  c.fillStyle="rgba(255,255,255,0.92)"; c.font="600 14px Inter,system-ui,sans-serif";
+  c.fillStyle="rgba(255,255,255,0.92)"; c.font="600 42px Inter,system-ui,sans-serif";
   c.textBaseline="top"; c.textAlign="left";
   const shortName=name.length>24?name.slice(0,22)+"…":name;
-  c.fillText(shortName,CX,ry+7);
+  c.fillText(shortName,CX,ry+21);
 
   // ── Date label (top-right of row) ──
   if(!isUndated){
    const dStr=startY===endY
     ? fmtY(startY)
     : fmtY(startY)+" – "+fmtY(endY);
-   c.fillStyle="rgba(255,255,255,0.65)"; c.font="500 12px Inter,system-ui,sans-serif";
+   c.fillStyle="rgba(255,255,255,0.65)"; c.font="500 36px Inter,system-ui,sans-serif";
    c.textAlign="right"; c.textBaseline="top";
-   c.fillText(dStr,CX+CW,ry+7);
+   c.fillText(dStr,CX+CW,ry+21);
   } else {
-   c.fillStyle="rgba(255,255,255,0.40)"; c.font="500 12px Inter,system-ui,sans-serif";
+   c.fillStyle="rgba(255,255,255,0.40)"; c.font="500 36px Inter,system-ui,sans-serif";
    c.textAlign="right"; c.textBaseline="top";
-   c.fillText("undated",CX+CW,ry+7);
+   c.fillText("undated",CX+CW,ry+21);
   }
 
   // ── Full-width grey track ──
   const trackY=ry+ROW_H-BAR_H-8;
-  c.beginPath(); _roundRect(c,TX,trackY,TW,BAR_H,5);
+  c.beginPath(); _roundRect(c,TX,trackY,TW,BAR_H,15);
   c.fillStyle=TRACK_COL; c.fill();
 
   // ── Coloured bar / point on track ──
@@ -798,23 +798,23 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
     const bx=Math.max(TX, toTX(startY));
     const bx2=Math.min(TX+TW, toTX(endY));
     const bw=Math.max(6, bx2-bx);
-    c.beginPath(); _roundRect(c,bx,trackY,bw,BAR_H,5);
+    c.beginPath(); _roundRect(c,bx,trackY,bw,BAR_H,15);
     const _gr=c.createLinearGradient(bx,0,bx+bw,0);
     _gr.addColorStop(0,_barC1); _gr.addColorStop(1,_barC2);
     c.fillStyle=_gr; c.fill();
    } else {
     // Point — small vertical bar centred on date
-    const px=Math.min(TX+TW-4, Math.max(TX+4, toTX(startY)));
-    c.beginPath(); _roundRect(c,px-4,trackY-1,8,BAR_H+2,3);
+    const px=Math.min(TX+TW-12, Math.max(TX+12, toTX(startY)));
+    c.beginPath(); _roundRect(c,px-12,trackY-3,24,BAR_H+6,9);
     c.fillStyle=_barC1; c.fill();
    }
   } else {
    // Undated chip below name (like the screenshot)
-   c.beginPath(); _roundRect(c,CX,ry+24,58,18,99);
+   c.beginPath(); _roundRect(c,CX,ry+72,174,54,99);
    c.fillStyle=UNDATED_BG; c.fill();
-   c.fillStyle=UNDATED_TEXT; c.font="500 11px Inter,system-ui,sans-serif";
+   c.fillStyle=UNDATED_TEXT; c.font="500 33px Inter,system-ui,sans-serif";
    c.textAlign="center"; c.textBaseline="middle";
-   c.fillText("undated",CX+29,ry+33);
+   c.fillText("undated",CX+87,ry+99);
   }
  });
 
