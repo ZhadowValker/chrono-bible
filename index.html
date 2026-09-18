@@ -731,28 +731,34 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, c1, c2){
 
   const barX=toX(startY), barX2=toX(endY);
   const barY=ry+rowH/2-5, barH2=10;
-  const BAR_OFFSET=W2*0.32; // push bars to right so label doesn't overlap
+  const BAR_OFFSET=W2*0.32; // push bars right of event name
+
+  // Measure date label first so we can reserve space and never let bars overlap it
+  const dateStr=startY===endY?(Math.abs(Math.round(startY))+(startY<0?" BC":" AD")):
+   (Math.abs(Math.round(startY))+(startY<0?" BC":" AD")+" – "+Math.abs(Math.round(endY))+(endY<0?" BC":" AD"));
+  c.font="500 12px Inter,system-ui,sans-serif";
+  const dateW=c.measureText(dateStr).width;
+  const DATE_PAD=8; // gap between bar right edge and date label
+  const BAR_RIGHT=X+W2-dateW-DATE_PAD; // bars must not exceed this x
 
   if(isRange){
-   const bx=Math.max(X+BAR_OFFSET,barX), bx2=Math.max(bx+4,barX2);
+   const bx=Math.max(X+BAR_OFFSET,barX);
+   const bx2=Math.min(BAR_RIGHT, Math.max(bx+4,barX2)); // clamp right edge
    const bw2=Math.max(4,bx2-bx);
    c.beginPath(); _roundRect(c,bx,barY,bw2,barH2,4);
-   // gradient fill matching part colour
    const gr=c.createLinearGradient(bx,0,bx+bw2,0);
    gr.addColorStop(0,"rgba(255,255,255,0.75)"); gr.addColorStop(1,"rgba(255,255,255,0.40)");
    c.fillStyle=gr; c.fill();
   } else {
-   // Point — diamond
-   const px=Math.max(X+BAR_OFFSET+6,barX);
+   // Point — diamond, also clamped so it doesn't enter the date zone
+   const px=Math.min(BAR_RIGHT-6, Math.max(X+BAR_OFFSET+6,barX));
    c.save(); c.translate(px,ry+rowH/2); c.rotate(Math.PI/4);
    c.fillStyle="rgba(255,255,255,0.85)";
    c.fillRect(-5,-5,10,10); c.restore();
   }
 
-  // Date label at right edge
-  const dateStr=startY===endY?(Math.abs(Math.round(startY))+(startY<0?" BC":" AD")):
-   (Math.abs(Math.round(startY))+(startY<0?" BC":" AD")+" – "+Math.abs(Math.round(endY))+(endY<0?" BC":" AD"));
-  c.fillStyle="rgba(255,255,255,0.32)"; c.font="500 12px Inter,system-ui,sans-serif";
+  // Date label — always at right edge, always clear of bars
+  c.fillStyle="rgba(255,255,255,0.45)"; c.font="500 12px Inter,system-ui,sans-serif";
   c.textAlign="right"; c.textBaseline="middle";
   c.fillText(dateStr,X+W2,ry+rowH/2);
  });
