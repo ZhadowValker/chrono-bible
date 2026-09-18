@@ -671,6 +671,11 @@ function _pipDrawFrame(){
   c.fillText("— End of queue", PAD+264, 1776);
  }
 
+ // ── Keyboard hint ──
+ c.fillStyle="rgba(255,255,255,0.28)"; c.font="500 36px Inter,system-ui,sans-serif";
+ c.textBaseline="top"; c.textAlign="center";
+ c.fillText("⌨  Space · ← → to control · Use keyboard on main page",W/2,1836);
+
  // ── Zone F: Progress track (y=626–634) ──
  const pbX=PAD, pbW=W-PAD*2, pbH=24;
  const pct=audio.duration?audio.currentTime/audio.duration:0;
