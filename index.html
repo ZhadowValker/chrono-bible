@@ -538,8 +538,8 @@ function _pipDrawFrame(){
  }
 
  // ── Layout: left panel (info+chips) | right panel (timeline) ──
- const PAD=48, SPLIT=W*0.44;
- const RX=SPLIT+36, RW=W-RX-PAD;
+ const PAD=44, SPLIT=W*0.30;
+ const RX=SPLIT+28, RW=W-RX-PAD;
 
  // ═══ LEFT PANEL ═══
 
@@ -564,35 +564,35 @@ function _pipDrawFrame(){
  c.fillText("NOW PLAYING",PAD,PAD+32);
 
  // Event title (word-wrap, serif)
- c.fillStyle="#fff"; c.font="700 44px 'Iowan Old Style',Palatino,Georgia,serif";
- const evMax=SPLIT-PAD-16;
+ c.fillStyle="#fff"; c.font="700 36px 'Iowan Old Style',Palatino,Georgia,serif";
+ const evMax=SPLIT-PAD-10;
  const evWords=r.Event.split(" "); let evLine=""; let evY=PAD+64;
  for(const w of evWords){
   const t2=evLine?evLine+" "+w:w;
-  if(c.measureText(t2).width>evMax&&evLine){ c.fillText(evLine,PAD,evY); evLine=w; evY+=54; if(evY>PAD+230) break; }
+  if(c.measureText(t2).width>evMax&&evLine){ c.fillText(evLine,PAD,evY); evLine=w; evY+=44; if(evY>PAD+200) break; }
   else evLine=t2;
  }
  if(evLine) c.fillText(evLine,PAD,evY);
 
  // Book · chapter of N
  const metaY=evY+60;
- c.font="500 24px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.50)";
+ c.font="500 20px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.50)";
  c.fillText("·",PAD,metaY);
- c.font="600 24px 'Iowan Old Style',Palatino,Georgia,serif"; c.fillStyle="#fff";
+ c.font="600 20px 'Iowan Old Style',Palatino,Georgia,serif"; c.fillStyle="#fff";
  c.fillText(item.book,PAD+18,metaY);
  const bw=c.measureText(item.book).width;
- c.font="700 24px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.90)";
+ c.font="700 20px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.90)";
  c.fillText(" "+item.chapter,PAD+18+bw,metaY);
  if(item.of>1){
   const cw=c.measureText(" "+item.chapter).width;
-  c.font="500 19px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.48)";
+  c.font="500 16px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.48)";
   c.fillText(" of "+item.of,PAD+18+bw+cw,metaY+3);
  }
 
  // Chapter chips grid
  const chs=CH.get(item.id)||[];
  if(chs.length>0){
-  const chipY0=metaY+38, chipW=48, chipH=33, chipGap=7;
+  const chipY0=metaY+34, chipW=42, chipH=30, chipGap=6;
   const perRow=Math.floor((SPLIT-PAD)/(chipW+chipGap));
   chs.forEach((ch,idx)=>{
    const col=idx%perRow, row=Math.floor(idx/perRow);
@@ -605,7 +605,7 @@ function _pipDrawFrame(){
    c.fill();
    c.strokeStyle=isCur?"transparent":isDone?"rgba(80,210,120,0.55)":"rgba(255,255,255,0.20)";
    c.lineWidth=1.5; c.stroke();
-   c.font="700 18px Inter,system-ui,sans-serif"; c.textBaseline="middle"; c.textAlign="center";
+   c.font="700 16px Inter,system-ui,sans-serif"; c.textBaseline="middle"; c.textAlign="center";
    c.fillStyle=isCur?"#241d63":isDone?"#c8ffe0":"rgba(255,255,255,0.80)";
    c.fillText(ch.chapter,cx2+chipW/2,cy2+chipH/2);
   });
@@ -731,7 +731,7 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, c1, c2){
 
   const barX=toX(startY), barX2=toX(endY);
   const barY=ry+rowH/2-5, barH2=10;
-  const BAR_OFFSET=W2*0.38; // push bars to right half so label doesn't overlap
+  const BAR_OFFSET=W2*0.32; // push bars to right so label doesn't overlap
 
   if(isRange){
    const bx=Math.max(X+BAR_OFFSET,barX), bx2=Math.max(bx+4,barX2);
