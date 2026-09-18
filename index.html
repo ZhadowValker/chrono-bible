@@ -769,6 +769,7 @@ function paintNow(){
  const item=qi>-1?QUEUE[qi]:null;
  document.querySelectorAll(".q.playing").forEach(el=>el.classList.remove("playing"));
  syncStickyPlayer();
+ if(pipWin) pipSyncMeta();
  if(!item){
   $("nowEvent").textContent=I18N[uiLang].nothingQueued;
   $("nowSub").textContent=I18N[uiLang].pickEvent;
@@ -1274,10 +1275,24 @@ async function openPiP(){
  audio.addEventListener("timeupdate",pipSyncProgress);
  audio.addEventListener("play",pipSyncProgress);
  audio.addEventListener("pause",pipSyncProgress);
+ // Document PiP is a separate floating window driven by this tab's script — plain DOM writes from here
+ // don't reliably force it to repaint on their own (Chrome seems to only flush a repaint for it in
+ // response to a native event inside that window, e.g. a click). Driving updates through the pip
+ // window's OWN requestAnimationFrame loop fixes that: it engages that window's own render scheduler
+ // directly, so the progress bar/knob/chips actually animate instead of only refreshing once you
+ // interact with the window yourself.
+ let pipTickRAF=null;
+ function pipTick(){
+  if(!pipWin) return;
+  pipSyncProgress();
+  pipTickRAF=pipWin.requestAnimationFrame(pipTick);
+ }
+ pipTickRAF=pipWin.requestAnimationFrame(pipTick);
  pipWin.addEventListener("pagehide",()=>{
   audio.removeEventListener("timeupdate",pipSyncProgress);
   audio.removeEventListener("play",pipSyncProgress);
   audio.removeEventListener("pause",pipSyncProgress);
+  if(pipTickRAF) pipWin.cancelAnimationFrame(pipTickRAF);
   pipWin=null;
   pipDismissed=true;
  },{once:true});
