@@ -518,7 +518,7 @@ function _pipDrawFrame(){
  const r=item?REC.get(item.id):null;
  const partNum=r?Number(r.Part):1;
  const covers=[
-  ["#241d63","#5146d8"],["#1a3a6b","#2d6bbf"],["#1e4a2a","#2e8b57"],
+  ["#241d63","#4a3fc0"],["#1a3a6b","#2d6bbf"],["#1e4a2a","#2e8b57"],
   ["#5a1a1a","#c0392b"],["#4a2a0a","#d4890a"],["#2a1a4a","#7b4fa6"],
   ["#1a3a4a","#1a7a8a"],["#3a2a10","#8a6020"],["#1a2a3a","#2a5a8a"],["#3a1a3a","#8a2a8a"]
  ];
@@ -528,182 +528,246 @@ function _pipDrawFrame(){
  const bg=c.createLinearGradient(0,0,W,H);
  bg.addColorStop(0,c1); bg.addColorStop(1,c2);
  c.fillStyle=bg; c.fillRect(0,0,W,H);
- // Soft radial blob
- const blob=c.createRadialGradient(W*0.25,H*0.3,0,W*0.25,H*0.3,W*0.55);
- blob.addColorStop(0,"rgba(255,255,255,0.10)"); blob.addColorStop(1,"rgba(255,255,255,0)");
+ const blob=c.createRadialGradient(W*0.22,H*0.28,0,W*0.22,H*0.28,W*0.5);
+ blob.addColorStop(0,"rgba(255,255,255,0.09)"); blob.addColorStop(1,"rgba(255,255,255,0)");
  c.fillStyle=blob; c.fillRect(0,0,W,H);
 
  if(!item){
   c.fillStyle="rgba(255,255,255,0.8)"; c.font="bold 42px Inter,system-ui,sans-serif";
-  c.textBaseline="middle"; c.textAlign="center"; c.fillText("Nothing queued",W/2,H/2);
-  return;
+  c.textBaseline="middle"; c.textAlign="center"; c.fillText("Nothing queued",W/2,H/2); return;
  }
 
- // ── Layout constants ──
- const PAD=52, SPLIT=W*0.46;
- // LEFT COLUMN: Part | Now Playing | Event title | book·ch | chapter chips
- // RIGHT COLUMN: Up Next | timeline bars
+ // ── Layout: left panel (info+chips) | right panel (timeline) ──
+ const PAD=48, SPLIT=W*0.44;
+ const RX=SPLIT+36, RW=W-RX-PAD;
 
- // ── PART label ──
- c.fillStyle="rgba(255,255,255,0.55)";
- c.font="700 22px Inter,system-ui,sans-serif";
+ // ═══ LEFT PANEL ═══
+
+ // Part + version badge row
+ c.fillStyle="rgba(255,255,255,0.50)";
+ c.font="700 20px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
  c.fillText("PART "+r.Part,PAD,PAD);
+ // Version badge top-right
+ const vLabel=(VERSIONS[currentVersion]||{label:"NLT"}).label.split(" ")[0];
+ c.font="700 19px Inter,system-ui,sans-serif";
+ const vW=c.measureText(vLabel).width+22;
+ c.beginPath(); _roundRect(c,W-PAD-vW,PAD-2,vW,30,99);
+ c.fillStyle="rgba(255,255,255,0.18)"; c.fill();
+ c.strokeStyle="rgba(255,255,255,0.32)"; c.lineWidth=1.5; c.stroke();
+ c.fillStyle="#fff"; c.textAlign="center"; c.textBaseline="middle";
+ c.fillText(vLabel,W-PAD-vW/2,PAD+13);
 
- // ── NOW PLAYING label ──
- c.fillStyle="rgba(255,255,255,0.45)";
- c.font="600 18px Inter,system-ui,sans-serif";
- c.fillText("NOW PLAYING",PAD,PAD+34);
+ // NOW PLAYING label
+ c.fillStyle="rgba(255,255,255,0.42)"; c.font="600 17px Inter,system-ui,sans-serif";
+ c.textBaseline="top"; c.textAlign="left";
+ c.fillText("NOW PLAYING",PAD,PAD+32);
 
- // ── Event title (word-wrap, up to 3 lines) ──
- c.fillStyle="#fff";
- c.font="700 46px 'Iowan Old Style',Palatino,Georgia,serif";
- c.textBaseline="top";
- const evWords=r.Event.split(" "); let evLine=""; let evY=PAD+70; const evMax=SPLIT-PAD-20;
+ // Event title (word-wrap, serif)
+ c.fillStyle="#fff"; c.font="700 44px 'Iowan Old Style',Palatino,Georgia,serif";
+ const evMax=SPLIT-PAD-16;
+ const evWords=r.Event.split(" "); let evLine=""; let evY=PAD+64;
  for(const w of evWords){
-  const test=evLine?evLine+" "+w:w;
-  if(c.measureText(test).width>evMax&&evLine){
-   c.fillText(evLine,PAD,evY); evLine=w; evY+=56; if(evY>PAD+240) break;
-  } else evLine=test;
+  const t2=evLine?evLine+" "+w:w;
+  if(c.measureText(t2).width>evMax&&evLine){ c.fillText(evLine,PAD,evY); evLine=w; evY+=54; if(evY>PAD+230) break; }
+  else evLine=t2;
  }
  if(evLine) c.fillText(evLine,PAD,evY);
 
- // ── Book · ch of N ──
- const chY=evY+70;
- c.font="600 26px Inter,system-ui,sans-serif";
- c.fillStyle="rgba(255,255,255,0.55)";
- c.fillText("·",PAD,chY);
- c.font="600 26px 'Iowan Old Style',Palatino,Georgia,serif";
- c.fillStyle="#fff"; c.fillText(item.book,PAD+22,chY);
+ // Book · chapter of N
+ const metaY=evY+60;
+ c.font="500 24px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.50)";
+ c.fillText("·",PAD,metaY);
+ c.font="600 24px 'Iowan Old Style',Palatino,Georgia,serif"; c.fillStyle="#fff";
+ c.fillText(item.book,PAD+18,metaY);
  const bw=c.measureText(item.book).width;
- c.font="700 26px Inter,system-ui,sans-serif";
- c.fillStyle="rgba(255,255,255,0.9)"; c.fillText(" "+item.chapter,PAD+22+bw,chY);
- const cw=c.measureText(" "+item.chapter).width;
+ c.font="700 24px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.90)";
+ c.fillText(" "+item.chapter,PAD+18+bw,metaY);
  if(item.of>1){
-  c.font="500 20px Inter,system-ui,sans-serif";
-  c.fillStyle="rgba(255,255,255,0.5)";
-  c.fillText(" of "+item.of,PAD+22+bw+cw,chY+3);
+  const cw=c.measureText(" "+item.chapter).width;
+  c.font="500 19px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.48)";
+  c.fillText(" of "+item.of,PAD+18+bw+cw,metaY+3);
  }
 
- // ── Chapter chips ──
+ // Chapter chips grid
  const chs=CH.get(item.id)||[];
  if(chs.length>0){
-  const chipY=chY+46, chipW=52, chipH=36, chipGap=8, chipsPerRow=Math.floor((SPLIT-PAD)/(chipW+chipGap));
+  const chipY0=metaY+38, chipW=48, chipH=33, chipGap=7;
+  const perRow=Math.floor((SPLIT-PAD)/(chipW+chipGap));
   chs.forEach((ch,idx)=>{
-   const col=idx%chipsPerRow, row=Math.floor(idx/chipsPerRow);
-   const cx2=PAD+col*(chipW+chipGap), cy2=chipY+row*(chipH+chipGap);
-   if(cy2+chipH>H-100) return; // don't overflow into progress bar area
+   const col=idx%perRow, row=Math.floor(idx/perRow);
+   const cx2=PAD+col*(chipW+chipGap), cy2=chipY0+row*(chipH+chipGap);
+   if(cy2+chipH>H-90) return;
    const isDone=progress.completed[chapKey(item.id,ch.chapter)];
    const isCur=ch.chapter===item.chapter;
-   // chip bg
-   c.beginPath();
-   _roundRect(c,cx2,cy2,chipW,chipH,8);
-   if(isCur) c.fillStyle="rgba(255,255,255,0.92)";
-   else if(isDone) c.fillStyle="rgba(80,210,120,0.32)";
-   else c.fillStyle="rgba(255,255,255,0.14)";
+   c.beginPath(); _roundRect(c,cx2,cy2,chipW,chipH,7);
+   c.fillStyle=isCur?"rgba(255,255,255,0.93)":isDone?"rgba(80,210,120,0.30)":"rgba(255,255,255,0.13)";
    c.fill();
-   // chip border
-   c.strokeStyle=isCur?"transparent":isDone?"rgba(80,210,120,0.55)":"rgba(255,255,255,0.22)";
+   c.strokeStyle=isCur?"transparent":isDone?"rgba(80,210,120,0.55)":"rgba(255,255,255,0.20)";
    c.lineWidth=1.5; c.stroke();
-   // chip number
-   c.font="700 20px Inter,system-ui,sans-serif";
-   c.textBaseline="middle"; c.textAlign="center";
+   c.font="700 18px Inter,system-ui,sans-serif"; c.textBaseline="middle"; c.textAlign="center";
    c.fillStyle=isCur?"#241d63":isDone?"#c8ffe0":"rgba(255,255,255,0.80)";
    c.fillText(ch.chapter,cx2+chipW/2,cy2+chipH/2);
   });
-  c.textBaseline="top"; c.textAlign="left";
  }
 
- // ── RIGHT COLUMN ──
- const RX=SPLIT+PAD*0.6, RW=W-RX-PAD;
+ // ═══ RIGHT PANEL — Book Event Timeline ═══
+ // Divider line
+ c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=1;
+ c.beginPath(); c.moveTo(SPLIT+18,PAD+10); c.lineTo(SPLIT+18,H-PAD-50); c.stroke();
 
- // NLT / version badge top-right
- c.font="700 20px Inter,system-ui,sans-serif";
- c.fillStyle="#fff";
- const vLabel=(VERSIONS[currentVersion]||{label:"?"}).label.split(" ")[0];
- const vW=c.measureText(vLabel).width+24;
- c.beginPath(); _roundRect(c,W-PAD-vW,PAD-4,vW,34,99);
- c.fillStyle="rgba(255,255,255,0.18)"; c.fill();
- c.strokeStyle="rgba(255,255,255,0.32)"; c.lineWidth=1.5; c.stroke();
- c.fillStyle="#fff"; c.textBaseline="middle"; c.textAlign="center";
- c.fillText(vLabel,W-PAD-vW/2,PAD+13);
- c.textBaseline="top"; c.textAlign="left";
-
- // ── Timeline bars for current book ──
- const bookChs=CH.get(item.id)||[];
- if(bookChs.length>1){
-  const tlLabel="CHAPTERS";
-  c.fillStyle="rgba(255,255,255,0.40)";
-  c.font="700 18px Inter,system-ui,sans-serif";
-  c.fillText(tlLabel,RX,PAD+2);
-  const barH=10, barGap=6;
-  const totalBars=bookChs.length;
-  const barW=Math.min(18, Math.floor((RW-(totalBars-1)*barGap)/totalBars));
-  const tlY=PAD+30;
-  bookChs.forEach((ch,idx)=>{
-   const bx=RX+idx*(barW+barGap), by=tlY;
-   const isDone=progress.completed[chapKey(item.id,ch.chapter)];
-   const isCur=ch.chapter===item.chapter;
-   c.beginPath(); _roundRect(c,bx,by,barW,barH,3);
-   c.fillStyle=isCur?"rgba(255,255,255,0.95)":isDone?"rgba(80,210,120,0.65)":"rgba(255,255,255,0.20)";
-   c.fill();
-  });
+ // Find this book in BOOKS (from timeline.html, fetched lazily)
+ const bookName=item.book;
+ // _PIP_BOOKS is loaded once from timeline.html and cached
+ if(typeof _PIP_BOOKS==="undefined"||!_PIP_BOOKS){
+  // Not loaded yet — show placeholder and trigger load
+  c.fillStyle="rgba(255,255,255,0.35)"; c.font="500 20px Inter,system-ui,sans-serif";
+  c.textBaseline="middle"; c.textAlign="center";
+  c.fillText("Loading timeline…",RX+RW/2,(PAD+H-90)/2);
+  _pipLoadBooks();
+ } else {
+  _pipDrawTimeline(c, RX, PAD, RW, H-PAD-90, bookName, c1, c2);
  }
 
- // ── Up Next ──
+ // ═══ UP NEXT ═══
+ const upY=H-82;
+ c.fillStyle="rgba(255,255,255,0.38)"; c.font="700 17px Inter,system-ui,sans-serif";
+ c.textBaseline="middle"; c.textAlign="left";
+ c.fillText("UP NEXT",PAD,upY);
  const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
- const upY=H-180;
- c.fillStyle="rgba(255,255,255,0.45)";
- c.font="700 18px Inter,system-ui,sans-serif";
- c.textBaseline="top";
- c.fillText("UP NEXT",RX,upY);
  if(nxt){
   const nr=REC.get(nxt.id);
-  c.fillStyle="#fff"; c.font="600 22px 'Iowan Old Style',Palatino,Georgia,serif";
-  // word-wrap up next title
-  const nWords=nr.Event.split(" "); let nLine=""; let nY=upY+26;
-  for(const w of nWords){
-   const test=nLine?nLine+" "+w:w;
-   if(c.measureText(test).width>RW&&nLine){ c.fillText(nLine,RX,nY); nLine=w; nY+=28; if(nY>upY+90) break; }
-   else nLine=test;
-  }
-  if(nLine) c.fillText(nLine,RX,nY);
-  c.font="500 18px Inter,system-ui,sans-serif";
-  c.fillStyle="rgba(255,255,255,0.55)";
-  c.fillText(nxt.book+" "+nxt.chapter,RX,nY+32);
+  c.fillStyle="#fff"; c.font="600 18px 'Iowan Old Style',Palatino,Georgia,serif";
+  const nLabel=nr.Event.length>52?nr.Event.slice(0,50)+"…":nr.Event;
+  c.fillText("— "+nLabel+" · "+nxt.book+" "+nxt.chapter, PAD+80, upY);
  } else {
-  c.font="500 20px Inter,system-ui,sans-serif";
-  c.fillStyle="rgba(255,255,255,0.40)"; c.fillText("End of queue",RX,upY+26);
+  c.fillStyle="rgba(255,255,255,0.38)"; c.font="500 18px Inter,system-ui,sans-serif";
+  c.fillText("— End of queue",PAD+80,upY);
  }
 
- // ── Progress bar (full width, near bottom) ──
+ // ═══ PROGRESS BAR (full width) ═══
+ const pbY=H-52, pbH=8, pbX=PAD, pbW=W-PAD*2;
  const pct=audio.duration?audio.currentTime/audio.duration:0;
- const pbY=H-62, pbH=8, pbX=PAD, pbW=W-PAD*2;
- // track
  c.beginPath(); _roundRect(c,pbX,pbY,pbW,pbH,4);
- c.fillStyle="rgba(255,255,255,0.22)"; c.fill();
- // fill
- c.beginPath(); _roundRect(c,pbX,pbY,pbW*pct,pbH,4);
- c.fillStyle="rgba(255,255,255,0.90)"; c.fill();
- // knob
- c.beginPath(); c.arc(pbX+pbW*pct,pbY+pbH/2,10,0,Math.PI*2);
- c.fillStyle="#fff"; c.fill();
- // times
- c.font="600 20px Inter,system-ui,sans-serif";
- c.fillStyle="rgba(255,255,255,0.65)";
- c.textBaseline="top"; c.textAlign="left"; c.fillText(clock(audio.currentTime),pbX,pbY+18);
- c.textAlign="right"; c.fillText(audio.duration?clock(audio.duration):"--:--",pbX+pbW,pbY+18);
+ c.fillStyle="rgba(255,255,255,0.20)"; c.fill();
+ if(pct>0){ c.beginPath(); _roundRect(c,pbX,pbY,pbW*pct,pbH,4); c.fillStyle="rgba(255,255,255,0.88)"; c.fill(); }
+ c.beginPath(); c.arc(pbX+pbW*pct,pbY+pbH/2,9,0,Math.PI*2); c.fillStyle="#fff"; c.fill();
+ c.font="600 18px Inter,system-ui,sans-serif"; c.fillStyle="rgba(255,255,255,0.60)";
+ c.textBaseline="top"; c.textAlign="left"; c.fillText(clock(audio.currentTime),pbX,pbY+14);
+ c.textAlign="right"; c.fillText(audio.duration?clock(audio.duration):"--:--",pbX+pbW,pbY+14);
 
- // ── Play/Pause glyph bottom-centre ──
- const pcx=W/2, pcy=H-30;
- c.beginPath(); c.arc(pcx,pcy,18,0,Math.PI*2);
- c.fillStyle="rgba(255,255,255,0.14)"; c.fill();
+ // Play/pause glyph centre-bottom
+ const pcx=W/2, pcy=H-34;
+ c.beginPath(); c.arc(pcx,pcy,16,0,Math.PI*2); c.fillStyle="rgba(255,255,255,0.13)"; c.fill();
  c.fillStyle="#fff";
  if(audio.paused){
-  c.beginPath(); c.moveTo(pcx-6,pcy-9); c.lineTo(pcx-6,pcy+9); c.lineTo(pcx+9,pcy); c.closePath(); c.fill();
- } else {
-  c.fillRect(pcx-8,pcy-9,5,18); c.fillRect(pcx+3,pcy-9,5,18);
+  c.beginPath(); c.moveTo(pcx-5,pcy-8); c.lineTo(pcx-5,pcy+8); c.lineTo(pcx+8,pcy); c.closePath(); c.fill();
+ } else { c.fillRect(pcx-7,pcy-8,4,16); c.fillRect(pcx+3,pcy-8,4,16); }
+}
+
+// ── Timeline drawing helper ──
+function _pipDrawTimeline(c, X, Y, W2, H2, bookName, c1, c2){
+ const book=_PIP_BOOKS.find(b=>b.name===bookName);
+ if(!book||!book.events||book.events.length===0){
+  c.fillStyle="rgba(255,255,255,0.25)"; c.font="500 19px Inter,system-ui,sans-serif";
+  c.textBaseline="middle"; c.textAlign="center"; c.fillText("No timeline data",X+W2/2,Y+H2/2); return;
  }
+ const evts=book.events;
+ // Compute time axis bounds from events with real years (skip undated)
+ const dated=evts.filter(e=>e[4]!==null&&e[5]!==null);
+ if(dated.length===0){
+  c.fillStyle="rgba(255,255,255,0.25)"; c.font="500 19px Inter,system-ui,sans-serif";
+  c.textBaseline="middle"; c.textAlign="center"; c.fillText("Timeline undated",X+W2/2,Y+H2/2); return;
+ }
+ const allYears=dated.flatMap(e=>[e[4],e[5]]);
+ let tMin=Math.min(...allYears), tMax=Math.max(...allYears);
+ const span=tMax-tMin||1; const pad2=span*0.08;
+ tMin-=pad2; tMax+=pad2;
+ const toX=y=>X+((y-tMin)/(tMax-tMin))*W2;
+
+ // Section heading
+ c.fillStyle="rgba(255,255,255,0.42)"; c.font="700 17px Inter,system-ui,sans-serif";
+ c.textBaseline="top"; c.textAlign="left";
+ c.fillText(bookName.toUpperCase()+" TIMELINE",X,Y);
+
+ // Time axis line
+ const axisY=Y+30, rowH=34, labelH=20;
+ c.strokeStyle="rgba(255,255,255,0.18)"; c.lineWidth=1;
+ c.beginPath(); c.moveTo(X,axisY); c.lineTo(X+W2,axisY); c.stroke();
+
+ // Axis tick labels (pick ~4 ticks)
+ const nTicks=4;
+ for(let ti=0;ti<=nTicks;ti++){
+  const yr=tMin+ti*(tMax-tMin)/nTicks;
+  const tx=toX(yr);
+  c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=1;
+  c.beginPath(); c.moveTo(tx,axisY-4); c.lineTo(tx,axisY+4); c.stroke();
+  const label=yr<0?Math.round(Math.abs(yr))+" BC":"AD "+Math.round(yr);
+  c.fillStyle="rgba(255,255,255,0.35)"; c.font="500 13px Inter,system-ui,sans-serif";
+  c.textBaseline="top"; c.textAlign="center"; c.fillText(label,tx,axisY+6);
+ }
+
+ // Draw each event row
+ const rowStart=axisY+labelH+8;
+ evts.forEach((ev,idx)=>{
+  const [name,type,,,startY,endY]=ev;
+  const ry=rowStart+idx*rowH;
+  if(ry+rowH>Y+H2) return; // clip
+
+  const isRange=type==="Range";
+  const isUndated=startY===null||endY===null;
+
+  // Event name label
+  c.fillStyle="rgba(255,255,255,0.75)"; c.font="500 14px Inter,system-ui,sans-serif";
+  c.textBaseline="middle"; c.textAlign="left";
+  const shortName=name.length>28?name.slice(0,26)+"…":name;
+  c.fillText(shortName,X,ry+rowH/2);
+
+  if(isUndated){
+   c.fillStyle="rgba(255,255,255,0.22)"; c.font="italic 12px Inter,system-ui,sans-serif";
+   c.fillText("undated",X+W2-60,ry+rowH/2);
+   return;
+  }
+
+  const barX=toX(startY), barX2=toX(endY);
+  const barY=ry+rowH/2-5, barH2=10;
+  const BAR_OFFSET=W2*0.38; // push bars to right half so label doesn't overlap
+
+  if(isRange){
+   const bx=Math.max(X+BAR_OFFSET,barX), bx2=Math.max(bx+4,barX2);
+   const bw2=Math.max(4,bx2-bx);
+   c.beginPath(); _roundRect(c,bx,barY,bw2,barH2,4);
+   // gradient fill matching part colour
+   const gr=c.createLinearGradient(bx,0,bx+bw2,0);
+   gr.addColorStop(0,"rgba(255,255,255,0.75)"); gr.addColorStop(1,"rgba(255,255,255,0.40)");
+   c.fillStyle=gr; c.fill();
+  } else {
+   // Point — diamond
+   const px=Math.max(X+BAR_OFFSET+6,barX);
+   c.save(); c.translate(px,ry+rowH/2); c.rotate(Math.PI/4);
+   c.fillStyle="rgba(255,255,255,0.85)";
+   c.fillRect(-5,-5,10,10); c.restore();
+  }
+
+  // Date label at right edge
+  const dateStr=startY===endY?(Math.abs(Math.round(startY))+(startY<0?" BC":" AD")):
+   (Math.abs(Math.round(startY))+(startY<0?" BC":" AD")+" – "+Math.abs(Math.round(endY))+(endY<0?" BC":" AD"));
+  c.fillStyle="rgba(255,255,255,0.32)"; c.font="500 12px Inter,system-ui,sans-serif";
+  c.textAlign="right"; c.textBaseline="middle";
+  c.fillText(dateStr,X+W2,ry+rowH/2);
+ });
+}
+
+// ── Lazy-load BOOKS data from timeline.html once ──
+let _PIP_BOOKS=null, _pipBooksLoading=false;
+function _pipLoadBooks(){
+ if(_pipBooksLoading||_PIP_BOOKS) return;
+ _pipBooksLoading=true;
+ fetch("timeline.html").then(r=>r.text()).then(html=>{
+  const m=html.match(/const BOOKS\s*=\s*(\[[\s\S]*?\]);/);
+  if(m){ try{ _PIP_BOOKS=eval("("+m[1]+")"); }catch(_){} }
+  _pipBooksLoading=false;
+ }).catch(()=>{ _pipBooksLoading=false; });
 }
 
 // Helper — rounded rect path (polyfill for older Safari that lacks ctx.roundRect)
