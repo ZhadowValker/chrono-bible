@@ -644,7 +644,7 @@ function _pipDrawFrame(){
   c.fillText("Loading timeline…", RX+RW/2, 314);
   _pipLoadBooks();
  } else {
-  _pipDrawTimeline(c, RX, 44, RW, 540, item.book);
+  _pipDrawTimeline(c, RX, 44, RW, 540, item.book, c1, c2);
  }
 
  // ── Zone E: UP NEXT (y=590–618, full width) ──
@@ -696,7 +696,7 @@ function _pipDrawFrame(){
 }
 
 // ── Timeline drawing helper — matches timeline.html visuals exactly ──
-function _pipDrawTimeline(c, X, Y, W2, H2, bookName){
+function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
  const book=_PIP_BOOKS&&_PIP_BOOKS.find(b=>b.name===bookName);
  if(!book||!book.events||book.events.length===0){
   c.fillStyle="rgba(255,255,255,0.30)"; c.font="500 18px Inter,system-ui,sans-serif";
@@ -746,7 +746,8 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName){
  // ── Event rows ──
  const ROW_H=46, BAR_H=10, ROW_START=axisY+22;
  const TRACK_COL="#e8e8ee";       // grey track behind every bar
- const BAR_COL="#5146d8";         // indigo bar (matches timeline.html .span-bar)
+ // Bar colour synced with the PiP background gradient
+ const _barC1=barC1||"#5146d8", _barC2=barC2||"#7a6ce6";
  const UNDATED_BG="#ebebeb";
  const UNDATED_TEXT="#999";
 
@@ -796,12 +797,14 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName){
     const bx2=Math.min(TX+TW, toTX(endY));
     const bw=Math.max(6, bx2-bx);
     c.beginPath(); _roundRect(c,bx,trackY,bw,BAR_H,5);
-    c.fillStyle=BAR_COL; c.fill();
+    const _gr=c.createLinearGradient(bx,0,bx+bw,0);
+    _gr.addColorStop(0,_barC1); _gr.addColorStop(1,_barC2);
+    c.fillStyle=_gr; c.fill();
    } else {
     // Point — small vertical bar centred on date
     const px=Math.min(TX+TW-4, Math.max(TX+4, toTX(startY)));
     c.beginPath(); _roundRect(c,px-4,trackY-1,8,BAR_H+2,3);
-    c.fillStyle=BAR_COL; c.fill();
+    c.fillStyle=_barC1; c.fill();
    }
   } else {
    // Undated chip below name (like the screenshot)
