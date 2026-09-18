@@ -459,6 +459,7 @@ const coverFor=part=>`linear-gradient(140deg,hsl(247 62% ${28+part*1.7}%),hsl(25
 
 const play=()=>{const p=audio.play();if(p&&typeof p.catch==="function")p.catch(()=>{})};
 const audio=new Audio();
+const VOL_TICKS=10, VOL_MIN_DEG=-135, VOL_MAX_DEG=135; // used by updateVolIcon() below, must exist before that ever runs
 audio.referrerPolicy="no-referrer";
 audio.preload="metadata";
 let QUEUE=[];        // one entry per chapter, flattened across the visible events
@@ -863,7 +864,6 @@ $("volIcon").addEventListener("click",()=>{
  updateVolIcon();
 });
 /* volume knob: same rotary drag/scroll widget as the pop-out, scaled for the inline control */
-const VOL_TICKS=10, VOL_MIN_DEG=-135, VOL_MAX_DEG=135;
 (function initVolKnob(){
  const wrap=$("volWrap"), dialWrap=$("volDialWrap");
  for(let i=0;i<VOL_TICKS;i++){
