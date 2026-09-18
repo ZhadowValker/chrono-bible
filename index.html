@@ -1005,7 +1005,7 @@ function pipSyncMeta(){
  d.getElementById("pipChOf").textContent=item.of>1?" of "+item.of:"";
  d.getElementById("pipSub").textContent=r.Event;
  d.querySelector(".pip-card").style.setProperty("--pip-cover",coverFor(Number(r.Part)));
- const nxt=QUEUE[qi+1];
+ const nxt=(()=>{ for(let i=qi+1;i<QUEUE.length;i++){ if(QUEUE[i].id!==item.id) return QUEUE[i]; } return null; })();
  d.getElementById("pipUpNext").innerHTML=nxt
   ? `UP NEXT — <b>${esc(REC.get(nxt.id).Event)}</b> · ${esc(nxt.book)} ${nxt.chapter}`
   : "END OF QUEUE";
@@ -1082,34 +1082,36 @@ async function openPiP(){
   .pip-topline{display:flex;align-items:center;justify-content:space-between}
   .pip-main{flex:1;display:flex;gap:12px;min-height:0;overflow:hidden}
   .pip-left{flex:0 0 44%;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-  .pip-header{font-size:9.5px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.55);margin-bottom:4px}
-  .pip-sub{font-family:'Iowan Old Style',Palatino,serif;font-size:22px;font-weight:700;color:#fff;line-height:1.2;
+  .pip-header{font-size:10.5px;font-weight:700;letter-spacing:.14em;color:rgba(255,255,255,.55);margin-bottom:4px}
+  .pip-sub{font-family:'Iowan Old Style',Palatino,serif;font-size:25px;font-weight:700;color:#fff;line-height:1.2;
    text-shadow:0 2px 10px rgba(30,22,80,.4)}
-  .pip-meta{font-size:12px;color:rgba(255,255,255,.72);margin-top:10px;display:flex;align-items:baseline;
+  .pip-meta{font-size:13px;color:rgba(255,255,255,.72);margin-top:10px;display:flex;align-items:baseline;
    flex-wrap:wrap;gap:4px 6px}
-  .pip-part{font-size:10px;font-weight:700;letter-spacing:.1em;opacity:.85;text-transform:uppercase}
-  .pip-book{font-family:'Iowan Old Style',Palatino,serif;font-size:13px;color:#fff}
-  .pip-chnum{font-size:12px;color:rgba(255,255,255,.72)}
+  .pip-part{font-size:11px;font-weight:700;letter-spacing:.1em;opacity:.85;text-transform:uppercase}
+  .pip-book{font-family:'Iowan Old Style',Palatino,serif;font-size:14px;color:#fff}
+  .pip-chnum{font-size:13px;color:rgba(255,255,255,.72)}
   .pip-chnum small{opacity:.8}
-  .pip-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;
+  .pip-badge{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;
    background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:4px 10px;
-   cursor:pointer;appearance:none;-webkit-appearance:none}
+   cursor:pointer;appearance:none;-webkit-appearance:none;text-align:center;text-align-last:center}
   .pip-badge option{color:#1d2536;background:#fff;text-transform:none}
   .pip-right{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
   .pip-chips{flex:1;display:grid;grid-template-columns:repeat(5,1fr);gap:5px;overflow-y:auto;
-   align-content:start;scrollbar-width:none;padding-right:2px}
-  .pip-chips::-webkit-scrollbar{display:none}
-  .pip-ch{font-size:11px;font-weight:600;padding:5px 2px;border-radius:8px;cursor:pointer;text-align:center;
+   align-content:start;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.35) transparent;padding-right:4px}
+  .pip-chips::-webkit-scrollbar{width:5px}
+  .pip-chips::-webkit-scrollbar-track{background:transparent}
+  .pip-chips::-webkit-scrollbar-thumb{background:rgba(255,255,255,.35);border-radius:99px}
+  .pip-ch{font-size:12px;font-weight:600;padding:5px 2px;border-radius:8px;cursor:pointer;text-align:center;
    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);color:rgba(255,255,255,.75);
    transition:background .15s}
   .pip-ch:hover{background:rgba(255,255,255,.28)}
   .pip-ch.cur{background:rgba(255,255,255,.92);color:#241d63;border-color:transparent;font-weight:700}
   .pip-ch.done{background:rgba(80,210,120,.28);border-color:rgba(80,210,120,.50);color:#c8ffe0}
   .pip-ch.done.cur{background:rgba(80,210,120,.85);color:#0a3020;border-color:transparent}
-  .pip-upnext{font-size:11px;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
+  .pip-upnext{font-size:12px;color:rgba(255,255,255,.6);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px}
   .pip-upnext b{color:#fff;font-weight:600}
   .pip-progress{display:flex;align-items:center;gap:8px}
-  .pip-time{font-size:10px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:30px}
+  .pip-time{font-size:11px;color:rgba(255,255,255,.7);font-variant-numeric:tabular-nums;width:32px}
   #pipDur{text-align:right}
   .pip-bar{position:relative;flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.28);cursor:pointer;touch-action:none}
   .pip-fill{position:absolute;top:0;left:0;height:100%;border-radius:99px;background:#fff;width:0%}
