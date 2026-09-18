@@ -778,7 +778,7 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
    const dStr=startY===endY
     ? fmtY(startY)
     : fmtY(startY)+" – "+fmtY(endY);
-   c.fillStyle="#aaa"; c.font="500 12px Inter,system-ui,sans-serif";
+   c.fillStyle="rgba(255,255,255,0.65)"; c.font="500 12px Inter,system-ui,sans-serif";
    c.textAlign="right"; c.textBaseline="top";
    c.fillText(dStr,CX+CW,ry+7);
   } else {
