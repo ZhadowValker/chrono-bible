@@ -706,8 +706,10 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
 
  // ── Colours matching timeline.html ──
  // Light card background
- c.fillStyle="rgba(255,255,255,0.93)";
+ c.fillStyle="rgba(255,255,255,0.18)";
  _roundRect(c,X,Y,W2,H2,14); c.fill();
+ // Frosted-glass border
+ c.strokeStyle="rgba(255,255,255,0.25)"; c.lineWidth=1.5; c.stroke();
 
  // Clip drawing to card
  c.save(); c.beginPath(); _roundRect(c,X,Y,W2,H2,14); c.clip();
@@ -719,7 +721,7 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
  function fmtY(y){ if(y===null||y===undefined) return "?"; return (y<0?Math.abs(y)+" BC":"AD "+y); }
  const narStr="Narrative: "+fmtY(book.spanStart)+" – "+fmtY(book.spanEnd)+
                " · Written: "+fmtY(book.writtenStart)+" – "+fmtY(book.writtenEnd);
- c.fillStyle="#888"; c.font="500 13px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.55)"; c.font="500 13px Inter,system-ui,sans-serif";
  c.textBaseline="top"; c.textAlign="left";
  c.fillText(narStr,CX,Y+PAD_Y);
 
@@ -735,21 +737,21 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
 
  // Axis row: left date | right date
  const axisY=Y+PAD_Y+22;
- c.fillStyle="#aaa"; c.font="500 12px Inter,system-ui,sans-serif";
+ c.fillStyle="rgba(255,255,255,0.55)"; c.font="500 12px Inter,system-ui,sans-serif";
  c.textAlign="left";  c.fillText(fmtY(tMin),TX,axisY);
  c.textAlign="right"; c.fillText(fmtY(tMax),TX+TW,axisY);
 
  // Axis separator line
- c.strokeStyle="#e0e0e0"; c.lineWidth=1;
+ c.strokeStyle="rgba(255,255,255,0.20)"; c.lineWidth=1;
  c.beginPath(); c.moveTo(CX,axisY+16); c.lineTo(CX+CW,axisY+16); c.stroke();
 
  // ── Event rows ──
  const ROW_H=46, BAR_H=10, ROW_START=axisY+22;
- const TRACK_COL="#e8e8ee";       // grey track behind every bar
+ const TRACK_COL="rgba(255,255,255,0.18)";  // white tint track
  // Bar colour synced with the PiP background gradient
  const _barC1=barC1||"#5146d8", _barC2=barC2||"#7a6ce6";
- const UNDATED_BG="#ebebeb";
- const UNDATED_TEXT="#999";
+ const UNDATED_BG="rgba(255,255,255,0.15)";
+ const UNDATED_TEXT="rgba(255,255,255,0.50)";
 
  book.events.forEach((ev,idx)=>{
   const [name,type,,, startY,endY]=ev;
@@ -761,12 +763,12 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
 
   // Separator line above row (except first)
   if(idx>0){
-   c.strokeStyle="#eeeeee"; c.lineWidth=1;
+   c.strokeStyle="rgba(255,255,255,0.12)"; c.lineWidth=1;
    c.beginPath(); c.moveTo(CX,ry); c.lineTo(CX+CW,ry); c.stroke();
   }
 
   // ── Event name (top-left of row) ──
-  c.fillStyle="#1d2536"; c.font="600 14px Inter,system-ui,sans-serif";
+  c.fillStyle="rgba(255,255,255,0.92)"; c.font="600 14px Inter,system-ui,sans-serif";
   c.textBaseline="top"; c.textAlign="left";
   const shortName=name.length>24?name.slice(0,22)+"…":name;
   c.fillText(shortName,CX,ry+7);
@@ -780,7 +782,7 @@ function _pipDrawTimeline(c, X, Y, W2, H2, bookName, barC1, barC2){
    c.textAlign="right"; c.textBaseline="top";
    c.fillText(dStr,CX+CW,ry+7);
   } else {
-   c.fillStyle=UNDATED_TEXT; c.font="500 12px Inter,system-ui,sans-serif";
+   c.fillStyle="rgba(255,255,255,0.40)"; c.font="500 12px Inter,system-ui,sans-serif";
    c.textAlign="right"; c.textBaseline="top";
    c.fillText("undated",CX+CW,ry+7);
   }
