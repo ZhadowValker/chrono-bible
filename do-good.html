@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Help G. Prasad Undergo Life-Saving Surgery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --violet:   #6C3AE8;
+    --indigo:   #3B5BDB;
+    --teal:     #0D9488;
+    --rose:     #E85A7A;
+    --amber:    #F59E0B;
+    --surface:  #0A0F1E;
+    --surface2: #111827;
+    --glass:    rgba(255,255,255,0.06);
+    --glass-b:  rgba(255,255,255,0.12);
+    --text:     #F0F4FF;
+    --muted:    #94A3B8;
+    --radius:   16px;
+    --grad-hero: linear-gradient(135deg, #1a0533 0%, #0D1B4B 50%, #0A2A28 100%);
+    --grad-card: linear-gradient(135deg, rgba(108,58,232,0.15), rgba(13,148,136,0.10));
+    --grad-cta:  linear-gradient(135deg, #6C3AE8, #3B5BDB 50%, #0D9488);
+    --grad-rose: linear-gradient(135deg, #E85A7A, #6C3AE8);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    min-height: 100vh;
+    background: var(--grad-hero);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 24px 60px;
+    overflow: hidden;
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 20%, rgba(108,58,232,0.25) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 10% 80%, rgba(13,148,136,0.20) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 60px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .urgency-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(232,90,122,0.2);
+    border: 1px solid rgba(232,90,122,0.4);
+    color: #FB7A97;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .urgency-badge::before {
+    content: '';
+    width: 7px; height: 7px;
+    background: #E85A7A;
+    border-radius: 50%;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.4); }
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 900;
+    line-height: 1.15;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #E2DEFF 0%, #A5F3FC 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.05rem;
+    color: var(--muted);
+    max-width: 520px;
+    margin-bottom: 32px;
+    font-weight: 300;
+    line-height: 1.75;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--grad-cta);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 30px rgba(108,58,232,0.4);
+  }
+
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(108,58,232,0.5); }
+
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--text);
+    padding: 14px 24px;
+    border-radius: 100px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    border: 1px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+    text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
+
+  /* ─── GOAL CARD ─── */
+  .goal-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-b);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 36px 32px;
+  }
+
+  .goal-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .goal-amount {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    background: var(--grad-rose);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .goal-sub {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .upi-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+  }
+
+  .upi-icon {
+    width: 36px; height: 36px;
+    background: var(--grad-cta);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .upi-detail { flex: 1; min-width: 0; }
+  .upi-detail .small { font-size: 0.7rem; color: var(--muted); }
+  .upi-detail .id { font-size: 0.88rem; font-weight: 600; word-break: break-all; }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: var(--muted);
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { border-color: var(--violet); color: #fff; }
+
+  .qr-toggle {
+    width: 100%;
+    background: rgba(108,58,232,0.15);
+    border: 1px solid rgba(108,58,232,0.3);
+    color: #C4B5FD;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 0.83rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .qr-toggle:hover { background: rgba(108,58,232,0.25); }
+
+  .qr-panel {
+    display: none;
+    margin-top: 14px;
+    text-align: center;
+    padding: 20px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+  }
+
+  .qr-panel.open { display: block; }
+
+  .qr-panel svg { width: 160px; height: 160px; }
+
+  /* ─── SECTION WRAPPER ─── */
+  .section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 24px;
+  }
+
+  .section-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #818CF8;
+    margin-bottom: 12px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .section-lead {
+    font-size: 1rem;
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+  }
+
+  /* ─── STORY ─── */
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+
+  .story-text p {
+    font-size: 0.97rem;
+    color: #CBD5E1;
+    line-height: 1.85;
+    margin-bottom: 18px;
+  }
+
+  .story-text p:last-child { margin-bottom: 0; }
+
+  .highlight-box {
+    background: var(--grad-card);
+    border: 1px solid rgba(108,58,232,0.25);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+
+  .highlight-box h4 {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #A5B4FC;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-bottom: 10px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ─── COST TABLE ─── */
+  .cost-table {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .cost-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .cost-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+
+  .cost-table td {
+    padding: 14px 20px;
+    font-size: 0.9rem;
+    color: #CBD5E1;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .cost-table tr:last-child td { border-bottom: none; }
+
+  .cost-table tr.total td {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text);
+    background: rgba(108,58,232,0.1);
+  }
+
+  .cost-table td.amount {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 500;
+  }
+
+  .cost-table tr.total td.amount {
+    background: var(--grad-rose);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* ─── NEED CARDS ─── */
+  .need-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .need-card {
+    background: var(--glass);
+    border: 1px solid var(--glass-b);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .need-icon {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+
+  .need-card h4 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .need-card p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* ─── DOCS MODAL ─── */
+  .docs-section {
+    background: linear-gradient(135deg, rgba(108,58,232,0.08), rgba(13,148,136,0.06));
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .doc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .doc-card {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    padding: 20px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .doc-card:hover { border-color: var(--violet); transform: translateY(-2px); }
+
+  .doc-thumb {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, rgba(108,58,232,0.3), rgba(59,91,219,0.3));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .doc-meta h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 4px; }
+  .doc-meta p { font-size: 0.75rem; color: var(--muted); }
+
+  .doc-arrow {
+    margin-left: auto;
+    color: var(--muted);
+    font-size: 1.1rem;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .doc-card:hover .doc-arrow { color: #A5B4FC; }
+
+  /* ─── LIGHTBOX ─── */
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .lightbox.open { display: flex; }
+
+  .lightbox-content {
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .lightbox-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 16px;
+  }
+
+  .lightbox-header h3 { font-size: 1rem; font-weight: 600; }
+
+  .lightbox-close {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-radius: 8px;
+    width: 34px; height: 34px;
+    color: var(--muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .lightbox-close:hover { background: rgba(232,90,122,0.2); color: #FB7A97; }
+
+  .lightbox-nav {
+    display: flex;
+    gap: 8px;
+  }
+
+  .nav-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:hover { border-color: var(--violet); color: var(--text); }
+  .nav-btn.active { background: var(--violet); border-color: var(--violet); color: #fff; }
+
+  .lightbox-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+  }
+
+  .doc-view {
+    display: none;
+    padding: 28px;
+  }
+
+  .doc-view.active { display: block; }
+
+  .doc-view img {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+    margin-bottom: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* ─── DOC VIEWER tabs ─── */
+  .tab-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .tab-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.74rem;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { border-color: var(--violet); color: var(--text); }
+  .tab-btn.active { background: var(--violet); border-color: var(--violet); color: #fff; }
+
+  /* ─── DONATE SECTION ─── */
+  .donate-section {
+    background: var(--grad-hero);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .donate-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 70% 70% at 50% 50%, rgba(108,58,232,0.2), transparent);
+    pointer-events: none;
+  }
+
+  .donate-inner {
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .amount-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin: 32px 0;
+  }
+
+  .amount-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-b);
+    border-radius: 100px;
+    padding: 12px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .amount-btn:hover, .amount-btn.selected {
+    background: var(--grad-cta);
+    border-color: transparent;
+    box-shadow: 0 6px 20px rgba(108,58,232,0.4);
+  }
+
+  .upi-big {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--glass);
+    border: 1px solid var(--glass-b);
+    border-radius: 14px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .upi-big:hover { border-color: rgba(108,58,232,0.5); }
+
+  .donate-note {
+    font-size: 0.82rem;
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto;
+    line-height: 1.7;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    background: var(--surface2);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 40px 24px;
+    text-align: center;
+  }
+
+  footer p {
+    font-size: 0.82rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  footer strong { color: var(--text); }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    margin: 0;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 860px) {
+    .hero-inner { grid-template-columns: 1fr; }
+    .story-grid { grid-template-columns: 1fr; }
+    .goal-card { max-width: 420px; }
+  }
+
+  @media (max-width: 560px) {
+    .hero { padding: 100px 20px 60px; }
+    .section { padding: 56px 20px; }
+    .amount-grid { gap: 8px; }
+    .amount-btn { padding: 10px 18px; font-size: 0.9rem; }
+    .lightbox-content { border-radius: 12px; }
+  }
+
+  /* ─── SCROLL ANIM ─── */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .fade-up.in { opacity: 1; transform: none; }
+
+  /* ─── COPY TOAST ─── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #10B981;
+    color: #fff;
+    padding: 10px 22px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    pointer-events: none;
+    z-index: 10000;
+  }
+
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-left">
+      <div class="urgency-badge">Urgent Medical Need</div>
+      <h1>Help G. Prasad Undergo Life-Saving Surgery</h1>
+      <p>G. Prasad, 49, is battling advanced Crohn's disease with severe intestinal strictures. He cannot eat and has lost significant weight. Doctors have recommended an urgent exploratory laparotomy. His family cannot bear this cost alone.</p>
+      <div class="hero-actions">
+        <a href="#donate" class="btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+          Donate Now
+        </a>
+        <button class="btn-ghost" onclick="openDocs()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          View Documents
+        </button>
+      </div>
+    </div>
+
+    <div class="goal-card">
+      <div class="goal-label">Fundraising Goal</div>
+      <div class="goal-amount">₹5,50,000</div>
+      <div class="goal-sub">Surgery · ICU care · Hospitalization · Medicines · Blood requirements · Additional medical expenses</div>
+
+
+
+      <a href="https://www.upilinks.in/payment-link/upi804490062" target="_blank" class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%;text-decoration:none;font-size:1rem;padding:16px 24px;margin-bottom:20px">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+        Donate Now via UPI
+      </a>
+      <div style="text-align:center">
+        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:12px;letter-spacing:0.05em;text-transform:uppercase;font-weight:600">Or Scan QR Code to Pay</p>
+        <div style="background:#fff;border-radius:16px;padding:16px;display:inline-block">
+          <img src="https://srv1822-files.hstgr.io/ab82c0c8402d3b39/api/raw/public_html/Do%20Good/G%20Prasad%20Donation%20QR%20.jpeg?" alt="UPI QR Code — Pallavi Geddada" style="width:220px;height:auto;display:block;border-radius:8px"/>
+          <p style="font-size:0.72rem;color:#334155;margin-top:8px;font-family:monospace;font-weight:600">pallaviprasad0416@okaxis</p>
+          <p style="font-size:0.68rem;color:#64748B;margin-top:2px">Scan with any UPI app to pay</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STORY ─── -->
+<section>
+  <div class="section">
+    <div class="section-tag">The Story</div>
+    <h2 class="section-title">A Father's Fight for Life</h2>
+
+    <div class="story-grid">
+      <div class="story-text fade-up">
+        <p>G. Prasad, 49, was first diagnosed with Crohn's disease in 2018. After years of managing with medication, his condition has worsened significantly. He is now unable to tolerate solid food — every attempt to eat causes severe cramping abdominal pain around his navel.</p>
+        <p>The inability to eat has caused rapid, significant weight loss and extreme weakness. CT imaging reveals multiple intestinal strictures, active inflammation, and a high-grade partial small bowel obstruction involving the distal jejunum and proximal ileum.</p>
+        <p>During his September 2026 hospitalization at AIG Hospitals, Banjara Hills, the surgical gastroenterology team explained the critical need for surgery. Doctors have planned a diagnostic laparoscopy and bowel resection — with or without a stoma, depending on what is found during surgery.</p>
+        <p>The follow-up note from AIG Hospitals states clearly: <em>"Urgent hospitalization required. Plan exploratory laparotomy and proceed."</em> Time is critical.</p>
+      </div>
+
+      <div class="fade-up" style="transition-delay:0.15s">
+        <div style="margin-bottom:24px;border-radius:var(--radius);overflow:hidden;border:1px solid rgba(255,255,255,0.1);box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+          <img src="https://srv1822-files.hstgr.io/ab82c0c8402d3b39/api/raw/public_html/Do%20Good/G%20Prasad%20Condition%20.jpeg?" alt="G. Prasad" style="width:100%;height:auto;display:block;object-fit:cover"/>
+          <div style="padding:12px 16px;background:rgba(255,255,255,0.04);text-align:center">
+            <p style="font-size:0.78rem;color:var(--muted);font-style:italic">G. Prasad, 49 — awaiting urgent surgery</p>
+          </div>
+        </div>
+        <div class="highlight-box">
+          <h4>Confirmed Diagnosis</h4>
+          <div class="tag-list">
+            <span class="tag">Crohn's Disease — A3 L3+L4 B2+B3</span>
+            <span class="tag">Multiple Intestinal Strictures</span>
+            <span class="tag">Distal Jejunum Stricture</span>
+            <span class="tag">Proximal Ileum Stricture</span>
+            <span class="tag">High-Grade Small Bowel Obstruction</span>
+            <span class="tag">Active Intestinal Inflammation</span>
+            <span class="tag">Incomplete Sinus Tracts</span>
+          </div>
+        </div>
+
+        <div class="highlight-box" style="border-color:rgba(13,148,136,0.25);background:linear-gradient(135deg,rgba(13,148,136,0.1),rgba(59,91,219,0.08))">
+          <h4>Attending Specialists · AIG Hospitals</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;margin-bottom:8px"><strong>Dr. Partha Pal</strong> — Director, IBD Centre · Medical Gastroenterology</p>
+          <p style="font-size:0.88rem;color:#CBD5E1"><strong>Dr. Pradeep Rebala</strong> — Consultant Surgical Gastroenterologist</p>
+        </div>
+
+        <div class="highlight-box" style="border-color:rgba(232,90,122,0.25);background:linear-gradient(135deg,rgba(232,90,122,0.1),rgba(108,58,232,0.07))">
+          <h4>Timeline</h4>
+          <p style="font-size:0.82rem;color:#CBD5E1;line-height:1.7">
+            <strong>2018</strong> — Crohn's disease diagnosed<br>
+            <strong>Feb 2026</strong> — Colonoscopy &amp; biopsy at AIG<br>
+            <strong>Mar 2026</strong> — CT confirms strictures<br>
+            <strong>Sep 1, 2026</strong> — Admitted with obstruction<br>
+            <strong>Sep 2, 2026</strong> — CECT confirms high-grade obstruction<br>
+            <strong>Sep 3, 2026</strong> — Discharged DAMA; surgery funds needed urgently
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── COSTS ─── -->
+<section>
+  <div class="section">
+    <div class="section-tag">Hospital Estimate</div>
+    <h2 class="section-title">Where Your Money Goes</h2>
+    <p class="section-lead">The following is AIG Hospitals' initial pre-admission estimate (Estimate No. ESTB1862). Final costs may be higher based on actual treatment, investigations, and any additional medical needs.</p>
+
+    <div class="cost-table fade-up">
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th class="amount" style="text-align:right">Amount (INR)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Room Rent — Sharing (5 days × ₹4,950)</td><td class="amount">₹24,750</td></tr>
+          <tr><td>Surgeon Fee (Dr. Pradeep Rebala)</td><td class="amount">₹1,70,000</td></tr>
+          <tr><td>Investigation Charges</td><td class="amount">As per actual</td></tr>
+          <tr><td>Drug Charges</td><td class="amount">₹1,50,000</td></tr>
+          <tr><td>Consumable Charges</td><td class="amount">₹20,000</td></tr>
+          <tr><td>Admission Charges</td><td class="amount">₹1,200</td></tr>
+          <tr><td>ICU Charges (2 days × ₹12,000)</td><td class="amount">₹24,000</td></tr>
+          <tr><td>Miscellaneous</td><td class="amount">₹30,000</td></tr>
+          <tr class="total"><td><strong>Initial Estimate Total</strong></td><td class="amount"><strong>₹4,19,950</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:16px;padding:16px 20px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:12px">
+      <p style="font-size:0.82rem;color:#FCD34D;line-height:1.7">
+        ⚠ Blood tests, blood requirements, and other complications are additional. The fundraising goal of ₹5,50,000 covers these additional expenses. Minimum deposit required at admission: ₹3,20,000.
+      </p>
+    </div>
+
+    <div style="margin-top:28px">
+      <div class="section-tag" style="margin-bottom:20px">What Your Support Covers</div>
+      <div class="need-grid">
+        <div class="need-card fade-up">
+          <div class="need-icon">🔬</div>
+          <h4>Diagnostic Surgery</h4>
+          <p>Planned laparoscopy and bowel resection with or without stoma</p>
+        </div>
+        <div class="need-card fade-up" style="transition-delay:0.1s">
+          <div class="need-icon">🏥</div>
+          <h4>Hospitalization</h4>
+          <p>Room charges, nursing care, and facility fees for 7+ days</p>
+        </div>
+        <div class="need-card fade-up" style="transition-delay:0.2s">
+          <div class="need-icon">💊</div>
+          <h4>Medicines</h4>
+          <p>IV antibiotics, drugs, and post-operative consumables</p>
+        </div>
+        <div class="need-card fade-up" style="transition-delay:0.3s">
+          <div class="need-icon">🩸</div>
+          <h4>Blood Requirements</h4>
+          <p>Transfusions and blood products if needed during surgery</p>
+        </div>
+        <div class="need-card fade-up" style="transition-delay:0.4s">
+          <div class="need-icon">🫀</div>
+          <h4>ICU Care</h4>
+          <p>Post-surgical intensive care monitoring for at least 2 days</p>
+        </div>
+        <div class="need-card fade-up" style="transition-delay:0.5s">
+          <div class="need-icon">📋</div>
+          <h4>Investigations</h4>
+          <p>Lab work, imaging, and additional tests as clinically required</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── DOCUMENTS ─── -->
+<section class="docs-section">
+  <div class="section">
+    <div class="section-tag">Transparency</div>
+    <h2 class="section-title">View Original Documents</h2>
+    <p class="section-lead">All medical records and hospital documents are available for your review. We believe in full transparency.</p>
+
+    <div class="doc-grid">
+      <div class="doc-card" onclick="openDoc(0)">
+        <div class="doc-thumb">📋</div>
+        <div class="doc-meta">
+          <h4>Hospital Estimate</h4>
+          <p>AIG Hospitals · Estimate No. ESTB1862 · ₹4,19,950</p>
+        </div>
+        <div class="doc-arrow">→</div>
+      </div>
+
+      <div class="doc-card" onclick="openDoc(1)">
+        <div class="doc-thumb">🏥</div>
+        <div class="doc-meta">
+          <h4>LAMA Summary — Pages 1–2</h4>
+          <p>AIG Hospitals · Admission, Diagnosis & History</p>
+        </div>
+        <div class="doc-arrow">→</div>
+      </div>
+
+      <div class="doc-card" onclick="openDoc(2)">
+        <div class="doc-thumb">🩻</div>
+        <div class="doc-meta">
+          <h4>CECT Abdomen Report</h4>
+          <p>02 Sep 2026 · High-grade obstruction confirmed</p>
+        </div>
+        <div class="doc-arrow">→</div>
+      </div>
+
+      <div class="doc-card" onclick="openDoc(3)">
+        <div class="doc-thumb">🔬</div>
+        <div class="doc-meta">
+          <h4>Lab Investigation Reports</h4>
+          <p>Renal Function Tests · Serum Electrolytes</p>
+        </div>
+        <div class="doc-arrow">→</div>
+      </div>
+
+      <div class="doc-card" onclick="openDoc(4)">
+        <div class="doc-thumb">💊</div>
+        <div class="doc-meta">
+          <h4>Discharge Summary & Medications</h4>
+          <p>Discharge on DAMA · Follow-up instructions</p>
+        </div>
+        <div class="doc-arrow">→</div>
+      </div>
+
+      <div class="doc-card" onclick="openDocs()">
+        <div class="doc-thumb" style="background:linear-gradient(135deg,rgba(13,148,136,0.3),rgba(59,91,219,0.3))">📁</div>
+        <div class="doc-meta">
+          <h4>All Documents</h4>
+          <p>Browse the full set of verified medical records</p>
+        </div>
+        <div class="doc-arrow">→</div>
+      </div>
+      <a class="doc-card" href="https://srv1822-files.hstgr.io/ab82c0c8402d3b39/api/raw/public_html/Do%20Good/Prasad%20Donation%20Request.pdf?" target="_blank" style="text-decoration:none;color:inherit">
+        <div class="doc-thumb" style="background:linear-gradient(135deg,rgba(232,90,122,0.3),rgba(108,58,232,0.3))">📄</div>
+        <div class="doc-meta">
+          <h4>Original Reports &amp; Estimations</h4>
+          <p>View all verified hospital documents</p>
+        </div>
+        <div class="doc-arrow" style="color:#FB7A97">↓</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ─── DONATE ─── -->
+<section class="donate-section" id="donate">
+  <div class="section donate-inner">
+    <div class="section-tag" style="text-align:center">Make a Difference</div>
+    <h2 class="section-title" style="text-align:center">Every Contribution Matters</h2>
+    <p class="section-lead" style="margin: 0 auto 0;text-align:center">Even a small gift brings G. Prasad closer to the surgery he urgently needs. Share with your network if you can't donate — it costs nothing and saves a life.</p>
+
+    <div style="display:flex;flex-direction:column;align-items:center;gap:28px;margin-top:40px">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
+        <a href="https://www.upilinks.in/payment-link/upi804490062" target="_blank" class="btn-primary" style="font-size:1.1rem;padding:18px 48px;text-decoration:none">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/></svg>
+          Donate via UPI Link
+        </a>
+        <a href="https://srv1822-files.hstgr.io/ab82c0c8402d3b39/api/raw/public_html/Do%20Good/Prasad%20Donation%20Request.pdf?" target="_blank" class="btn-ghost" style="font-size:1rem;padding:18px 32px;text-decoration:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          View Original Reports &amp; Estimations
+        </a>
+      </div>
+      <div>
+        <p style="font-size:0.72rem;color:var(--muted);margin-bottom:14px;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;text-align:center">Or Scan QR Code</p>
+        <div style="background:#fff;border-radius:20px;padding:20px;display:inline-block;box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+          <img src="https://srv1822-files.hstgr.io/ab82c0c8402d3b39/api/raw/public_html/Do%20Good/G%20Prasad%20Donation%20QR%20.jpeg?" alt="UPI QR Code — Pallavi Geddada" style="width:240px;height:auto;display:block;border-radius:8px"/>
+          <p style="font-size:0.78rem;color:#1e293b;margin-top:10px;font-family:monospace;font-weight:700;text-align:center">pallaviprasad0416@okaxis</p>
+          <p style="font-size:0.7rem;color:#64748B;margin-top:3px;text-align:center">Scan with any UPI app · Google Pay, PhonePe, Paytm</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="donate-note">
+      Payments go directly to <strong>Pallavi Geddada</strong> (daughter of G. Prasad) via UPI. 
+      For queries, please reach out through the contact on the fundraiser poster. 
+      Please keep G. Prasad in your prayers. 🙏
+    </p>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <p>
+    Fundraiser raised by <strong>Pallavi Geddada</strong> for her father <strong>G. Prasad</strong> (Age 49).<br>
+    Patient at <strong>AIG Hospitals, Banjara Hills, Hyderabad, Telangana — 500034.</strong><br><br>
+    <span style="font-size:0.75rem">All documents are original hospital records and can be verified. Any contribution, however small, brings hope.</span>
+  </p>
+</footer>
+
+<!-- ─── LIGHTBOX ─── -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOnBg(event)">
+  <div class="lightbox-content">
+    <div class="lightbox-header">
+      <h3 id="docTitle">Medical Documents — G. Prasad</h3>
+      <div class="lightbox-nav" id="lbNav"></div>
+      <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+    </div>
+
+    <div class="tab-bar" id="tabBar"></div>
+
+    <div class="lightbox-body">
+      <!-- Doc 0: Hospital Estimate -->
+      <div class="doc-view active" id="dv0">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+          <strong style="color:var(--text)">AIG Hospitals Surgery Estimation</strong><br>
+          Estimate No. ESTB1862 · Dated 18/09/2026 · Patient UHID: AIGG.21293071<br>
+          Surgeon: Dr. Pradeep Rebala · Minimum Deposit: ₹3,20,000
+        </p>
+        <div class="cost-table" style="margin-bottom:16px">
+          <table>
+            <thead><tr><th>Item</th><th class="amount" style="text-align:right">Amount (INR)</th></tr></thead>
+            <tbody>
+              <tr><td>Room Rent — Sharing (5×₹4,950)</td><td class="amount">₹24,750</td></tr>
+              <tr><td>Surgeon Fee</td><td class="amount">₹1,70,000</td></tr>
+              <tr><td>Investigation Charges</td><td class="amount">As per actual</td></tr>
+              <tr><td>Drug Charges</td><td class="amount">₹1,50,000</td></tr>
+              <tr><td>Consumable Charges</td><td class="amount">₹20,000</td></tr>
+              <tr><td>Admission Charges</td><td class="amount">₹1,200</td></tr>
+              <tr><td>ICU Charge (2 days)</td><td class="amount">₹24,000</td></tr>
+              <tr><td>Miscellaneous</td><td class="amount">₹30,000</td></tr>
+              <tr class="total"><td><strong>Total Amount</strong></td><td class="amount"><strong>₹4,19,950</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:14px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;font-size:0.8rem;color:#FCD34D;line-height:1.7">
+          Remarks: Blood, tests &amp; other complications are additional. Diagnosis: Diag Lap – Small Bowel RA +/– Stoma. Expected stay: 7 days.
+        </div>
+      </div>
+
+      <!-- Doc 1: LAMA Summary -->
+      <div class="doc-view" id="dv1">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+          <strong style="color:var(--text)">LAMA Summary (Left Against Medical Advice)</strong><br>
+          UHID: AIGG.21293071 · IP No: 4003258 · Admission: 01-09-2026 · Discharge: 03-09-2026<br>
+          Primary: Dr. Partha Pal (Director, IBD Centre) · Referral: Dr. Pradeep Rebala
+        </p>
+        <div class="highlight-box">
+          <h4>Diagnosis (ICD)</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;line-height:1.7">
+            • Crohn's Disease — A3 L3+L4 B2+B3<br>
+            • Subacute Intestinal Obstruction (Stricture at Distal Jejunum and Proximal Ileum)
+          </p>
+        </div>
+        <div class="highlight-box" style="border-color:rgba(13,148,136,0.25)">
+          <h4>History of Presenting Complaints</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;line-height:1.75">
+            Patient presented with increasing abdominal pain for 3–4 weeks, abdominal distension from 2 months — increased with food/fluid intake. No fever, vomiting, hematemesis, or blood in stool. Previously diagnosed with Crohn's in 2018 and treated with Mesacol twice daily. CT enterography done 03/03/2026. Started on Wysolone 20 mg once daily 20 days prior to admission.
+          </p>
+        </div>
+        <div class="highlight-box" style="border-color:rgba(232,90,122,0.25)">
+          <h4>CECT Abdomen — 02/09/2026 (Summary)</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;line-height:1.75">
+            Known Crohn's disease with active stricturing disease involving the distal jejunum and proximal ileum, causing moderate to severe luminal narrowing and resultant upstream small-bowel dilatation with distal bowel collapse — consistent with high grade partial small bowel obstruction. Associated mild penetrating disease adjacent to the ileal lesion. No associated abscess.
+          </p>
+        </div>
+        <div style="padding:14px;background:rgba(232,90,122,0.08);border:1px solid rgba(232,90,122,0.25);border-radius:10px;font-size:0.82rem;color:#FB7A97;line-height:1.7">
+          <strong>Review / Follow-up Note:</strong> "Urgent hospitalization required. Plan exploratory laparotomy and proceed." — Signed Dr. Partha Pal, Director IBD Centre
+        </div>
+      </div>
+
+      <!-- Doc 2: CECT Report -->
+      <div class="doc-view" id="dv2">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+          <strong style="color:var(--text)">CECT Abdomen Report</strong><br>
+          Bill Date: 02-Sep-2026 · Reporting Date: 03/09/2026 12:32PM · Accession No: 1I.2082634.33749<br>
+          Ref. Phys: Dr. Partha Pal · Approved by: Dr. Chaithanya Isamalla, MBBS MDRD, Director Sr. Consultant Radiology
+        </p>
+        <div class="highlight-box">
+          <h4>Impression (Final Radiology)</h4>
+          <p style="font-size:0.9rem;color:#E2E8F0;line-height:1.8;font-style:italic">
+            "Known Crohn's disease with active stricturing disease involving the distal jejunum and proximal ileum, causing moderate to severe luminal narrowing and resultant upstream small-bowel dilatation with distal bowel collapse — consistent with high grade partial small bowel obstruction. Associated mild penetrating disease adjacent to the ileal lesion in the right hypochondrium with heterogeneously enhancing incomplete sinus tracts. No associated abscess. Persistent mild mucosal enhancement of the cecum and proximal appendix — residual inflammatory change. Mildly enlarged jejunal mesenteric lymphnodes — likely reactive."
+          </p>
+        </div>
+        <div class="highlight-box" style="border-color:rgba(13,148,136,0.25)">
+          <h4>Key Findings</h4>
+          <p style="font-size:0.85rem;color:#CBD5E1;line-height:1.8">
+            • Proximal ileum stricture (right hypochondrium): 2.8 cm length, max wall thickness 12mm, moderate to severe luminal narrowing<br>
+            • Distal jejunum stricture: ~4.5 cm length, max wall thickness 9.8mm<br>
+            • Upstream small bowel dilatation (max luminal diameter 6.5 cm in proximal jejunum)<br>
+            • Incomplete sinus tracts — no abscess<br>
+            • Jejunal mesenteric node: 11.8 mm · Ileal mesenteric node: 5.6 mm (reactive)<br>
+            • Multiple enteroliths in mid-dilated jejunal loops<br>
+            • Osteopenia of pelvic bones<br>
+            • Liver, kidneys, spleen, pancreas, aorta — normal
+          </p>
+        </div>
+      </div>
+
+      <!-- Doc 3: Lab Reports -->
+      <div class="doc-view" id="dv3">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+          <strong style="color:var(--text)">Laboratory Investigation Reports</strong><br>
+          AIG Hospitals, Banjara Hills · Ref. Dr. Partha Pal · Verified by: Dr. G. Deepika (Dir. HOD Biochemistry)
+        </p>
+        <div class="cost-table" style="margin-bottom:20px">
+          <table>
+            <thead><tr><th>Test</th><th>Result</th><th>Reference Range</th><th>Date</th></tr></thead>
+            <tbody>
+              <tr><td colspan="4" style="background:rgba(108,58,232,0.1);font-size:0.75rem;font-weight:600;color:#A5B4FC">Renal Function Tests (Urea, Creat, Elect) — 03/09/2026</td></tr>
+              <tr><td>Blood Urea</td><td>24 mg/dL</td><td>16.6–48.5</td><td>03/09</td></tr>
+              <tr><td>Serum Creatinine</td><td>0.97 mg/dL</td><td>0.7–1.2</td><td>03/09</td></tr>
+              <tr><td>Sodium</td><td style="color:#FCD34D">134 mEq/L ▼</td><td>136–145</td><td>03/09</td></tr>
+              <tr><td>Potassium</td><td>4.9 mEq/L</td><td>3.5–5.1</td><td>03/09</td></tr>
+              <tr><td>Chloride</td><td>100 mEq/L</td><td>98–107</td><td>03/09</td></tr>
+              <tr><td colspan="4" style="background:rgba(108,58,232,0.1);font-size:0.75rem;font-weight:600;color:#A5B4FC">Serum Electrolytes — 01/09/2026</td></tr>
+              <tr><td>Sodium</td><td style="color:#FCD34D">132 mEq/L ▼</td><td>136–145</td><td>01/09</td></tr>
+              <tr><td>Potassium</td><td>4.9 mEq/L</td><td>3.5–5.1</td><td>01/09</td></tr>
+              <tr><td>Chloride</td><td>98 mEq/L</td><td>98–107</td><td>01/09</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="padding:14px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);border-radius:10px;font-size:0.8rem;color:#FCD34D;line-height:1.7">
+          Note: Sodium levels were mildly low on admission (132) and improved slightly at discharge (134) — still below normal range. This is consistent with poor nutritional intake and fluid imbalance from bowel obstruction.
+        </div>
+      </div>
+
+      <!-- Doc 4: Discharge / Medications -->
+      <div class="doc-view" id="dv4">
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6">
+          <strong style="color:var(--text)">Discharge Summary & Medications</strong><br>
+          Discharge Date: 03-09-2026 08:02 PM (DAMA — Discharged Against Medical Advice)<br>
+          Patient was discharged at attendees' request after being explained the need for surgery
+        </p>
+        <div class="highlight-box" style="border-color:rgba(232,90,122,0.25)">
+          <h4>Condition on Discharge</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;line-height:1.7">
+            Temp: 98.6 · Pulse: 84 · BP: 102/73 · SpO2: 99%<br>
+            Patient was conscious/coherent. Treated with IV fluids, IV antibiotics (Zostum, Metrogyl), nasogastric tube insertion. 350 mL RT output noted (suspected food). Surgical opinion sought and advice followed.
+          </p>
+        </div>
+        <div class="highlight-box" style="border-color:rgba(13,148,136,0.25)">
+          <h4>Discharge Medications</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;line-height:1.9">
+            1. <strong>Sompraz IT Cap</strong> (Esomeprazole 40mg + Itopride 150mg) — Once daily before breakfast · 1 month<br>
+            2. <strong>Bevon 200mL Syrup</strong> (Multivitamine) — Twice daily after food · 1 month<br>
+            3. <strong>Drotin 40mg Tab</strong> (Drotaverine) — SOS (as needed)
+          </p>
+        </div>
+        <div class="highlight-box">
+          <h4>Diet &amp; Follow-up</h4>
+          <p style="font-size:0.88rem;color:#CBD5E1;line-height:1.7">
+            Diet: Exclusive enteral nutrition as advised by dietitian.<br>
+            <span style="color:#FB7A97;font-weight:600">Follow-up: Urgent hospitalization required. Plan exploratory laparotomy and proceed.</span><br>
+            Review SOS in Medical Gastroenterology OPD.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── TOAST ─── -->
+<div class="toast" id="toast">✓ UPI ID Copied!</div>
+
+<script>
+  // ─── UPI ───
+  function copyUPI() {
+    navigator.clipboard.writeText('pallaviprasad0416@okaxis').then(() => showToast('✓ UPI ID Copied!'));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ─── QR TOGGLE ───
+  function toggleQR() {
+    document.getElementById('qrPanel').classList.toggle('open');
+  }
+
+  // ─── AMOUNT SELECT ───
+  function selectAmt(btn) {
+    document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  // ─── LIGHTBOX ───
+  const docs = [
+    { title: 'Hospital Estimate', tab: 'Estimate' },
+    { title: 'LAMA Summary', tab: 'LAMA Summary' },
+    { title: 'CECT Abdomen Report', tab: 'CECT Report' },
+    { title: 'Lab Reports', tab: 'Lab Reports' },
+    { title: 'Discharge & Medications', tab: 'Discharge' },
+  ];
+
+  let currentDoc = 0;
+
+  function buildTabs() {
+    const bar = document.getElementById('tabBar');
+    bar.innerHTML = '';
+    docs.forEach((d, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn' + (i === currentDoc ? ' active' : '');
+      btn.textContent = d.tab;
+      btn.onclick = () => switchDoc(i);
+      bar.appendChild(btn);
+    });
+  }
+
+  function switchDoc(i) {
+    document.querySelectorAll('.doc-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('dv' + i).classList.add('active');
+    currentDoc = i;
+    document.getElementById('docTitle').textContent = docs[i].title;
+    buildTabs();
+  }
+
+  function openDoc(i) {
+    currentDoc = i;
+    buildTabs();
+    document.querySelectorAll('.doc-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('dv' + i).classList.add('active');
+    document.getElementById('docTitle').textContent = docs[i].title;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openDocs() { openDoc(0); }
+
+  function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function closeLightboxOnBg(e) {
+    if (e.target === document.getElementById('lightbox')) closeLightbox();
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight' && document.getElementById('lightbox').classList.contains('open'))
+      switchDoc((currentDoc + 1) % docs.length);
+    if (e.key === 'ArrowLeft' && document.getElementById('lightbox').classList.contains('open'))
+      switchDoc((currentDoc - 1 + docs.length) % docs.length);
+  });
+
+  // ─── SCROLL ANIMATIONS ───
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
