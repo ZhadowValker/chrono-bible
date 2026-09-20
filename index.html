@@ -53,7 +53,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
  line-height:1.04;letter-spacing:-.022em}
 .hero p{margin:7px 0 0;font-size:13.5px;line-height:1.5;color:rgba(255,255,255,.76);max-width:46ch}
 .hero-nav{flex:0 0 auto}
-.hero-actions{margin-left:auto;display:flex;gap:8px;flex:0 0 auto}
+.hero-actions{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:0 0 auto}
 .hero-nav a{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#fff;text-decoration:none;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:9px 15px;backdrop-filter:blur(6px);transition:background .2s,transform .2s;white-space:nowrap}
 .hero-nav a:hover{background:rgba(255,255,255,.24);transform:translateY(-1px)}
 .hero-lang{font-size:12.5px;font-weight:600;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.32);border-radius:99px;padding:9px 12px;backdrop-filter:blur(6px);cursor:pointer}
@@ -176,6 +176,122 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
+
+  /* ─── DO GOOD PILL ─── */
+  .do-good-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #E85A7A, #6C3AE8);
+    color: #fff;
+    border: none;
+    border-radius: 99px;
+    padding: 9px 14px;
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(232,90,122,0.55);
+    animation: pill-glow 2.4s ease-in-out infinite;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .do-good-pill:hover {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 10px 28px rgba(232,90,122,0.75);
+    animation: none;
+  }
+  .do-good-pill .pill-dot {
+    width: 7px; height: 7px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse-dot 1.8s ease-in-out infinite;
+  }
+  @keyframes pill-glow {
+    0%, 100% { box-shadow: 0 6px 20px rgba(232,90,122,0.55); }
+    50%       { box-shadow: 0 8px 30px rgba(232,90,122,0.9), 0 0 0 7px rgba(232,90,122,0.14); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.35; transform: scale(1.6); }
+  }
+  /* ─── DO GOOD MODAL ─── */
+  .dg-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(5,8,18,0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .dg-overlay.open { display: flex; }
+  .dg-modal {
+    width: 100%;
+    max-width: 980px;
+    max-height: 92vh;
+    background: #0A0F1E;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 40px 100px rgba(0,0,0,0.75);
+    animation: modal-in 0.32s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes modal-in {
+    from { opacity:0; transform:scale(0.92) translateY(20px); }
+    to   { opacity:1; transform:scale(1) translateY(0); }
+  }
+  .dg-modal-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 22px;
+    background: linear-gradient(90deg,rgba(232,90,122,0.12),rgba(108,58,232,0.12));
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    gap: 12px;
+  }
+  .dg-modal-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #FB7A97;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: inherit;
+  }
+  .dg-modal-close {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.07);
+    border: none;
+    border-radius: 8px;
+    color: #94A3B8;
+    font-size: 1rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: all 0.2s;
+  }
+  .dg-modal-close:hover { background:rgba(232,90,122,0.2); color:#FB7A97; }
+  .dg-modal-body {
+    flex: 1;
+    overflow: hidden;
+  }
+  .dg-modal-body iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
 </style>
 </head><body>
 
@@ -194,6 +310,10 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       <p>Two hundred and thirty-six events, in order</p>
     </div>
     <div class="hero-actions">
+     <button class="do-good-pill" onclick="openDoGood()" aria-label="Help G. Prasad">
+      <span class="pill-dot"></span>
+      🙏 Do Good
+     </button>
      <nav class="hero-nav"><a href="timeline.html">Timeline chart →</a></nav>
      <select id="uiLang" class="hero-lang" title="Interface language" aria-label="Interface language">
       <option value="en" selected>English</option>
@@ -1723,5 +1843,28 @@ applyLang(uiLang);
  const t=progress.last.time||0;
  audio.addEventListener("loadedmetadata",()=>{ if(t>0&&t<(audio.duration||Infinity)) audio.currentTime=t; },{once:true});
 })();
+</script>
+
+<!-- ─── DO GOOD MODAL ─── -->
+<div class="dg-overlay" id="dgOverlay" onclick="closeDGOnBg(event)">
+  <div class="dg-modal">
+    <div class="dg-modal-bar">
+      <div class="dg-modal-title">🙏 &nbsp;Do Good — Help G. Prasad</div>
+      <button class="dg-modal-close" onclick="closeDoGood()">✕</button>
+    </div>
+    <div class="dg-modal-body">
+      <iframe
+        src="do-good.html"
+        title="Help G. Prasad — Donation Page"
+        loading="lazy">
+      </iframe>
+    </div>
+  </div>
+</div>
+<script>
+function openDoGood(){document.getElementById('dgOverlay').classList.add('open');document.body.style.overflow='hidden';}
+function closeDoGood(){document.getElementById('dgOverlay').classList.remove('open');document.body.style.overflow='';}
+function closeDGOnBg(e){if(e.target===document.getElementById('dgOverlay'))closeDoGood();}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDoGood();});
 </script>
 </body></html>
