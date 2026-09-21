@@ -292,6 +292,43 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     border: none;
     display: block;
   }
+
+  /* ─── DARK MODE ─── */
+  [data-theme="dark"] {
+    --bg:#0f1117; --panel:#1a1f2e; --surface:#222840;
+    --ink:#e8eaf6; --muted:#7b87a8; --line:#2a3050;
+    --accent:#7c6ff0; --accent-dark:#6c60e0; --accent-ring:#4a4580; --soft:#1e1b40; --soft-ink:#a89cf5;
+  }
+  [data-theme="dark"] .hero {
+    background: linear-gradient(118deg,#0d0a2e 0%,#1a1560 38%,#2a238a 68%,#3d34b0 100%);
+  }
+  [data-theme="dark"] .q { background: var(--surface); }
+  [data-theme="dark"] .stat { background: var(--surface); }
+
+  body, .player, .q, .stat, .tools input, .tools select, .lightbox-content {
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* ─── THEME TOGGLE BUTTON ─── */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 50%;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover {
+    background: rgba(255,255,255,0.25);
+    transform: rotate(20deg);
+  }
 </style>
 </head><body>
 
@@ -314,6 +351,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
       🙏 Do Good
     </a>
     <div class="hero-actions">
+     <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode" aria-label="Toggle theme">🌙</button>
      <nav class="hero-nav"><a href="timeline.html">Timeline chart →</a></nav>
      <select id="uiLang" class="hero-lang" title="Interface language" aria-label="Interface language">
       <option value="en" selected>English</option>
@@ -1866,5 +1904,26 @@ function openDoGood(){document.getElementById('dgOverlay').classList.add('open')
 function closeDoGood(){document.getElementById('dgOverlay').classList.remove('open');document.body.style.overflow='';}
 function closeDGOnBg(e){if(e.target===document.getElementById('dgOverlay'))closeDoGood();}
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDoGood();});
+</script>
+
+<script>
+// ─── THEME TOGGLE ───
+(function() {
+  const root = document.documentElement;
+  const btn  = document.getElementById('themeToggle');
+  const saved = localStorage.getItem('theme') ||
+    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+
+  function applyTheme(t) {
+    root.setAttribute('data-theme', t);
+    btn.textContent = t === 'dark' ? '☀️' : '🌙';
+    localStorage.setItem('theme', t);
+  }
+
+  applyTheme(saved);
+  btn.addEventListener('click', () => {
+    applyTheme(root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+})();
 </script>
 </body></html>
