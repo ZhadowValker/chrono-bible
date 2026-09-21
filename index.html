@@ -293,50 +293,56 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
     display: block;
   }
 
-  /* ─── DARK MODE — DEEP BLACK ─── */
+  /* ─── DARK MODE — HERO GRADIENT ─── */
   [data-theme="dark"] {
-    --bg:#0a0a0a; --panel:#111111; --surface:#1a1a1a;
-    --ink:#f5f5f5; --muted:#999999; --line:#2a2a2a;
-    --accent:#7c6ff0; --accent-dark:#6c60e0; --accent-ring:#3a3660; --soft:#1a1730; --soft-ink:#b8aff7;
+    --bg:#080d1f; --panel:#0d1530; --surface:#111c3a;
+    --ink:#f0f4ff; --muted:#7b8ab8; --line:rgba(255,255,255,0.08);
+    --accent:#7c6ff0; --accent-dark:#6c60e0; --accent-ring:rgba(124,111,240,0.35); --soft:rgba(108,58,232,0.18); --soft-ink:#b8aff7;
+  }
+  [data-theme="dark"] body {
+    background: linear-gradient(135deg,#1a0533 0%,#0D1B4B 50%,#0A2A28 100%);
+    background-attachment: fixed;
   }
   [data-theme="dark"] .hero {
-    background: linear-gradient(118deg,#0a0a0a 0%,#0e0b1f 40%,#130f2a 70%,#1a1445 100%);
-  }
-  [data-theme="dark"] .hero::before {
-    background: radial-gradient(52% 58% at 26% 100%, rgba(124,111,240,0.22), transparent 68%);
+    background: linear-gradient(135deg,#1a0533 0%,#0D1B4B 50%,#0A2A28 100%);
   }
   [data-theme="dark"] .hero::after {
-    background: linear-gradient(180deg, transparent 0%, #0a0a0a 100%);
+    background: linear-gradient(180deg, transparent 0%, #080d1f 100%);
+  }
+  [data-theme="dark"] .player {
+    background: rgba(13,21,48,0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 18px 40px -14px rgba(0,0,0,0.6);
+    backdrop-filter: blur(12px);
   }
   [data-theme="dark"] .q {
-    background: #111111;
-    border-color: #2a2a2a;
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.07);
   }
-  [data-theme="dark"] .q:hover { border-color: #555; }
+  [data-theme="dark"] .q:hover { border-color: rgba(255,255,255,0.18); }
   [data-theme="dark"] .q.playing {
-    background: linear-gradient(90deg, #1a1730, #111 55%);
+    background: rgba(108,58,232,0.18);
+    border-color: rgba(108,58,232,0.35);
     border-left-color: var(--accent);
   }
   [data-theme="dark"] .stat {
-    background: #111111;
-    border-color: #2a2a2a;
-  }
-  [data-theme="dark"] .player {
-    background: #111111;
-    box-shadow: 0 18px 40px -14px rgba(0,0,0,0.8);
+    background: rgba(255,255,255,0.04);
+    border-color: rgba(255,255,255,0.07);
   }
   [data-theme="dark"] .tools input,
   [data-theme="dark"] .tools select {
-    background: #111111;
-    border-color: #333;
-    color: #f5f5f5;
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.1);
+    color: #f0f4ff;
   }
-  [data-theme="dark"] .bar { background: #2a2a2a; }
+  [data-theme="dark"] .bar { background: rgba(255,255,255,0.1); }
   [data-theme="dark"] .chip-speed {
-    background: #111111;
-    border-color: #333;
-    color: #f5f5f5;
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.12);
+    color: #f0f4ff;
   }
+  [data-theme="dark"] .upnext { border-color: rgba(255,255,255,0.07); }
+  [data-theme="dark"] .cover-art { box-shadow: 0 10px 30px -8px rgba(0,0,0,0.7); }
 
   body, .player, .q, .stat, .tools input, .tools select, .lightbox-content {
     transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
